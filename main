@@ -1,0 +1,93 @@
+#!/usr/bin/env ruby
+
+require 'bundler'
+Bundler.require(:default)
+
+require 'fileutils'
+require 'securerandom'
+require 'rack/protection'
+require_relative './helpers'
+
+set :database, { adapter: 'sqlite3', database: "#{settings.environment}.sqlite3" }
+set :bind, '0.0.0.0'
+set :port, 3000
+set :sessions, true
+set :strict_paths, false
+
+use Rack::Protection
+use Rack::Protection::AuthenticityToken
+
+class Book < ActiveRecord::Base
+  validates_presence_of :title, :author, :isbn
+  belongs_to :shelf
+  default_scope { order(created_at: :desc) }
+end
+
+class Shelf < ActiveRecord::Base
+  validates_presence_of :name
+  has_many :books
+end
+
+get '/' do
+  erb :index, locals: { books: Book.where.missing(:shelf), shelves: Shelf.all }
+end
+
+get '/books/new' do
+  erb :'books/new', locals: { book: Book.new }
+end
+
+post '/books' do
+  attrs = params.slice(:title, :author, :isbn)
+  book = Book.new(attrs)
+
+  book.save ? redirect("/books/#{book.isbn}/image") : erb(:'books/new', locals: { book: book })
+end
+
+get '/books/:isbn' do
+  book = Book.find_by!(isbn: params[:isbn])
+  erb :'books/show', locals: { book: book }
+end
+
+get '/books/:isbn/edit' do
+  book = Book.find_by!(isbn: params[:isbn])
+  erb :'books/new', locals: { book: book }
+end
+
+post '/books/:isbn' do
+  attrs = params.slice(:title, :author)
+  book = Book.find_by!(isbn: params[:isbn])
+
+  book.update(attrs) ? redirect("/books/#{book.isbn}") : erb(:'books/new', locals: { book: book })
+end
+
+get '/books/:isbn/image' do
+  book = Book.find_by!(isbn: params[:isbn])
+  erb :'books/image', locals: { book: book }
+end
+
+post '/books/:isbn/image' do
+  book = Book.find_by!(isbn: params[:isbn])
+  uuid = book.image || SecureRandom.uuid
+  FileUtils.mv params[:image][:tempfile], "public/books/image/#{uuid}"
+  book.update(image: uuid)
+
+  redirect "/books/#{book.isbn}"
+end
+
+post '/books/:isbn/shelf' do
+  book = Book.find_by!(isbn: params[:isbn])
+  book.update(shelf_id: params[:shelf_id])
+
+  redirect "/books/#{book.isbn}"
+end
+
+get '/shelves/new' do
+  erb :'shelves/new', locals: { shelf: Shelf.new }
+end
+
+post '/shelves' do
+  attrs = params.slice(:name)
+  shelf = Shelf.new(attrs)
+
+  shelf.save ? redirect('/') : erb(:'shelves/new', locals: { shelf: shelf })
+end

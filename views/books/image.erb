@@ -1,0 +1,19 @@
+<form action="/books/<%= book.isbn %>/image" method="POST" enctype="multipart/form-data">
+  <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
+
+  <div class="field">
+    <label class="label">Conver Image</label>
+    <div class="control">
+      <input class="input <%= 'is-danger' if book.errors.include?(:image) %>" type="file" name="image"  accept="image/*;capture=camera" required>
+      <% if book.errors.include?(:image) %>
+        <p class="help is-danger"><%= book.errors.full_messages_for(:image).join %></p>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="field is-grouped">
+    <div class="control">
+      <button class="button is-link">Save</button>
+    </div>
+  </div>
+</form>

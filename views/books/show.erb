@@ -1,0 +1,38 @@
+<div class="content">
+  <form action="/books/<%= book.isbn %>/shelf" method="POST">
+    <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
+
+    <div class="field has-addons">
+      <div class="control">
+        <a class="button" href="/books/<%= book.isbn %>/edit">Edit</a>
+      </div>
+
+      <div class="control">
+        <a class="button" href="/books/<%= book.isbn %>/image">Change Cover</a>
+      </div>
+
+      <div class="control">
+        <span class="select">
+          <select name="shelf_id">
+            <option value="" <%= 'selected' if book.shelf.nil? %>>No Shelf</option>
+            <% Shelf.all.each do |shelf| %>
+              <option value="<%= shelf.id %>" <%= 'selected' if shelf == book.shelf %>><%= shelf.name %></option>
+            <% end %>
+          </select>
+        </span>
+      </div>
+
+      <div class="control">
+        <button class="button">Move to Shelf</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="columns">
+  <div class="column is-4">
+    <%= erb :'books/_book', locals: { book: book } %>
+  </div>
+  <div class="column content">
+  </div>
+</div>
