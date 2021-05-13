@@ -1,6 +1,6 @@
 <div class="columns">
   <div class="column is-4">
-    <figure class="image is-3by4">
+    <figure class="image is-3by4 mb-3">
       <a href="/books/<%= book.isbn %>">
         <img src="/books/image/<%= book.image || 'default.jpg' %>?v=<%= book.updated_at.to_i %>" loading="lazy">
       </a>

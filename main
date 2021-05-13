@@ -25,7 +25,7 @@ end
 
 class Shelf < ActiveRecord::Base
   validates_presence_of :name
-  has_many :books
+  has_many :books, dependent: :nullify
 end
 
 get '/' do
@@ -81,6 +81,12 @@ post '/books/:isbn/shelf' do
   redirect "/books/#{book.isbn}"
 end
 
+delete '/books/:isbn' do
+  book = Book.find_by!(isbn: params[:isbn])
+  book.destroy
+  redirect '/'
+end
+
 get '/shelves/new' do
   erb :'shelves/new', locals: { shelf: Shelf.new }
 end
@@ -112,7 +118,6 @@ end
 
 delete '/shelves/:id' do
   shelf = Shelf.find(params[:id])
-  shelf.books.update_all(shelf_id: nil)
   shelf.destroy
   redirect '/'
 end
