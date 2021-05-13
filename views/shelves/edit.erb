@@ -1,0 +1,23 @@
+<form action="/shelves/<%= shelf.id %>" method="POST">
+  <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
+
+  <div class="field">
+    <label class="label">Shelf name</label>
+    <div class="control">
+      <input
+          class="input"
+          type="text"
+          name="name"
+          placeholder="Shelf name..."
+          value="<%=h shelf.name %>"
+          required
+          autofocus>
+    </div>
+  </div>
+
+  <div class="field">
+    <div class="control">
+      <button class="button">Save</button>
+    </div>
+  </div>
+</form>

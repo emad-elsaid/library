@@ -1,6 +1,13 @@
-<h2 class="title is-3">
-  <%= shelf.name %>
-</h2>
+<div class="columns">
+  <div class="column">
+    <h2 class="title is-3">
+      <%= shelf.name %>
+    </h2>
+  </div>
+  <div class="column has-text-right">
+    <a class="button" href="/shelves/<%= shelf.id %>/edit">Edit</a>
+  </div>
+</div>
 
 <% if shelf.books.count > 0 %>
   <div class="columns is-multiline">

@@ -96,3 +96,16 @@ get '/shelves/:id' do
   shelf = Shelf.find(params[:id])
   erb :'shelves/show', locals: { shelf: shelf }
 end
+
+get '/shelves/:id/edit' do
+  shelf = Shelf.find(params[:id])
+  erb :'shelves/edit', locals: { shelf: shelf }
+end
+
+post '/shelves/:id' do
+  shelf = Shelf.find(params[:id])
+  attrs = params.slice(:name)
+  shelf.update(attrs)
+
+  redirect "/shelves/#{shelf.id}"
+end
