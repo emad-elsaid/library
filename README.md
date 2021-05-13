@@ -38,4 +38,5 @@ Start the server
 
 - Clone it
 - Install dependencies `bundle install`
+- Setup the database `rake db:setup`
 - Run the server `bundle exec ./main`
