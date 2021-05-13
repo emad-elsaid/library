@@ -91,3 +91,8 @@ post '/shelves' do
 
   shelf.save ? redirect('/') : erb(:'shelves/new', locals: { shelf: shelf })
 end
+
+get '/shelves/:id' do
+  shelf = Shelf.find(params[:id])
+  erb :'shelves/show', locals: { shelf: shelf }
+end

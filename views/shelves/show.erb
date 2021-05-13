@@ -1,0 +1,17 @@
+<h2 class="title is-3">
+  <%= shelf.name %>
+</h2>
+
+<% if shelf.books.count > 0 %>
+  <div class="columns is-multiline">
+    <% shelf.books.each do |book| %>
+      <div class="column is-3">
+        <%= erb :'books/_book', locals: { book: book } %>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <div class="notification has-text-centered">
+    This is an empty shelf!
+  </div>
+<% end %>
