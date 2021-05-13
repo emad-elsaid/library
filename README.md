@@ -33,3 +33,9 @@ Guideline:
 - Don't add javascript
 - Don't write custom CSS. use bulma.io
 - Don't depend on any external system like social login..etc.
+
+Start the server
+
+- Clone it
+- Install dependencies `bundle install`
+- Run the server `bundle exec ./main`
