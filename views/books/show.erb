@@ -1,38 +1,37 @@
-<div class="content">
-  <form action="/books/<%= book.isbn %>/shelf" method="POST">
-    <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
-
-    <div class="field is-grouped is-grouped-multiline">
-      <div class="control">
-        <span class="select">
-          <select name="shelf_id">
-            <option value="" <%= 'selected' if book.shelf.nil? %>>No Shelf</option>
-            <% Shelf.all.each do |shelf| %>
-              <option value="<%= shelf.id %>" <%= 'selected' if shelf == book.shelf %>><%= shelf.name %></option>
-            <% end %>
-          </select>
-        </span>
-      </div>
-
-      <div class="control">
-        <button class="button">Move to Shelf</button>
-      </div>
-
-      <div class="control">
-        <a class="button" href="/books/<%= book.isbn %>/edit">Edit</a>
-      </div>
-
-      <div class="control">
-        <a class="button" href="/books/<%= book.isbn %>/image">Change Cover</a>
-      </div>
-    </div>
-  </form>
-</div>
-
 <div class="columns">
   <div class="column is-4">
-    <%= erb :'books/_book', locals: { book: book } %>
+    <figure class="image is-3by4">
+      <a href="/books/<%= book.isbn %>">
+        <img src="/books/image/<%= book.image || 'default.jpg' %>?v=<%= book.updated_at.to_i %>" loading="lazy">
+      </a>
+    </figure>
+    <a class="button is-fullwidth mt-1" href="/books/<%= book.isbn %>/image">Change Cover</a>
+    <a class="button is-fullwidth mt-1" href="/books/<%= book.isbn %>/edit">Edit</a>
   </div>
   <div class="column content">
+    <h2 class="title"><%= book.title %></h2>
+    <p class="subtitle">
+      <%= book.author %>
+    </p>
+
+    <form action="/books/<%= book.isbn %>/shelf" method="POST">
+      <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
+      <div class="field has-addons">
+        <div class="control">
+          <span class="select">
+            <select name="shelf_id">
+              <option value="" <%= 'selected' if book.shelf.nil? %>>No Shelf</option>
+              <% Shelf.all.each do |shelf| %>
+                <option value="<%= shelf.id %>" <%= 'selected' if shelf == book.shelf %>><%= shelf.name %></option>
+              <% end %>
+            </select>
+          </span>
+        </div>
+
+        <div class="control">
+          <button class="button">Move</button>
+        </div>
+      </div>
+    </form>
   </div>
 </div>
