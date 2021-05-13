@@ -2,15 +2,7 @@
   <form action="/books/<%= book.isbn %>/shelf" method="POST">
     <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
 
-    <div class="field has-addons">
-      <div class="control">
-        <a class="button" href="/books/<%= book.isbn %>/edit">Edit</a>
-      </div>
-
-      <div class="control">
-        <a class="button" href="/books/<%= book.isbn %>/image">Change Cover</a>
-      </div>
-
+    <div class="field is-grouped is-grouped-multiline">
       <div class="control">
         <span class="select">
           <select name="shelf_id">
@@ -24,6 +16,14 @@
 
       <div class="control">
         <button class="button">Move to Shelf</button>
+      </div>
+
+      <div class="control">
+        <a class="button" href="/books/<%= book.isbn %>/edit">Edit</a>
+      </div>
+
+      <div class="control">
+        <a class="button" href="/books/<%= book.isbn %>/image">Change Cover</a>
       </div>
     </div>
   </form>
