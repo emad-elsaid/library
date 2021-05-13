@@ -5,20 +5,22 @@
         <img src="/books/image/<%= book.image || 'default.jpg' %>?v=<%= book.updated_at.to_i %>" loading="lazy">
       </a>
     </figure>
-    <a class="button is-fullwidth mt-1" href="/books/<%= book.isbn %>/image">Change Cover</a>
-    <a class="button is-fullwidth mt-1" href="/books/<%= book.isbn %>/edit">Edit</a>
-  </div>
-  <div class="column content">
-    <h2 class="title"><%= book.title %></h2>
-    <p class="subtitle">
-      <%= book.author %>
-    </p>
 
     <form action="/books/<%= book.isbn %>/shelf" method="POST">
       <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
-      <div class="field has-addons">
+      <div class="field">
         <div class="control">
-          <span class="select">
+          <a class="button is-fullwidth" href="/books/<%= book.isbn %>/image">Change Cover</a>
+        </div>
+      </div>
+      <div class="field">
+        <div class="control">
+          <a class="button is-fullwidth" href="/books/<%= book.isbn %>/edit">Edit</a>
+        </div>
+      </div>
+      <div class="field has-addons">
+        <div class="control is-expanded">
+          <span class="select is-fullwidth">
             <select name="shelf_id">
               <option value="" <%= 'selected' if book.shelf.nil? %>>No Shelf</option>
               <% Shelf.all.each do |shelf| %>
@@ -33,5 +35,20 @@
         </div>
       </div>
     </form>
+
+  </div>
+  <div class="column content">
+    <h2 class="title"><%= book.title %></h2>
+    <p class="subtitle">
+      <%= book.author %>
+    </p>
+    <p>
+      Shelf: <%= book.shelf&.name || 'No Shelf' %> <br/>
+      ISBN: <%= book.isbn %> <br/>
+      On Amazon:
+        <a href="https://www.amazon.com/dp/<%= book.isbn %>" rel="noopener" target="_blank">Amazon.com</a>,
+        <a href="https://www.amazon.de/dp/<%= book.isbn %>" rel="noopener" target="_blank">Amazon.de</a>
+        <a href="https://www.amazon.co.uk/dp/<%= book.isbn %>" rel="noopener" target="_blank">Amazon.co.uk</a>
+    </p>
   </div>
 </div>
