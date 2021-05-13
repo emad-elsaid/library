@@ -15,7 +15,7 @@
 <% shelves.each do |shelf| %>
   <h2 class="title is-3">
     <a href="/shelves/<%= shelf.id %>" class="has-text-black">
-      <%= shelf.name %>
+      <%=h shelf.name %>
     </a>
   </h2>
 

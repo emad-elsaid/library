@@ -24,7 +24,7 @@
             <select name="shelf_id">
               <option value="" <%= 'selected' if book.shelf.nil? %>>No Shelf</option>
               <% Shelf.all.each do |shelf| %>
-                <option value="<%= shelf.id %>" <%= 'selected' if shelf == book.shelf %>><%= shelf.name %></option>
+                <option value="<%= shelf.id %>" <%= 'selected' if shelf == book.shelf %>><%=h shelf.name %></option>
               <% end %>
             </select>
           </span>
@@ -38,14 +38,14 @@
 
   </div>
   <div class="column content">
-    <h2 class="title"><%= book.title %></h2>
+    <h2 class="title"><%=h book.title %></h2>
     <p class="subtitle">
       <%= book.author %>
     </p>
     <p>
       Shelf:
       <% if book.shelf %>
-        <a href="/shelves/<%= book.shelf_id %>"><%= book.shelf.name %></a>
+        <a href="/shelves/<%= book.shelf_id %>"><%=h book.shelf.name %></a>
       <% else %>
         No shelf
       <% end %> <br/>
