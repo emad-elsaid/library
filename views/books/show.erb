@@ -43,11 +43,16 @@
       <%= book.author %>
     </p>
     <p>
-      Shelf: <%= book.shelf&.name || 'No Shelf' %> <br/>
+      Shelf:
+      <% if book.shelf %>
+        <a href="/shelves/<%= book.shelf_id %>"><%= book.shelf.name %></a>
+      <% else %>
+        No shelf
+      <% end %> <br/>
       ISBN: <%= book.isbn %> <br/>
       On Amazon:
         <a href="https://www.amazon.com/dp/<%= book.isbn %>" rel="noopener" target="_blank">Amazon.com</a>,
-        <a href="https://www.amazon.de/dp/<%= book.isbn %>" rel="noopener" target="_blank">Amazon.de</a>
+        <a href="https://www.amazon.de/dp/<%= book.isbn %>" rel="noopener" target="_blank">Amazon.de</a>,
         <a href="https://www.amazon.co.uk/dp/<%= book.isbn %>" rel="noopener" target="_blank">Amazon.co.uk</a>
     </p>
   </div>

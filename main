@@ -109,3 +109,10 @@ post '/shelves/:id' do
 
   redirect "/shelves/#{shelf.id}"
 end
+
+delete '/shelves/:id' do
+  shelf = Shelf.find(params[:id])
+  shelf.books.update_all(shelf_id: nil)
+  shelf.destroy
+  redirect '/'
+end
