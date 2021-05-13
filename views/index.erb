@@ -24,7 +24,7 @@
 
   <% if shelf.books.count > 0 %>
     <div class="columns is-multiline">
-      <% shelf.books.each do |book| %>
+      <% shelf.books.limit(4).each do |book| %>
         <div class="column is-3">
           <%= erb :'books/_book', locals: { book: book } %>
         </div>
@@ -43,7 +43,7 @@
 
     <div class="field has-addons">
       <div class="control is-expanded">
-        <input class="input is-medium" type="text" name="name" placeholder="Shelf name..." required autofocus>
+        <input class="input is-medium" type="text" name="name" placeholder="Shelf name..." required>
       </div>
       <div class="control">
         <button class="button is-medium">New Shelf</button>
