@@ -6,35 +6,37 @@
       </a>
     </figure>
 
-    <form action="/books/<%= book.isbn %>/shelf" method="POST">
-      <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
-      <div class="field">
-        <div class="control">
-          <a class="button is-fullwidth" href="/books/<%= book.isbn %>/image">Change Cover</a>
+    <% if can? :edit, book %>
+      <form action="/books/<%= book.isbn %>/shelf" method="POST">
+        <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
+        <div class="field">
+          <div class="control">
+            <a class="button is-fullwidth" href="/books/<%= book.isbn %>/image">Change Cover</a>
+          </div>
         </div>
-      </div>
-      <div class="field">
-        <div class="control">
-          <a class="button is-fullwidth" href="/books/<%= book.isbn %>/edit">Edit</a>
+        <div class="field">
+          <div class="control">
+            <a class="button is-fullwidth" href="/books/<%= book.isbn %>/edit">Edit</a>
+          </div>
         </div>
-      </div>
-      <div class="field has-addons">
-        <div class="control is-expanded">
-          <span class="select is-fullwidth">
-            <select name="shelf_id">
-              <option value="" <%= 'selected' if book.shelf.nil? %>>No Shelf</option>
-              <% Shelf.all.each do |shelf| %>
-                <option value="<%= shelf.id %>" <%= 'selected' if shelf == book.shelf %>><%=h shelf.name %></option>
-              <% end %>
-            </select>
-          </span>
-        </div>
+        <div class="field has-addons">
+          <div class="control is-expanded">
+            <span class="select is-fullwidth">
+              <select name="shelf_id">
+                <option value="" <%= 'selected' if book.shelf.nil? %>>No Shelf</option>
+                <% Shelf.all.each do |shelf| %>
+                  <option value="<%= shelf.id %>" <%= 'selected' if shelf == book.shelf %>><%=h shelf.name %></option>
+                <% end %>
+              </select>
+            </span>
+          </div>
 
-        <div class="control">
-          <button class="button">Move</button>
+          <div class="control">
+            <button class="button">Move</button>
+          </div>
         </div>
-      </div>
-    </form>
+      </form>
+    <% end %>
 
   </div>
   <div class="column content">

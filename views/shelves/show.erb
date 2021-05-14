@@ -4,9 +4,11 @@
       <%=h shelf.name %>
     </h2>
   </div>
-  <div class="column has-text-right">
-    <a class="button" href="/shelves/<%= shelf.id %>/edit">Edit</a>
-  </div>
+  <% if can? :edit, shelf %>
+    <div class="column has-text-right">
+      <a class="button" href="/shelves/<%= shelf.id %>/edit">Edit</a>
+    </div>
+  <% end %>
 </div>
 
 <% if shelf.books.count > 0 %>

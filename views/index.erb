@@ -34,17 +34,19 @@
   <% end %>
 <% end %>
 
-<div class="content">
-  <form action="/shelves" method="POST">
-    <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
+<% if can? :create, Shelf.new %>
+  <div class="content">
+    <form action="/shelves" method="POST">
+      <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
 
-    <div class="field has-addons">
-      <div class="control is-expanded">
-        <input class="input is-medium" type="text" name="name" placeholder="Shelf name..." required>
+      <div class="field has-addons">
+        <div class="control is-expanded">
+          <input class="input is-medium" type="text" name="name" placeholder="Shelf name..." required>
+        </div>
+        <div class="control">
+          <button class="button is-medium">New Shelf</button>
+        </div>
       </div>
-      <div class="control">
-        <button class="button is-medium">New Shelf</button>
-      </div>
-    </div>
-  </form>
-</div>
+    </form>
+  </div>
+<% end %>

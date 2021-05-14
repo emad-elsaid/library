@@ -8,7 +8,7 @@
   </head>
   <body>
 
-    <% if current_user %>
+    <% if can? :logout %>
 
       <div class="container mt-4">
         <figure class="image is-32x32 is-pulled-left mx-3">
@@ -32,17 +32,15 @@
           </div>
           <div class="column has-text-right">
 
-            <% if current_user %>
-
+            <% if can? :create, Book.new %>
               <a href="/books/new" class="button"> 📕 Add a Book </a>
+            <% end %>
 
-            <% else %>
-
+            <% if can? :login %>
               <form action="/auth/<%= settings.development? ? :developer : :google %>" method="POST">
                 <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
                 <button class="button">Login</button>
               </form>
-
             <% end %>
 
           </div>
