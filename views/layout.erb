@@ -7,8 +7,23 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.2/css/bulma.min.css">
   </head>
   <body>
+
+    <% if current_user %>
+
+      <div class="container mt-4">
+        <figure class="image is-32x32 is-pulled-left mx-3">
+          <img class="is-rounded" src="<%= current_user.image || '/users/default' %>"/>
+        </figure>
+        <%= current_user.name %>
+        [ <a href="/logout" class="has-text-danger">Logout</a> ]
+        <hr/>
+      </div>
+
+    <% end %>
+
     <section class="section">
       <div class="container">
+
         <div class="columns">
           <div class="column">
             <h1 class="title is-2">
@@ -16,7 +31,20 @@
             </h1>
           </div>
           <div class="column has-text-right">
-            <a href="/books/new" class="button"> 📕 Add a Book </a>
+
+            <% if current_user %>
+
+              <a href="/books/new" class="button"> 📕 Add a Book </a>
+
+            <% else %>
+
+              <form action="/auth/<%= settings.development? ? :developer : :google %>" method="POST">
+                <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
+                <button class="button">Login</button>
+              </form>
+
+            <% end %>
+
           </div>
         </div>
         <hr/>

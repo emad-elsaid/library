@@ -16,10 +16,13 @@ set :sessions, true
 set :session_secret, ENV['SESSION_SECRET']
 set :strict_paths, false
 
-use Rack::Protection
-use Rack::Protection::AuthenticityToken
+use Rack::Protection::AuthenticityToken, allow_if: ->(env) {
+  env['PATH_INFO'].start_with?('/auth/developer/callback') ||
+    env['PATH_INFO'].start_with?('/auth/google/callback')
+}
+
 use OmniAuth::Builder do
-  provider :developer
+  provider :developer if development?
   provider :google_oauth2, ENV['GOOGLE_CLIENT_ID'], ENV['GOOGLE_CLIENT_SECRET']
 end
 
@@ -124,10 +127,26 @@ delete '/shelves/:id' do
   redirect '/'
 end
 
+post '/auth/:provider/callback' do
+  halt if params[:provider] == 'developer' && !settings.development?
+
+  info = request.env['omniauth.auth']['info']
+  attrs = info.slice(:name, :email, :image).to_h
+  user = User.create_with(attrs).find_or_create_by(email: attrs['email'])
+  session[:user] = user.id
+
+  redirect '/'
+end
+
+get '/logout' do
+  session[:user] = nil
+  redirect '/'
+end
+
 Sinatra::Application.routes.each do |verb, routes|
   next if verb == 'HEAD'
 
   routes.each do |route|
-    puts "#{verb} #{route[0]}"
+    puts "#{verb}\t#{route[0]}"
   end
 end
