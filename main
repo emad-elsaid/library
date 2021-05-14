@@ -13,10 +13,15 @@ set :database, { adapter: 'sqlite3', database: "#{settings.environment}.sqlite3"
 set :bind, '0.0.0.0'
 set :port, 3000
 set :sessions, true
+set :session_secret, ENV['SESSION_SECRET']
 set :strict_paths, false
 
 use Rack::Protection
 use Rack::Protection::AuthenticityToken
+use OmniAuth::Builder do
+  provider :developer
+  provider :google_oauth2, ENV['GOOGLE_CLIENT_ID'], ENV['GOOGLE_CLIENT_SECRET']
+end
 
 get '/' do
   erb :index, locals: { books: Book.where.missing(:shelf), shelves: Shelf.all }
@@ -117,4 +122,12 @@ delete '/shelves/:id' do
   shelf = Shelf.find(params[:id])
   shelf.destroy
   redirect '/'
+end
+
+Sinatra::Application.routes.each do |verb, routes|
+  next if verb == 'HEAD'
+
+  routes.each do |route|
+    puts "#{verb} #{route[0]}"
+  end
 end

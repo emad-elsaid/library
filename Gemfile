@@ -2,8 +2,11 @@
 
 source "https://rubygems.org"
 
-gem 'fastimage'
-gem 'rake'
 gem 'sinatra'
 gem 'sinatra-activerecord'
+
+gem 'fastimage'
+gem 'rake'
 gem 'sqlite3'
+gem 'omniauth'
+gem 'omniauth-google-oauth2'
