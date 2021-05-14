@@ -57,9 +57,16 @@ end
 
 post '/books/:isbn/image' do
   book = Book.find_by!(isbn: params[:isbn])
-  uuid = book.image || SecureRandom.uuid
-  FileUtils.mv params[:image][:tempfile], "public/books/image/#{uuid}"
-  book.update(image: uuid)
+  size = FastImage.size(params[:image][:tempfile])
+  allowed_type = [:gif, :png, :jpeg].include? FastImage.type(params[:image][:tempfile])
+
+  book.errors.add(:image, 'File type is not an image. Allowed type JPG, GIF, PNG') unless allowed_type
+  book.errors.add(:image, 'Image should be a portrait. width should be less than height') if size && size[0] > size[1]
+  return erb :'books/image', locals: { book: book } if book.errors.include?(:image)
+
+  (File.delete("public/books/image/#{book.image}") rescue nil) if book.image
+  book.update(image: SecureRandom.uuid)
+  FileUtils.mv params[:image][:tempfile], "public/books/image/#{book.image}"
 
   redirect "/books/#{book.isbn}"
 end

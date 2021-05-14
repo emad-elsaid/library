@@ -13,6 +13,7 @@ GEM
       tzinfo (~> 2.0)
       zeitwerk (~> 2.3)
     concurrent-ruby (1.1.8)
+    fastimage (2.2.3)
     i18n (1.8.10)
       concurrent-ruby (~> 1.0)
     minitest (5.14.4)
@@ -42,6 +43,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
+  fastimage
   rake
   sinatra
   sinatra-activerecord
