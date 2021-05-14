@@ -18,8 +18,9 @@ So I sat down and wrote my own simple library program.
 - Free to use
 - Free to fork and modify and redistribute
 - Has a feature to lend my books to other people
+- Doesn't track me
 
-What's done and what's not:
+What's done so far:
 
 - So far it's single user. for local use
 - Allows adding books and taking pictures for covers from phones.

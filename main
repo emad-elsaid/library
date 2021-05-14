@@ -7,6 +7,7 @@ require 'fileutils'
 require 'securerandom'
 require 'rack/protection'
 require_relative './helpers'
+require_relative './models'
 
 set :database, { adapter: 'sqlite3', database: "#{settings.environment}.sqlite3" }
 set :bind, '0.0.0.0'
@@ -16,17 +17,6 @@ set :strict_paths, false
 
 use Rack::Protection
 use Rack::Protection::AuthenticityToken
-
-class Book < ActiveRecord::Base
-  validates_presence_of :title, :author, :isbn
-  belongs_to :shelf
-  default_scope { order(created_at: :desc) }
-end
-
-class Shelf < ActiveRecord::Base
-  validates_presence_of :name
-  has_many :books, dependent: :nullify
-end
 
 get '/' do
   erb :index, locals: { books: Book.where.missing(:shelf), shelves: Shelf.all }
