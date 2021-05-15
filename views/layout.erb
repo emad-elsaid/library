@@ -21,32 +21,35 @@
 
     <% end %>
 
-    <section class="section">
-      <div class="container">
+    <section class="hero is-info">
+      <div class="hero-body">
+        <div class="container">
+          <div class="columns">
+            <div class="column">
+              <h1 class="title">
+                <a href="/">LIBRARY</a>
+              </h1>
+            </div>
+            <div class="column has-text-right">
 
-        <div class="columns">
-          <div class="column">
-            <h1 class="title is-2">
-              <a href="/" class="has-text-black">LIBRARY</a>
-            </h1>
-          </div>
-          <div class="column has-text-right">
+              <% if can? :create, current_user.books.new %>
+                <a href="/books/new" class="button is-primary is-inverted is-outlined"> 📕 Add a Book </a>
+              <% end %>
 
-            <% if can? :create, current_user.books.new %>
-              <a href="/books/new" class="button"> 📕 Add a Book </a>
-            <% end %>
+              <% if can? :login %>
+                <form action="/auth/<%= settings.development? ? :developer : :google %>" method="POST">
+                  <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
+                  <button class="button is-primary is-light">Sign in with Google</button>
+                </form>
+              <% end %>
 
-            <% if can? :login %>
-              <form action="/auth/<%= settings.development? ? :developer : :google %>" method="POST">
-                <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
-                <button class="button is-primary is-light">Sign in with Google</button>
-              </form>
-            <% end %>
-
+            </div>
           </div>
         </div>
-        <hr/>
       </div>
+    </section>
+
+    <section class="section">
       <div class="container">
         <%= yield %>
       </div>

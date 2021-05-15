@@ -1,5 +1,5 @@
 class Book < ActiveRecord::Base
-  belongs_to :shelf, ->(b) { where(user: b.user) }
+  belongs_to :shelf
   belongs_to :user, required: true
 
   validates_presence_of :title, :author, :isbn
