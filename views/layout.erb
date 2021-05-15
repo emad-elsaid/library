@@ -9,13 +9,18 @@
   <body>
 
     <% if can? :logout %>
-      <div class="container mt-4">
-        <figure class="image is-32x32 is-pulled-left mx-3">
-          <img class="is-rounded" src="<%= current_user.image || '/users/default' %>"/>
-        </figure>
-        <%= current_user.name %>
-        [ <a href="/logout" class="has-text-danger">Logout</a> ]
-        <hr/>
+      <div class="container my-4">
+        <div class="columns">
+          <div class="column is-narrow">
+            <figure class="image is-32x32">
+              <img class="is-rounded" src="<%= current_user.image || '/users/default' %>"/>
+            </figure>
+          </div>
+          <div class="column">
+            <%= current_user.name %>
+            [ <a href="/logout" class="has-text-danger">Logout</a> ]
+          </div>
+        </div>
       </div>
     <% end %>
 
