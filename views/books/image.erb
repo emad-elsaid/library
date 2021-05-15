@@ -2,7 +2,8 @@
   When accessing this page from your phone it'll prompt you to captuer a photo using your phone camera. <br/>
   Use <strong>3:4 aspect ratio</strong> when taking your picture for best result.
 </div>
-<form action="/books/<%= book.isbn %>/image" method="POST" enctype="multipart/form-data">
+
+<form action="/users/<%= user.id %>/books/<%= book.isbn %>/image" method="POST" enctype="multipart/form-data">
   <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
 
   <div class="field">

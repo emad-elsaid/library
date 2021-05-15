@@ -6,7 +6,7 @@
   </div>
   <% if can? :edit, shelf %>
     <div class="column has-text-right">
-      <a class="button" href="/shelves/<%= shelf.id %>/edit">Edit</a>
+      <a class="button" href="/users/<%= user.id %>/shelves/<%= shelf.id %>/edit">Edit</a>
     </div>
   <% end %>
 </div>
@@ -15,7 +15,7 @@
   <div class="columns is-multiline">
     <% shelf.books.each do |book| %>
       <div class="column is-3">
-        <%= erb :'books/_book', locals: { book: book } %>
+        <%= erb :'books/_book', locals: { user: user, book: book } %>
       </div>
     <% end %>
   </div>

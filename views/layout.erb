@@ -13,11 +13,15 @@
         <div class="columns">
           <div class="column is-narrow">
             <figure class="image is-32x32">
-              <img class="is-rounded" src="<%= current_user.image || '/users/default' %>"/>
+              <a href="/users/<%= current_user.id %>">
+                <img class="is-rounded" src="<%= current_user.image || '/users/default' %>"/>
+              </a>
             </figure>
           </div>
           <div class="column">
-            <%= current_user.name %>
+            <a href="/users/<%= current_user.id %>">
+              <%= current_user.name %>
+            </a>
             [ <a href="/logout" class="has-text-danger">Logout</a> ]
           </div>
         </div>
@@ -28,15 +32,29 @@
       <div class="hero-body">
         <div class="container">
           <div class="columns">
+            <% if user %>
+            <div class="column is-narrow">
+              <figure class="image is-32x32">
+                <img class="is-rounded" src="<%= user.image || '/users/default' %>"/>
+              </figure>
+            </div>
+            <% end %>
             <div class="column">
-              <h1 class="title">
-                <a href="/">LIBRARY</a>
+              <h1 class="title is-capitalized">
+                <a href="/users/<%= user.id %>">
+                  <% if loggedin? && current_user == user %>
+                    Your
+                  <% else %>
+                    <%= user.name + "\'s" if user %>
+                  <% end %>
+                    Library
+                </a>
               </h1>
             </div>
             <div class="column has-text-right">
 
-              <% if current_user && can?(:create, current_user.books.new) %>
-                <a href="/books/new" class="button is-primary is-inverted is-outlined"> 📕 Add a Book </a>
+              <% if current_user && can?(:create, user.books.new) %>
+                <a href="/users/<%= user.id %>/books/new" class="button is-primary is-inverted is-outlined"> 📕 Add a Book </a>
               <% end %>
 
               <% if can? :login %>

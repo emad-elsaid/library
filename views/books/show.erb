@@ -1,22 +1,20 @@
 <div class="columns">
   <div class="column is-4">
     <figure class="image is-3by4 mb-3">
-      <a href="/books/<%= book.isbn %>">
-        <img src="/books/image/<%= book.image || 'default.jpg' %>?v=<%= book.updated_at.to_i %>" loading="lazy">
-      </a>
+      <img src="/books/image/<%= book.image || 'default.jpg' %>?v=<%= book.updated_at.to_i %>" loading="lazy">
     </figure>
 
     <% if can? :edit, book %>
-      <form action="/books/<%= book.isbn %>/shelf" method="POST">
+      <form action="/users/<%= user.id %>/books/<%= book.isbn %>/shelf" method="POST">
         <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
         <div class="field">
           <div class="control">
-            <a class="button is-fullwidth" href="/books/<%= book.isbn %>/image">Change Cover</a>
+            <a class="button is-fullwidth" href="/users/<%= user.id %>/books/<%= book.isbn %>/image">Change Cover</a>
           </div>
         </div>
         <div class="field">
           <div class="control">
-            <a class="button is-fullwidth" href="/books/<%= book.isbn %>/edit">Edit</a>
+            <a class="button is-fullwidth" href="/users/<%= user.id %>/books/<%= book.isbn %>/edit">Edit</a>
           </div>
         </div>
         <div class="field has-addons">
@@ -47,7 +45,7 @@
     <p>
       Shelf:
       <% if book.shelf %>
-        <a href="/shelves/<%= book.shelf_id %>"><%=h book.shelf.name %></a>
+        <a href="/users/<%= user.id %>/shelves/<%= book.shelf_id %>"><%=h book.shelf.name %></a>
       <% else %>
         No shelf
       <% end %> <br/>

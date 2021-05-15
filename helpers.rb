@@ -33,7 +33,7 @@ helpers do
 
     when Book
       case verb
-      when :create then loggedin?
+      when :create then record.user == current_user
       when :edit then record.user == current_user
       when :delete then record.user == current_user
       else raise "Verb #{verb} not handled for #{record}"
@@ -41,7 +41,7 @@ helpers do
 
     when Shelf
       case verb
-      when :create then loggedin?
+      when :create then record.user == current_user
       when :edit then record.user == current_user
       when :delete then record.user == current_user
       else raise "Verb #{verb} not handled for #{record}"
