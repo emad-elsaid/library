@@ -53,7 +53,7 @@
   </div>
 </form>
 
-<% if book %>
+<% if book.persisted? %>
   <form action="/books/<%= book.isbn %>" method="POST" class="has-text-right">
     <input type="hidden" name="_method" value="DELETE">
     <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">

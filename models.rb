@@ -1,6 +1,6 @@
 class Book < ActiveRecord::Base
-  belongs_to :shelf
-  belongs_to :user
+  belongs_to :shelf, ->(b) { where(user: b.user) }
+  belongs_to :user, required: true
 
   validates_presence_of :title, :author, :isbn
 
@@ -9,7 +9,7 @@ class Book < ActiveRecord::Base
 end
 
 class Shelf < ActiveRecord::Base
-  belongs_to :user
+  belongs_to :user, required: true
   has_many :books, dependent: :nullify
 
   validates_presence_of :name

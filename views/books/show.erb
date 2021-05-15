@@ -24,7 +24,7 @@
             <span class="select is-fullwidth">
               <select name="shelf_id">
                 <option value="" <%= 'selected' if book.shelf.nil? %>>No Shelf</option>
-                <% Shelf.all.each do |shelf| %>
+                <% current_user.shelves.each do |shelf| %>
                   <option value="<%= shelf.id %>" <%= 'selected' if shelf == book.shelf %>><%=h shelf.name %></option>
                 <% end %>
               </select>

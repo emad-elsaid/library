@@ -34,7 +34,7 @@
   <% end %>
 <% end %>
 
-<% if can? :create, Shelf.new %>
+<% if can? :create, current_user.shelves.new %>
   <div class="content">
     <form action="/shelves" method="POST">
       <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
