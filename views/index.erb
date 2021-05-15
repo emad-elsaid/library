@@ -17,6 +17,19 @@
     <a href="/shelves/<%= shelf.id %>" class="has-text-black">
       <%=h shelf.name %>
     </a>
+
+    <% unless shelf.first? %>
+    <form action="/shelves/<%=shelf.id %>/up" class="is-pulled-right" method="POST">
+      <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
+      <button class="button is-small">↑</button>
+    </form>
+    <% end %>
+    <% unless shelf.last? %>
+    <form action="/shelves/<%=shelf.id %>/down" class="is-pulled-right" method="POST">
+      <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
+      <button class="button is-small">↓</button>
+    </form>
+    <% end %>
   </h2>
 
   <% if shelf.books.count > 0 %>

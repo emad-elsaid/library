@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_05_14_180734) do
+ActiveRecord::Schema.define(version: 2021_05_15_090946) do
 
   create_table "books", force: :cascade do |t|
     t.string "title"
@@ -30,6 +30,7 @@ ActiveRecord::Schema.define(version: 2021_05_14_180734) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.integer "user_id"
+    t.integer "position"
     t.index ["user_id"], name: "index_shelves_on_user_id"
   end
 

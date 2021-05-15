@@ -149,6 +149,24 @@ post '/shelves/:id' do
   redirect "/shelves/#{shelf.id}"
 end
 
+post '/shelves/:id/up' do
+  shelf = current_user.shelves.find(params[:id])
+  halt 401 unless can? :edit, shelf
+
+  shelf.move_higher
+
+  redirect "/"
+end
+
+post '/shelves/:id/down' do
+  shelf = current_user.shelves.find(params[:id])
+  halt 401 unless can? :edit, shelf
+
+  shelf.move_lower
+
+  redirect "/"
+end
+
 delete '/shelves/:id' do
   shelf = current_user.shelves.find(params[:id])
   halt 401 unless can? :delete, shelf
@@ -156,6 +174,8 @@ delete '/shelves/:id' do
   shelf.destroy
   redirect '/'
 end
+
+
 
 post '/auth/:provider/callback' do
   halt if params[:provider] == 'developer' && !settings.development?
