@@ -20,14 +20,15 @@ So I sat down and wrote my own simple library program.
 - Has a feature to lend my books to other people
 - Doesn't track me
 
-What's done so far:
+# What's done so far:
 
 - So far it's single user. for local use
 - Allows adding books and taking pictures for covers from phones.
 - Allows creating book shelves
 - Each book can be put in one shelf like real books. no multiple lists nonsense.
+- User login
 
-Guideline:
+# Guidelines
 
 - Keep it simple
 - Minimize dependencies
@@ -35,9 +36,15 @@ Guideline:
 - Don't write custom CSS. use bulma.io
 - Don't depend on any external system like social login..etc.
 
-Start the server
+# Start the server
 
 - Clone it
 - Install dependencies `bundle install`
 - Setup the database `rake db:setup`
 - Run the server `bundle exec ./main`
+
+# Contributions
+
+- Make it simpler
+- Make faster
+- Make it more secure
