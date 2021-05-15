@@ -35,14 +35,14 @@
             </div>
             <div class="column has-text-right">
 
-              <% if can? :create, current_user.books.new %>
+              <% if current_user && can?(:create, current_user.books.new) %>
                 <a href="/books/new" class="button is-primary is-inverted is-outlined"> 📕 Add a Book </a>
               <% end %>
 
               <% if can? :login %>
                 <form action="/auth/<%= settings.development? ? :developer : :google %>" method="POST">
                   <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
-                  <button class="button is-primary is-light">Sign in with Google</button>
+                  <button class="button is-primary is-inverted is-outlined is-light">Sign in with Google</button>
                 </form>
               <% end %>
 

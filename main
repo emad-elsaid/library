@@ -27,14 +27,12 @@ use OmniAuth::Builder do
 end
 
 get '/' do
-  if loggedin?
-    erb :index, locals: {
-      books: current_user.books.where.missing(:shelf),
-      shelves: current_user.shelves
-    }
-  else
-    erb :home
-  end
+  loggedin? ? redirect("/users/#{current_user.id}") : erb(:index)
+end
+
+get '/users/:id' do
+  user = User.find(params[:id])
+  erb :'users/show', locals: { user: user, books: user.books.where.missing(:shelf), shelves: user.shelves }
 end
 
 get '/books/new' do
