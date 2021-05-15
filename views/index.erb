@@ -18,13 +18,13 @@
       <%=h shelf.name %>
     </a>
 
-    <% unless shelf.first? %>
+    <% unless shelf.first? || !can?(:edit, shelf) %>
     <form action="/shelves/<%=shelf.id %>/up" class="is-pulled-right" method="POST">
       <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
       <button class="button is-small">↑</button>
     </form>
     <% end %>
-    <% unless shelf.last? %>
+    <% unless shelf.last? || !can?(:edit, shelf) %>
     <form action="/shelves/<%=shelf.id %>/down" class="is-pulled-right" method="POST">
       <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
       <button class="button is-small">↓</button>
