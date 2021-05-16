@@ -1,4 +1,4 @@
-<form action="/users/<%= user.id %>/shelves/<%= shelf.id %>" method="POST">
+<form action="/users/<%= user.slug %>/shelves/<%= shelf.id %>" method="POST">
   <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
 
   <div class="field">

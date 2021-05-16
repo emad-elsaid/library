@@ -5,16 +5,16 @@
     </figure>
 
     <% if can? :edit, book %>
-      <form action="/users/<%= user.id %>/books/<%= book.isbn %>/shelf" method="POST">
+      <form action="/users/<%= user.slug %>/books/<%= book.isbn %>/shelf" method="POST">
         <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
         <div class="field">
           <div class="control">
-            <a class="button is-fullwidth" href="/users/<%= user.id %>/books/<%= book.isbn %>/image">Change Cover</a>
+            <a class="button is-fullwidth" href="/users/<%= user.slug %>/books/<%= book.isbn %>/image">Change Cover</a>
           </div>
         </div>
         <div class="field">
           <div class="control">
-            <a class="button is-fullwidth" href="/users/<%= user.id %>/books/<%= book.isbn %>/edit">Edit</a>
+            <a class="button is-fullwidth" href="/users/<%= user.slug %>/books/<%= book.isbn %>/edit">Edit</a>
           </div>
         </div>
         <div class="field has-addons">
@@ -45,7 +45,7 @@
     <p>
       Shelf:
       <% if book.shelf %>
-        <a href="/users/<%= user.id %>/shelves/<%= book.shelf_id %>"><%=h book.shelf.name %></a>
+        <a href="/users/<%= user.slug %>/shelves/<%= book.shelf_id %>"><%=h book.shelf.name %></a>
       <% else %>
         No shelf
       <% end %> <br/>

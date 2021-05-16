@@ -1,7 +1,7 @@
 <div class="card">
   <div class="card-image">
     <figure class="image is-3by4">
-      <a href="/users/<%= user.id %>/books/<%= book.isbn %>">
+      <a href="/users/<%= user.slug %>/books/<%= book.isbn %>">
         <img src="/books/image/<%= book.image || 'default.jpg' %>?v=<%= book.updated_at.to_i %>" loading="lazy">
       </a>
     </figure>

@@ -21,4 +21,5 @@ class User < ActiveRecord::Base
   has_many :shelves, -> { order(position: :asc) }, dependent: :destroy
 
   validates :email, presence: true, uniqueness: true
+  validates :slug, presence: true, uniqueness: true
 end

@@ -6,7 +6,7 @@
   </div>
   <% if can? :edit, shelf %>
     <div class="column has-text-right">
-      <a class="button" href="/users/<%= user.id %>/shelves/<%= shelf.id %>/edit">Edit</a>
+      <a class="button" href="/users/<%= user.slug %>/shelves/<%= shelf.id %>/edit">Edit</a>
     </div>
   <% end %>
 </div>

@@ -5,7 +5,7 @@
   <div class="columns is-multiline">
     <% books.each do |book| %>
       <div class="column is-3">
-        <%= erb :'books/_book', locals: { book: book } %>
+        <%= erb :'books/_book', locals: { user: user, book: book } %>
       </div>
     <% end %>
   </div>
@@ -14,18 +14,18 @@
 
 <% shelves.each do |shelf| %>
   <h2 class="title is-3">
-    <a href="/users/<%= user.id %>/shelves/<%= shelf.id %>" class="has-text-black">
+    <a href="/users/<%= user.slug %>/shelves/<%= shelf.id %>" class="has-text-black">
       <%=h shelf.name %>
     </a>
 
     <% unless shelf.first? || !can?(:edit, shelf) %>
-    <form action="/users/<%= user.id %>/shelves/<%=shelf.id %>/up" class="is-pulled-right" method="POST">
+    <form action="/users/<%= user.slug %>/shelves/<%=shelf.id %>/up" class="is-pulled-right" method="POST">
       <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
       <button class="button is-small">↑</button>
     </form>
     <% end %>
     <% unless shelf.last? || !can?(:edit, shelf) %>
-    <form action="/users/<%= user.id %>/shelves/<%=shelf.id %>/down" class="is-pulled-right" method="POST">
+    <form action="/users/<%= user.slug %>/shelves/<%=shelf.id %>/down" class="is-pulled-right" method="POST">
       <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
       <button class="button is-small">↓</button>
     </form>
@@ -49,7 +49,7 @@
 
 <% if can? :create, user.shelves.new %>
   <div class="content">
-    <form action="/users/<%= user.id %>/shelves" method="POST">
+    <form action="/users/<%= user.slug %>/shelves" method="POST">
       <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
 
       <div class="field has-addons">

@@ -27,41 +27,41 @@ use OmniAuth::Builder do
 end
 
 get '/' do
-  loggedin? ? redirect("/users/#{current_user.id}") : erb(:index, locals: { user: nil })
+  loggedin? ? redirect("/users/#{current_user.slug}") : erb(:index, locals: { user: nil })
 end
 
-get '/users/:id' do
-  user = User.find(params[:id])
+get '/users/:user' do
+  user = User.find_by!(slug: params[:user])
   erb :'users/show', locals: { user: user, books: user.books.where.missing(:shelf), shelves: user.shelves }
 end
 
 get '/users/:user/books/new' do
-  user = User.find(params[:id])
+  user = User.find_by!(slug: params[:user])
   halt 401 unless can? :create, user.books.new
   erb :'books/new', locals: { user: user, book: user.books.new }
 end
 
 post '/users/:user/books' do
-  user = User.find(params[:id])
+  user = User.find_by!(slug: params[:user])
   attrs = params.slice(:title, :author, :isbn)
   book = user.books.new(attrs)
   halt 401 unless can? :create, book
 
   if book.save
-    redirect "/books/#{book.isbn}/image"
+    redirect "/users/#{user.slug}/books/#{book.isbn}/image"
   else
     erb :'books/new', locals: { user: user, book: book }
   end
 end
 
 get '/users/:user/books/:isbn' do
-  user = User.find(params[:user])
+  user = User.find_by!(slug: params[:user])
   book = user.books.find_by!(isbn: params[:isbn])
   erb :'books/show', locals: { user: user, book: book }
 end
 
 get '/users/:user/books/:isbn/edit' do
-  user = User.find(params[:user])
+  user = User.find_by!(slug: params[:user])
   book = user.books.find_by!(isbn: params[:isbn])
   halt 401 unless can? :edit, book
 
@@ -69,20 +69,20 @@ get '/users/:user/books/:isbn/edit' do
 end
 
 post '/users/:user/books/:isbn' do
-  user = User.find(params[:user])
+  user = User.find_by!(slug: params[:user])
   book = user.books.find_by!(isbn: params[:isbn])
   halt 401 unless can? :edit, book
 
   attrs = params.slice(:title, :author)
   if book.update(attrs)
-    redirect "/users/#{user.id}/books/#{book.isbn}"
+    redirect "/users/#{user.slug}/books/#{book.isbn}"
   else
     erb :'books/new', locals: { user: user, book: book }
   end
 end
 
 get '/users/:user/books/:isbn/image' do
-  user = User.find(params[:user])
+  user = User.find_by!(slug: params[:user])
   book = user.books.find_by!(isbn: params[:isbn])
   halt 401 unless can? :edit, book
 
@@ -90,7 +90,7 @@ get '/users/:user/books/:isbn/image' do
 end
 
 post '/users/:user/books/:isbn/image' do
-  user = User.find(params[:user])
+  user = User.find_by!(slug: params[:user])
   book = user.books.find_by!(isbn: params[:isbn])
   halt 401 unless can? :edit, book
 
@@ -105,11 +105,11 @@ post '/users/:user/books/:isbn/image' do
   book.update(image: SecureRandom.uuid)
   FileUtils.mv params[:image][:tempfile], "public/books/image/#{book.image}"
 
-  redirect "/users/#{user.id}/books/#{book.isbn}"
+  redirect "/users/#{user.slug}/books/#{book.isbn}"
 end
 
 post '/users/:user/books/:isbn/shelf' do
-  user = User.find(params[:user])
+  user = User.find_by!(slug: params[:user])
   book = user.books.find_by!(isbn: params[:isbn])
   halt 401 unless can? :edit, book
 
@@ -117,11 +117,11 @@ post '/users/:user/books/:isbn/shelf' do
   halt 401 unless can? :edit, shelf
 
   book.update(shelf: shelf)
-  redirect "/users/#{user.id}/books/#{book.isbn}"
+  redirect "/users/#{user.slug}/books/#{book.isbn}"
 end
 
 delete '/users/:user/books/:isbn' do
-  user = User.find(params[:user])
+  user = User.find_by!(slug: params[:user])
   book = user.books.find_by!(isbn: params[:isbn])
   halt 401 unless can? :delete, book
 
@@ -130,14 +130,14 @@ delete '/users/:user/books/:isbn' do
 end
 
 get '/users/:user/shelves/new' do
-  user = User.find(params[:user])
+  user = User.find_by!(slug: params[:user])
   halt 401 unless can? :create, user.shelves.new
 
   erb :'shelves/new', locals: { user: user, shelf: user.shelves.new }
 end
 
 post '/users/:user/shelves' do
-  user = User.find(params[:user])
+  user = User.find_by!(slug: params[:user])
   attrs = params.slice(:name)
   shelf = user.shelves.new(attrs)
   halt 401 unless can? :create, shelf
@@ -149,53 +149,53 @@ post '/users/:user/shelves' do
   end
 end
 
-get '/users/:user/shelves/:id' do
-  user = User.find(params[:user])
-  shelf = user.shelves.find(params[:id])
+get '/users/:user/shelves/:shelf' do
+  user = User.find_by!(slug: params[:user])
+  shelf = user.shelves.find(params[:shelf])
 
   erb :'shelves/show', locals: { user: user, shelf: shelf }
 end
 
-get '/users/:user/shelves/:id/edit' do
-  user = User.find(params[:user])
-  shelf = user.shelves.find(params[:id])
+get '/users/:user/shelves/:shelf/edit' do
+  user = User.find_by!(slug: params[:user])
+  shelf = user.shelves.find(params[:shelf])
   halt 401 unless can? :edit, shelf
 
   erb :'shelves/edit', locals: { user: user, shelf: shelf }
 end
 
-post '/users/:user/shelves/:id' do
-  user = User.find(params[:user])
-  shelf = user.shelves.find(params[:id])
+post '/users/:user/shelves/:shelf' do
+  user = User.find_by!(slug: params[:user])
+  shelf = user.shelves.find(params[:shelf])
   halt 401 unless can? :edit, shelf
 
   attrs = params.slice(:name)
   shelf.update(attrs)
 
-  redirect "/users/#{user.id}/shelves/#{shelf.id}"
+  redirect "/users/#{user.slug}/shelves/#{shelf.id}"
 end
 
-post '/users/:user/shelves/:id/up' do
-  user = User.find(params[:user])
-  shelf = user.shelves.find(params[:id])
+post '/users/:user/shelves/:shelf/up' do
+  user = User.find_by!(slug: params[:user])
+  shelf = user.shelves.find(params[:shelf])
   halt 401 unless can? :edit, shelf
 
   shelf.move_higher
   redirect '/'
 end
 
-post '/users/:user/shelves/:id/down' do
-  user = User.find(params[:user])
-  shelf = user.shelves.find(params[:id])
+post '/users/:user/shelves/:shelf/down' do
+  user = User.find_by!(slug: params[:user])
+  shelf = user.shelves.find(params[:shelf])
   halt 401 unless can? :edit, shelf
 
   shelf.move_lower
   redirect '/'
 end
 
-delete '/users/:user/shelves/:id' do
-  user = User.find(params[:user])
-  shelf = user.shelves.find(params[:id])
+delete '/users/:user/shelves/:shelf' do
+  user = User.find_by!(slug: params[:user])
+  shelf = user.shelves.find(params[:shelf])
   halt 401 unless can? :delete, shelf
 
   shelf.destroy
@@ -207,6 +207,7 @@ post '/auth/:provider/callback' do
 
   info = request.env['omniauth.auth']['info']
   attrs = info.slice(:name, :email, :image).to_h
+  attrs[:slug] = SecureRandom.uuid
   user = User.create_with(attrs).find_or_create_by(email: attrs['email'])
   session[:user] = user.id
 
