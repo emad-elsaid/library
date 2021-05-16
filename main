@@ -211,7 +211,7 @@ post '/auth/:provider/callback' do
   user = User.create_with(attrs).find_or_create_by(email: attrs['email'])
   session[:user] = user.id
 
-  redirect '/'
+  redirect(env['omniauth.origin'] || '/')
 end
 
 get '/logout' do
