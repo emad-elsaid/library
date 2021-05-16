@@ -1,4 +1,4 @@
-<% if books.count > 0 %>
+<% if books.exists? %>
 
   <h1 class="title is-3">Books lying around</h1>
 
@@ -32,7 +32,7 @@
     <% end %>
   </h2>
 
-  <% if shelf.books.count > 0 %>
+  <% if shelf.books.exists? %>
     <div class="columns is-multiline">
       <% shelf.books.limit(4).each do |book| %>
         <div class="column is-3">

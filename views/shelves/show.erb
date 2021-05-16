@@ -11,7 +11,7 @@
   <% end %>
 </div>
 
-<% if shelf.books.count > 0 %>
+<% if shelf.books.exists? %>
   <div class="columns is-multiline">
     <% shelf.books.each do |book| %>
       <div class="column is-3">
