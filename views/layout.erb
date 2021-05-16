@@ -56,13 +56,17 @@
             <div class="column has-text-right">
 
               <% if current_user && can?(:create, user.books.new) %>
-                <a href="/users/<%= user.slug %>/books/new" class="button is-primary is-inverted is-outlined"> 📕 Add a Book </a>
+                <a href="/users/<%= user.slug %>/books/new" class="button is-primary is-inverted is-outlined">
+                  📕 Add a Book
+                </a>
               <% end %>
 
               <% if can? :login %>
                 <form action="/auth/<%= settings.development? ? :developer : :google %>" method="POST">
                   <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
-                  <button class="button is-primary is-inverted is-outlined is-light">Create/Access your library</button>
+                  <button class="button is-primary is-inverted is-outlined is-light">
+                    Create/Access your library
+                  </button>
                 </form>
               <% end %>
 
