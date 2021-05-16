@@ -62,7 +62,7 @@
               <% if can? :login %>
                 <form action="/auth/<%= settings.development? ? :developer : :google %>" method="POST">
                   <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
-                  <button class="button is-primary is-inverted is-outlined is-light">Sign in with Google</button>
+                  <button class="button is-primary is-inverted is-outlined is-light">Create/Access your library</button>
                 </form>
               <% end %>
 
