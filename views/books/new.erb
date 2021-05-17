@@ -54,7 +54,7 @@
 </form>
 
 <% if book.persisted? %>
-  <form action="/users/<%= user.slug %>/books/<%= book.isbn %>" method="POST" class="has-text-right">
+  <form action="/users/<%= user.slug %>/books/<%=h book.isbn %>" method="POST" class="has-text-right">
     <input type="hidden" name="_method" value="DELETE">
     <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
     <button class="button is-danger">Delete!</button>

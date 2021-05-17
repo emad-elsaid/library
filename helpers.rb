@@ -47,6 +47,12 @@ helpers do
       else raise "Verb #{verb} not handled for #{record}"
       end
 
+    when User
+      case verb
+      when :edit then record == current_user
+      else raise "Verb #{verb} not handled for #{record}"
+      end
+
     else
       raise "Error #{record} permissions not handled."
     end

@@ -35,6 +35,24 @@ get '/users/:user' do
   erb :'users/show', locals: { user: user, books: user.books.where.missing(:shelf), shelves: user.shelves }
 end
 
+get '/users/:user/edit' do
+  user = User.find_by!(slug: params[:user])
+  halt 401 unless can? :edit, user
+  erb :'users/edit', locals: { user: user }
+end
+
+post '/users/:user' do
+  user = User.find_by!(slug: params[:user])
+  halt 401 unless can? :edit, user
+
+  attrs = params.slice(:description)
+  if user.update(attrs)
+    redirect "/users/#{user.slug}"
+  else
+    erb :'users/edit', locals: { user: user }
+  end
+end
+
 get '/users/:user/books/new' do
   user = User.find_by!(slug: params[:user])
   halt 401 unless can? :create, user.books.new
@@ -113,8 +131,8 @@ post '/users/:user/books/:isbn/shelf' do
   book = user.books.find_by!(isbn: params[:isbn])
   halt 401 unless can? :edit, book
 
-  shelf = user.shelves.find(params[:shelf_id])
-  halt 401 unless can? :edit, shelf
+  shelf = params[:shelf_id].empty? ? nil : user.shelves.find(params[:shelf_id])
+  halt 401 unless can? :edit, shelf if shelf
 
   book.update(shelf: shelf)
   redirect "/users/#{user.slug}/books/#{book.isbn}"

@@ -4,7 +4,12 @@
   <div class="field">
     <label class="label">Name</label>
     <div class="control">
-      <input class="input <%= 'is-danger' if shelf.errors.include?(:name) %>" type="text" name="name" value="<%=h shelf.name %>" required>
+      <input
+          class="input <%= 'is-danger' if shelf.errors.include?(:name) %>"
+          type="text"
+          name="name"
+          value="<%=h shelf.name %>"
+          required>
       <% if shelf.errors.include?(:name) %>
         <p class="help is-danger"><%= shelf.errors.full_messages_for(:name).join %></p>
       <% end %>

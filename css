@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+gem install --conservative sass
+wget --no-clobber --output-document=bulma.zip https://github.com/jgthms/bulma/releases/download/0.9.2/bulma-0.9.2.zip
+unzip -u bulma.zip
+
+cat << EOT > bulma.scss
+@charset "utf-8";
+@import "bulma/bulma.sass";
+.one-line{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+EOT
+
+sass --sourcemap=none \
+     --style compressed \
+     bulma.scss:public/style.css
+
+rm -rf bulma* .sass-cache

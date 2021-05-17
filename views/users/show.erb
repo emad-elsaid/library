@@ -1,3 +1,9 @@
+<% if user.description.present? %>
+  <div class="notification">
+    <%= h(user.description).gsub("\n","<br>") %>
+  </div>
+<% end %>
+
 <% if books.exists? %>
 
   <h1 class="title is-3">Books lying around</h1>

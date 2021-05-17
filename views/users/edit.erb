@@ -1,0 +1,22 @@
+<form action="/users/<%= user.slug %>" method="POST">
+  <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
+
+  <div class="field">
+    <label class="label">Library description</label>
+    <div class="control">
+      <textarea
+          class="textarea <%= 'is-danger' if user.errors.include?(:description) %>"
+          name="description"><%=h user.description %></textarea>
+      <p class="help">Maximum 500 character.</p>
+      <% if user.errors.include?(:description) %>
+        <p class="help is-danger"><%= user.errors.full_messages_for(:description).join %></p>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="field is-grouped">
+    <div class="control">
+      <button class="button is-link">Save</button>
+    </div>
+  </div>
+</form>

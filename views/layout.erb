@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>LIBRARY</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.2/css/bulma.min.css">
+    <link rel="stylesheet" href="/style.css">
   </head>
   <body>
 
@@ -22,7 +22,12 @@
             <a href="/users/<%= current_user.slug %>">
               <%= current_user.name %>
             </a>
-            [ <a href="/logout" class="has-text-danger">Logout</a> ]
+          </div>
+          <div class="column is-narrow">
+            <a href="/users/<%= current_user.slug %>/edit">Settings</a>
+          </div>
+          <div class="column is-narrow">
+            <a href="/logout" class="has-text-danger">Logout</a>
           </div>
         </div>
       </div>
@@ -46,7 +51,7 @@
                   <% if current_user == user %>
                     Your
                   <% else %>
-                    <%= user.name + "\'s" if user %>
+                    <%=h user.name + "\'s" if user %>
                   <% end %>
                 <% end %>
                     Library
