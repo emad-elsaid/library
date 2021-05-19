@@ -138,6 +138,49 @@ post '/users/:user/books/:isbn/shelf' do
   redirect "/users/#{user.slug}/books/#{book.isbn}"
 end
 
+post '/users/:user/books/:isbn/borrows' do
+  user = User.find_by!(slug: params[:user])
+  book = user.books.find_by!(isbn: params[:isbn])
+  halt 401 unless can? :borrow, book
+
+  book.borrows.create(user: current_user, owner: book.user, days: params[:days])
+
+  redirect "/users/#{user.slug}/books/#{book.isbn}"
+end
+
+post '/users/:user/books/:isbn/borrows/:borrow/borrow' do
+  user = User.find_by!(slug: params[:user])
+  book = user.books.find_by!(isbn: params[:isbn])
+  borrow = book.borrows.wait_list.find(params[:borrow])
+  halt 401 unless can? :borrow, borrow
+
+  borrow.update(borrowed_at: Time.now)
+
+  redirect back
+end
+
+post '/users/:user/books/:isbn/borrows/:borrow/return' do
+  user = User.find_by!(slug: params[:user])
+  book = user.books.find_by!(isbn: params[:isbn])
+  borrow = book.borrows.borrowed.find(params[:borrow])
+  halt 401 unless can? :return, borrow
+
+  borrow.update(returned_at: Time.now)
+
+  redirect back
+end
+
+delete '/users/:user/books/:isbn/borrows/:borrow' do
+  user = User.find_by!(slug: params[:user])
+  book = user.books.find_by!(isbn: params[:isbn])
+  borrow = book.borrows.find(params[:borrow])
+  halt 401 unless can? :delete, borrow
+
+  borrow.destroy
+
+  redirect back
+end
+
 delete '/users/:user/books/:isbn' do
   user = User.find_by!(slug: params[:user])
   book = user.books.find_by!(isbn: params[:isbn])

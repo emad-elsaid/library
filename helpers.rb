@@ -36,6 +36,7 @@ helpers do
       when :create then record.user == current_user
       when :edit then record.user == current_user
       when :delete then record.user == current_user
+      when :borrow then loggedin? && record.user != current_user && !record.borrows.exists?(user: current_user)
       else raise "Verb #{verb} not handled for #{record}"
       end
 
@@ -53,8 +54,21 @@ helpers do
       else raise "Verb #{verb} not handled for #{record}"
       end
 
+    when Borrow
+      case verb
+      when :show then loggedin?
+      when :delete then (record.user == current_user && record.borrowed_at.nil?) || record.owner == current_user
+      when :borrow then !record.book.borrows.borrowed.exists? && record.owner == current_user
+      when :return then record.borrowed_at.present? && record.owner == current_user
+      else raise "Verb #{verb} not handled for #{record}"
+      end
+
     else
       raise "Error #{record} permissions not handled."
     end
+  end
+
+  def format_date(date)
+    date.to_date
   end
 end

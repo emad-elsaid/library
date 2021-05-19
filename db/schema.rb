@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_05_17_193731) do
+ActiveRecord::Schema.define(version: 2021_05_18_144128) do
 
   create_table "books", force: :cascade do |t|
     t.string "title"
@@ -23,6 +23,20 @@ ActiveRecord::Schema.define(version: 2021_05_17_193731) do
     t.integer "user_id"
     t.index ["shelf_id"], name: "index_books_on_shelf_id"
     t.index ["user_id"], name: "index_books_on_user_id"
+  end
+
+  create_table "borrows", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "book_id", null: false
+    t.integer "owner_id", null: false
+    t.integer "days"
+    t.datetime "borrowed_at"
+    t.datetime "returned_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["book_id"], name: "index_borrows_on_book_id"
+    t.index ["owner_id"], name: "index_borrows_on_owner_id"
+    t.index ["user_id"], name: "index_borrows_on_user_id"
   end
 
   create_table "shelves", force: :cascade do |t|
@@ -47,5 +61,8 @@ ActiveRecord::Schema.define(version: 2021_05_17_193731) do
 
   add_foreign_key "books", "shelves"
   add_foreign_key "books", "users"
+  add_foreign_key "borrows", "books"
+  add_foreign_key "borrows", "users"
+  add_foreign_key "borrows", "users", column: "owner_id"
   add_foreign_key "shelves", "users"
 end

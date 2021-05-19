@@ -39,7 +39,7 @@
   </div>
   <div class="column content">
     <% if book.shelf %>
-      <a class="tag is-info" href="/users/<%= user.slug %>/shelves/<%= book.shelf_id %>"><%=h book.shelf.name %></a>
+      <a class="tag is-info is-light" href="/users/<%= user.slug %>/shelves/<%= book.shelf_id %>"><%=h book.shelf.name %></a>
     <% end %>
     <h2 class="title">
       <%=h book.title %>
@@ -49,8 +49,134 @@
     </p>
     <ul>
       <li>
-        ISBN: <%=h book.isbn %> <br/>
+        ISBN:
+        <a href="https://www.google.com/search?tbm=bks&q=<%=h book.isbn %>" rel="noopener" target="_blank">
+          <%=h book.isbn %>
+        </a>
       </li>
     </ul>
+
+    <% if !loggedin? %>
+      <div class="notification is-info is-light">
+        You need to login to borrow this book.
+      </div>
+    <% end %>
+
+    <% if can? :borrow, book %>
+      <p>
+        <form action="/users/<%= user.slug %>/books/<%=h book.isbn %>/borrows" method="POST">
+          <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
+          <div class="field has-addons">
+            <div class="control is-expanded">
+              <button class="button is-fullwidth is-info">I want to borrow this book for </button>
+            </div>
+            <div class="control">
+              <input class="input" name="days" type="number" value="10"/>
+            </div>
+            <div class="control">
+              <div class="button is-static">
+                days
+              </div>
+            </div>
+          </div>
+          <p class="help">
+            This will reveal your email and contact information to <%= book.user.name %>.
+            Make sure you filled in enough contacts in your settings page.
+          </p>
+        </form>
+      </p>
+    <% end %>
+
+    <% book.borrows.borrowed.each do |borrow| %>
+      <% next unless can? :show, borrow %>
+      <div class="box">
+        <div class="columns is-mobile">
+          <div class="column">
+            <%= borrow.user == current_user ? 'You' : borrow.user.name %> borrowed this book and is due
+            <div class="tag">
+              <%= format_date borrow.borrowed_at.to_date + borrow.days %>.
+            </div>
+          </div>
+
+          <% if can? :return, borrow %>
+            <div class="column is-narrow">
+              <form action="/users/<%= user.slug %>/books/<%=h book.isbn %>/borrows/<%= borrow.id %>/return" method="POST">
+                <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
+                <div class="control">
+                  <button class="button is-small is-success">Returned</button>
+                </div>
+              </form>
+            </div>
+          <% end %>
+
+          <div class="column is-narrow">
+            <div class="tag">
+              <%= format_date borrow.borrowed_at %>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+    <% book.borrows.wait_list.each do |borrow| %>
+      <% next unless can? :show, borrow %>
+      <div class="box">
+        <div class="columns is-mobile">
+          <div class="column">
+            <%= borrow.user == current_user ? 'You' : borrow.user.name %> wants to borrow this book for <%= borrow.days %> days.
+          </div>
+
+          <% if can? :borrow, borrow %>
+            <div class="column is-narrow">
+              <form action="/users/<%= user.slug %>/books/<%=h book.isbn %>/borrows/<%= borrow.id %>/borrow" method="POST">
+                <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
+                <div class="control">
+                  <button class="button is-small is-success">Borrowed</button>
+                </div>
+              </form>
+            </div>
+          <% end %>
+
+          <% if can? :delete, borrow %>
+            <div class="column is-narrow">
+              <form action="/users/<%= user.slug %>/books/<%=h book.isbn %>/borrows/<%= borrow.id %>" method="POST">
+                <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
+                <input name="_method" type="hidden" value="DELETE"/>
+                <div class="control">
+                  <button class="button is-small is-danger">Delete</button>
+                </div>
+              </form>
+            </div>
+          <% end %>
+
+          <div class="column is-narrow">
+            <div class="tag">
+              <%= format_date borrow.created_at %>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    <% end %>
+
+    <% if book.borrows.returned.exists? %>
+      <div class="box">
+        <%= book.borrows.returned.count %> people borrowed and returned it.
+      </div>
+    <% end %>
+
+    <div class="box">
+      <div class="columns is-mobile">
+        <div class="column">
+          Added to the library
+        </div>
+        <div class="column is-narrow">
+          <div class="tag">
+            <%= format_date book.created_at %>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
