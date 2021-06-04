@@ -54,6 +54,7 @@ GEM
     omniauth-oauth2 (1.7.1)
       oauth2 (~> 1.4)
       omniauth (>= 1.9, < 3)
+    pg (1.2.3)
     puma (5.3.1)
       nio4r (~> 2.0)
     rack (2.2.3)
@@ -69,7 +70,6 @@ GEM
     sinatra-activerecord (2.0.23)
       activerecord (>= 4.1)
       sinatra (>= 1.0)
-    sqlite3 (1.4.2)
     tilt (2.0.10)
     tzinfo (2.0.4)
       concurrent-ruby (~> 1.0)
@@ -84,11 +84,11 @@ DEPENDENCIES
   fastimage
   omniauth
   omniauth-google-oauth2
+  pg
   puma
   rake
   sinatra
   sinatra-activerecord
-  sqlite3
 
 BUNDLED WITH
    2.2.16

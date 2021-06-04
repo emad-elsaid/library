@@ -9,7 +9,7 @@ require 'rack/protection'
 require_relative './helpers'
 require_relative './models'
 
-set :database, { adapter: 'sqlite3', database: "#{settings.environment}.sqlite3" }
+set :database, { adapter: 'postgresql', encoding: 'unicode', pool: 2, url: ENV['DATABASE_URL'] }
 set :bind, '0.0.0.0'
 set :port, 3000
 set :sessions, true

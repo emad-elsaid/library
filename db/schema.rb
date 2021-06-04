@@ -29,7 +29,7 @@ ActiveRecord::Schema.define(version: 2021_05_20_122458) do
     t.string "title"
     t.string "author"
     t.string "image"
-    t.integer "isbn"
+    t.bigint "isbn"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.integer "shelf_id"

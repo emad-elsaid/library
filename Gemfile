@@ -7,7 +7,7 @@ gem 'sinatra-activerecord'
 
 gem 'fastimage'
 gem 'rake'
-gem 'sqlite3'
+gem 'pg'
 gem 'omniauth'
 gem 'omniauth-google-oauth2'
 gem 'acts_as_list'
