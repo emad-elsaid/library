@@ -22,7 +22,7 @@ class Borrow < ActiveRecord::Base
   belongs_to :owner, required: true, class_name: :User, inverse_of: :lends
   belongs_to :book, required: true
 
-  default_scope { order(created_at: :asc) }
+  scope :by_creation, -> { order(created_at: :asc) }
   scope :wait_list, -> { where(borrowed_at: nil) }
   scope :borrowed, -> { where.not(borrowed_at: nil).where(returned_at: nil) }
   scope :returned, -> { where.not(returned_at: nil) }

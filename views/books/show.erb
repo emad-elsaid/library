@@ -96,7 +96,7 @@
       </p>
     <% end %>
 
-    <% book.borrows.borrowed.each do |borrow| %>
+    <% book.borrows.by_creation.borrowed.each do |borrow| %>
       <% next unless can? :show, borrow %>
       <div class="box">
         <div class="columns is-mobile">
@@ -144,7 +144,7 @@
       </div>
     <% end %>
 
-    <% book.borrows.wait_list.each do |borrow| %>
+    <% book.borrows.by_creation.wait_list.each do |borrow| %>
       <% next unless can? :show, borrow %>
       <div class="box">
         <div class="columns is-mobile">
