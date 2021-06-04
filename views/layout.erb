@@ -38,24 +38,25 @@
         <div class="container">
           <div class="columns is-mobile">
             <% if user %>
-            <div class="column is-narrow">
-              <figure class="image is-32x32">
-                <img class="is-rounded" src="<%= user.image || '/users/default' %>"/>
-              </figure>
-            </div>
+              <div class="column is-narrow">
+                <figure class="image is-32x32">
+                  <img class="is-rounded" src="<%= user.image || '/users/default' %>"/>
+                </figure>
+              </div>
             <% end %>
             <div class="column">
               <h1 class="title is-capitalized">
                 <% if user %>
-                <a href="/users/<%= user.slug %>">
-                  <% if current_user == user %>
-                    Your
-                  <% else %>
-                    <%=h user.name + "\'s" if user %>
-                  <% end %>
+                  <a href="/users/<%= user.slug %>">
+                    <% if current_user == user %>
+                      Your Library
+                    <% else %>
+                      <%=h user.name + "\'s" if user %> Library
+                    <% end %>
+                  </a>
+                <% else %>
+                  Library
                 <% end %>
-                    Library
-                </a>
               </h1>
             </div>
             <div class="column has-text-right">
