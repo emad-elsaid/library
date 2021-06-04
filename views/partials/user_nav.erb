@@ -1,0 +1,22 @@
+<div class="container my-4">
+  <div class="columns is-mobile">
+    <div class="column is-narrow">
+      <figure class="image is-32x32">
+        <a href="/users/<%= current_user.slug %>">
+          <img class="is-rounded" src="<%= current_user.image || '/users/default' %>"/>
+        </a>
+      </figure>
+    </div>
+    <div class="column">
+      <a href="/users/<%= current_user.slug %>">
+        <%= current_user.name %>
+      </a>
+    </div>
+    <div class="column is-narrow">
+      <a href="/users/<%= current_user.slug %>/edit">Settings</a>
+    </div>
+    <div class="column is-narrow">
+      <a href="/logout" class="has-text-danger">Logout</a>
+    </div>
+  </div>
+</div>
