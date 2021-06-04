@@ -61,7 +61,7 @@
             <div class="column has-text-right">
 
               <% if current_user && can?(:create, user.books.new) %>
-                <a href="/users/<%= user.slug %>/books/new" class="button is-primary is-outlined">
+                <a href="/users/<%= user.slug %>/books/new" class="button">
                   📕 Add a Book
                 </a>
               <% end %>
@@ -70,7 +70,7 @@
                 <form action="/auth/<%= settings.development? ? :developer : :google %>" method="POST">
                   <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
                   <input name="origin" type="hidden" value="<%=h request.path_info %>"/>
-                  <button class="button is-primary is-outlined is-light">
+                  <button class="button">
                     Create/Access your library
                   </button>
                 </form>
