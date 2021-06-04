@@ -1,1 +1,5 @@
 *.sqlite3
+
+/public/books/image/*
+!/public/books/image/
+!/public/books/image/.keep

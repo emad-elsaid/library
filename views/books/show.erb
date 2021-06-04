@@ -62,6 +62,15 @@
       </div>
     <% end %>
 
+    <% if loggedin? && !can?(:access, user) %>
+      <p>
+        <form action="/users/<%= user.slug %>/accesses" method="POST">
+          <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
+          <button class="button is-fullwidth is-info">Request Access to borrow from <%=h user.name %>'s library</button>
+        </form>
+      </p>
+    <% end %>
+
     <% if can? :borrow, book %>
       <p>
         <form action="/users/<%= user.slug %>/books/<%=h book.isbn %>/borrows" method="POST">
@@ -115,6 +124,23 @@
             </div>
           </div>
         </div>
+
+        <% if can? :contact, borrow %>
+          <table class="table">
+            <tr>
+              <th>email</th>
+              <td><%=h borrow.user.email %></td>
+            </tr>
+            <% User::PROFILES.each do |profile| %>
+              <% next unless borrow.user[profile].present? %>
+              <tr>
+                <th><%= profile %></th>
+                <td><%=h borrow.user[profile] %></td>
+              </tr>
+            <% end %>
+          </table>
+        <% end %>
+
       </div>
     <% end %>
 
@@ -156,6 +182,23 @@
           </div>
 
         </div>
+
+        <% if can? :contact, borrow %>
+          <table class="table">
+            <tr>
+              <th>email</th>
+              <td><%=h borrow.user.email %></td>
+            </tr>
+            <% User::PROFILES.each do |profile| %>
+              <% next unless borrow.user[profile].present? %>
+              <tr>
+                <th><%= profile %></th>
+                <td><%=h borrow.user[profile] %></td>
+              </tr>
+            <% end %>
+          </table>
+        <% end %>
+
       </div>
     <% end %>
 

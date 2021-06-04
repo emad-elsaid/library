@@ -14,9 +14,87 @@
     </div>
   </div>
 
+  <div class="title">
+    Social Profiles
+  </div>
+  <div class="subtitle">
+    Will show up under your borrow requests to the book owner only so they can contact you.
+  </div>
+  <% User::PROFILES.each do |profile| %>
+    <div class="field">
+      <label class="label is-capitalized"><%= profile %></label>
+      <div class="control">
+        <input
+            class="input <%= 'is-danger' if user.errors.include?(profile) %>"
+            name="<%= profile %>" value="<%=h user[profile] %>"/>
+        <% if user.errors.include?(profile) %>
+          <p class="help is-danger"><%= user.errors.full_messages_for(profile).join %></p>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
   <div class="field is-grouped">
     <div class="control">
       <button class="button is-link">Save</button>
     </div>
   </div>
 </form>
+
+<br/>
+
+<% if user.accesses_to.exists? %>
+  <div class="title">
+    People who can borrow from you
+  </div>
+  <div class="subtitle">
+    This is a list of people that you allowed to have access to the borrow feature in your library
+  </div>
+
+
+  <% user.accesses_to.accepted.each do |access| %>
+    <div class="box">
+      <div class="columns is-mobile">
+        <div class="column is-narrow">
+          <figure class="image is-32x32">
+            <img class="is-rounded" src="<%= access.owner.image || '/users/default' %>"/>
+          </figure>
+        </div>
+
+        <div class="column">
+          <%=h access.user.name %>
+        </div>
+
+        <% if can? :delete, access %>
+          <div class="column is-narrow">
+            <form action="/users/<%= user.slug %>/accesses/<%= access.id %>" method="POST">
+              <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
+              <input name="_method" type="hidden" value="DELETE"/>
+              <div class="control">
+                <button class="button is-small is-danger">Remove Access</button>
+              </div>
+            </form>
+          </div>
+        <% end %>
+      </div>
+
+      <% if can? :contact, access %>
+        <table class="table">
+          <tr>
+            <th>email</th>
+            <td><%=h access.user.email %></td>
+          </tr>
+          <% User::PROFILES.each do |profile| %>
+            <% next unless access.user[profile].present? %>
+            <tr>
+              <th><%= profile %></th>
+              <td><%=h access.user[profile] %></td>
+            </tr>
+          <% end %>
+        </table>
+      <% end %>
+
+    </div>
+  <% end %>
+
+<% end %>

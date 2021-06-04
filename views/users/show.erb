@@ -4,6 +4,49 @@
   </div>
 <% end %>
 
+<% if user == current_user %>
+<nav class="level">
+  <div class="level-item has-text-centered">
+    <div>
+      <p class="heading">Have</p>
+      <p class="title"><%= current_user.books.count %></p>
+    </div>
+  </div>
+  <div class="level-item has-text-centered">
+    <div>
+      <p class="heading">Books to Lend</p>
+      <p class="title">
+        <a href="/books/to_lend"><%= current_user.books_to_lend.count %></a>
+      </p>
+    </div>
+  </div>
+  <div class="level-item has-text-centered">
+    <div>
+      <p class="heading">Books to borrow</p>
+      <p class="title">
+        <a href="/books/to_borrow"><%= current_user.books_to_borrow.count %></a>
+      </p>
+    </div>
+  </div>
+  <div class="level-item has-text-centered">
+    <div>
+      <p class="heading">Pending access requests</p>
+      <p class="title">
+        <a href="/accesses/to"><%= current_user.accesses_to.pending.count %></a>
+      </p>
+    </div>
+  </div>
+  <div class="level-item has-text-centered">
+    <div>
+      <p class="heading">Open libraries</p>
+      <p class="title">
+        <a href="/accesses/from"><%= current_user.accesses_from.accepted.count %></a>
+      </p>
+    </div>
+  </div>
+</nav>
+<% end %>
+
 <% if books.exists? %>
 
   <h1 class="title is-3">Books lying around</h1>
@@ -11,11 +54,39 @@
   <div class="columns is-multiline">
     <% books.each do |book| %>
       <div class="column is-3">
-        <%= erb :'books/_book', locals: { user: user, book: book } %>
+        <%= erb :'books/_book', locals: { book: book } %>
       </div>
     <% end %>
   </div>
 
+<% end %>
+
+<% if current_user == user && user.borrowed_books.exists? %>
+  <h2 class="title is-3">
+    Borrowed Books
+  </h2>
+
+  <div class="columns is-multiline">
+    <% user.borrowed_books.each do |book| %>
+      <div class="column is-3">
+        <%= erb :'books/_book', locals: { book: book } %>
+      </div>
+    <% end %>
+  </div>
+<% end %>
+
+<% if current_user == user && user.lent_books.exists? %>
+  <h2 class="title is-3">
+    Lent Books
+  </h2>
+
+  <div class="columns is-multiline">
+    <% user.lent_books.each do |book| %>
+      <div class="column is-3">
+        <%= erb :'books/_book', locals: { book: book } %>
+      </div>
+    <% end %>
+  </div>
 <% end %>
 
 <% shelves.each do |shelf| %>
@@ -42,7 +113,7 @@
     <div class="columns is-multiline">
       <% shelf.books.limit(4).each do |book| %>
         <div class="column is-3">
-          <%= erb :'books/_book', locals: { user: user, book: book } %>
+          <%= erb :'books/_book', locals: { book: book } %>
         </div>
       <% end %>
     </div>

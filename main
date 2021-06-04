@@ -45,7 +45,7 @@ post '/users/:user' do
   user = User.find_by!(slug: params[:user])
   halt 401 unless can? :edit, user
 
-  attrs = params.slice(:description)
+  attrs = params.slice(:description, *User::PROFILES)
   if user.update(attrs)
     redirect "/users/#{user.slug}"
   else
@@ -280,4 +280,68 @@ get '/logout' do
 
   session[:user] = nil
   redirect '/'
+end
+
+post '/users/:user/accesses' do
+  user = User.find_by!(slug: params[:user])
+  access = user.accesses_to.new(user: current_user)
+  halt 401 unless can? :create, access
+
+  access.save
+  redirect back
+end
+
+post '/users/:user/accesses/:access/accept' do
+  user = User.find_by!(slug: params[:user])
+  access = user.accesses_to.find(params[:access])
+  halt 401 unless can? :accept, access
+
+  access.update(accepted_at: Time.now)
+  redirect back
+end
+
+post '/users/:user/accesses/:access/reject' do
+  user = User.find_by!(slug: params[:user])
+  access = user.accesses_to.find(params[:access])
+  halt 401 unless can? :reject, access
+
+  access.update(rejected_at: Time.now)
+  redirect back
+end
+
+delete '/users/:user/accesses/:access' do
+  user = User.find_by!(slug: params[:user])
+  access = user.accesses_to.find(params[:access])
+  halt 401 unless can? :delete, access
+
+  access.destroy
+  redirect back
+end
+
+get '/accesses/from' do
+  user = current_user
+  halt 401 unless can? :list_access
+
+  erb :'accesses/from', locals: { accesses: current_user.accesses_from, user: user }
+end
+
+get '/accesses/to' do
+  user = current_user
+  halt 401 unless can? :list_access
+
+  erb :'accesses/to', locals: { accesses: current_user.accesses_to, user: user }
+end
+
+get '/books/to_lend' do
+  user = current_user
+  halt 401 unless can? :to_lend
+
+  erb :'books/to_lend', locals: { user: user, books: user.books_to_lend }
+end
+
+get '/books/to_borrow' do
+  user = current_user
+  halt 401 unless can? :to_borrow
+
+  erb :'books/to_borrow', locals: { user: user, books: user.books_to_borrow }
 end

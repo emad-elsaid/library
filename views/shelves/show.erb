@@ -15,7 +15,7 @@
   <div class="columns is-multiline">
     <% shelf.books.each do |book| %>
       <div class="column is-3">
-        <%= erb :'books/_book', locals: { user: user, book: book } %>
+        <%= erb :'books/_book', locals: { book: book } %>
       </div>
     <% end %>
   </div>

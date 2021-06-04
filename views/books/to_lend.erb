@@ -1,0 +1,18 @@
+<div class="columns">
+  <div class="column">
+    <h2 class="title is-3">
+      Books to lend
+    </h2>
+    <h3 class="subtitle">
+      Books people requested to borrow from your library
+    </h3>
+  </div>
+</div>
+
+<div class="columns is-multiline">
+  <% books.each do |book| %>
+    <div class="column is-3">
+      <%= erb :'books/_book', locals: { book: book } %>
+    </div>
+  <% end %>
+</div>
