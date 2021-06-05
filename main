@@ -132,7 +132,7 @@ post '/users/:user/books/:isbn/shelf' do
   halt 401 unless can? :edit, book
 
   shelf = params[:shelf_id].empty? ? nil : user.shelves.find(params[:shelf_id])
-  halt 401 unless can? :edit, shelf if shelf
+  halt 401 if shelf && !can?(:edit, shelf)
 
   book.update(shelf: shelf)
   redirect "/users/#{user.slug}/books/#{book.isbn}"
