@@ -38,6 +38,7 @@ end
 get '/users/:user/edit' do
   user = User.find_by!(slug: params[:user])
   halt 401 unless can? :edit, user
+
   erb :'users/edit', locals: { user: user }
 end
 
@@ -56,6 +57,7 @@ end
 get '/users/:user/books/new' do
   user = User.find_by!(slug: params[:user])
   halt 401 unless can? :create, user.books.new
+
   erb :'books/new', locals: { user: user, book: user.books.new }
 end
 
