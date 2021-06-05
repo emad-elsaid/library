@@ -18,6 +18,6 @@ EOT
 
 sass --sourcemap=none \
      --style compressed \
-     bulma.scss:public/style.css
+     bulma.scss:../public/style.css
 
 rm -rf bulma* .sass-cache
