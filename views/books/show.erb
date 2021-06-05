@@ -101,28 +101,21 @@
       <div class="box">
         <div class="columns is-mobile">
           <div class="column">
-            <%= borrow.user == current_user ? 'You' : borrow.user.name %> borrowed this book and is due
-            <div class="tag">
-              <%= format_date borrow.borrowed_at.to_date + borrow.days %>.
-            </div>
+            <%= borrow.user == current_user ? 'You' : borrow.user.name %>
+            borrowed this book in
+            <div class="tag"><%= format_date borrow.borrowed_at %></div>
+            and is due
+            <div class="tag"><%= format_date borrow.borrowed_at.to_date + borrow.days %>.</div>
           </div>
 
           <% if can? :return, borrow %>
             <div class="column is-narrow">
               <form action="/users/<%= user.slug %>/books/<%=h book.isbn %>/borrows/<%= borrow.id %>/return" method="POST">
                 <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
-                <div class="control">
-                  <button class="button is-small is-success">Returned</button>
-                </div>
+                <button class="button is-success is-light">Returned</button>
               </form>
             </div>
           <% end %>
-
-          <div class="column is-narrow">
-            <div class="tag">
-              <%= format_date borrow.borrowed_at %>
-            </div>
-          </div>
         </div>
 
         <% if can? :contact, borrow %>
@@ -156,9 +149,7 @@
             <div class="column is-narrow">
               <form action="/users/<%= user.slug %>/books/<%=h book.isbn %>/borrows/<%= borrow.id %>/borrow" method="POST">
                 <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
-                <div class="control">
-                  <button class="button is-small is-success">Borrowed</button>
-                </div>
+                <button class="button is-success is-light">Borrowed</button>
               </form>
             </div>
           <% end %>
@@ -168,19 +159,10 @@
               <form action="/users/<%= user.slug %>/books/<%=h book.isbn %>/borrows/<%= borrow.id %>" method="POST">
                 <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
                 <input name="_method" type="hidden" value="DELETE"/>
-                <div class="control">
-                  <button class="button is-small is-danger">Delete</button>
-                </div>
+                <button class="button is-danger is-light">Delete</button>
               </form>
             </div>
           <% end %>
-
-          <div class="column is-narrow">
-            <div class="tag">
-              <%= format_date borrow.created_at %>
-            </div>
-          </div>
-
         </div>
 
         <% if can? :contact, borrow %>

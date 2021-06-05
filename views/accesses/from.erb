@@ -1,18 +1,19 @@
 <% accesses.accepted.each do |access| %>
-  <div class="box">
-    <div class="columns is-mobile">
-      <div class="column is-narrow">
-        <figure class="image is-32x32">
-          <img class="is-rounded" src="<%= access.owner.image || '/users/default' %>"/>
-        </figure>
-      </div>
+  <div class="card is-shadowless">
+    <div class="card-content">
+      <div class="columns is-mobile">
+        <div class="column is-narrow">
+          <figure class="image is-32x32">
+            <img class="is-rounded" src="<%= access.owner.image || '/users/default' %>"/>
+          </figure>
+        </div>
 
-      <div class="column">
-        <a href="/users/<%= access.owner.slug %>">
-          <%=h access.owner.name %>
-        </a>
+        <div class="column">
+          <a href="/users/<%= access.owner.slug %>">
+            <%=h access.owner.name %>
+          </a>
+        </div>
       </div>
     </div>
-
   </div>
 <% end %>
