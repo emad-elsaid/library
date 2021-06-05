@@ -265,14 +265,17 @@ delete '/users/:user/shelves/:shelf' do
   redirect '/'
 end
 
-post '/auth/:provider/callback' do
-  halt if params[:provider] == 'developer' && !settings.development?
+post '/auth/developer/callback' do
+  halt unless settings.development?
 
   info = request.env['omniauth.auth']['info']
-  attrs = info.slice(:name, :email, :image).to_h
-  attrs[:slug] = SecureRandom.uuid
-  user = User.create_with(attrs).find_or_create_by(email: attrs['email'])
-  session[:user] = user.id
+  session[:user] = User.signup(info[:name], info[:email], info[:image]).id
+  redirect(env['omniauth.origin'] || '/')
+end
+
+get '/auth/google_oauth2/callback' do
+  info = request.env['omniauth.auth']['info']
+  session[:user] = User.signup(info[:name], info[:email], info[:image]).id
 
   redirect(env['omniauth.origin'] || '/')
 end

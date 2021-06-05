@@ -1,3 +1,5 @@
+require 'securerandom'
+
 class Book < ActiveRecord::Base
   belongs_to :shelf
   belongs_to :user, required: true
@@ -63,4 +65,9 @@ class User < ActiveRecord::Base
   validates :email, presence: true, uniqueness: true
   validates :slug, presence: true, uniqueness: true
   validates :description, length: { maximum: 500 }
+
+  def self.signup(name, email, image)
+    attrs = { name: name, image: image, slug: SecureRandom.uuid }
+    User.create_with(attrs).find_or_create_by(email: email)
+  end
 end
