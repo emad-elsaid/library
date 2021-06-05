@@ -2,7 +2,7 @@
   <div class="card-image">
     <figure class="image is-3by4">
       <a href="/users/<%= book.user.slug %>/books/<%=h book.isbn %>">
-        <img src="/books/image/<%= book.image || 'default.jpg' %>" loading="lazy">
+        <img src="<%= book.image? ? "/books/image/#{book.image}" : '/default_book' %>" loading="lazy">
       </a>
     </figure>
   </div>

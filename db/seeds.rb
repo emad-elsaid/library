@@ -2,7 +2,7 @@ user1 = User.create!(
   name: 'emad',
   email: 'emad@example.com',
   slug: SecureRandom.uuid,
-  image: 'https://www.emadelsaid.com/images/avatar.jpg'
+  image: 'https://www.emadelsaid.com/images/avatar.webp'
 )
 user2 = User.create!(
   name: 'github emad',

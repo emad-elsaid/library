@@ -1,7 +1,7 @@
 <div class="columns">
   <div class="column is-4">
     <figure class="image is-3by4 mb-3">
-      <img src="/books/image/<%= book.image || 'default.jpg' %>" loading="lazy">
+      <img src="<%= book.image? ? "/books/image/#{book.image}" : '/default_book' %>" loading="lazy">
     </figure>
 
     <% if can? :edit, book %>
