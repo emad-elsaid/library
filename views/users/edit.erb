@@ -70,9 +70,7 @@
             <form action="/users/<%= user.slug %>/accesses/<%= access.id %>" method="POST">
               <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
               <input name="_method" type="hidden" value="DELETE"/>
-              <div class="control">
-                <button class="button is-small is-danger">Remove Access</button>
-              </div>
+              <button class="button is-light is-danger">Remove Access</button>
             </form>
           </div>
         <% end %>
