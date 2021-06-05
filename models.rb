@@ -1,6 +1,8 @@
 require 'securerandom'
 
 class Book < ActiveRecord::Base
+  ALLOWED_TYPES = [:gif, :png, :jpeg]
+
   belongs_to :shelf
   belongs_to :user, required: true
   has_many :borrows
@@ -9,6 +11,19 @@ class Book < ActiveRecord::Base
 
   default_scope { order(created_at: :desc) }
   before_destroy { File.delete "public/books/image/#{image}" if image }
+
+  def upload(uploaded_image)
+    size = FastImage.size(uploaded_image)
+    allowed_type = ALLOWED_TYPES.include? FastImage.type(uploaded_image)
+
+    errors.add(:image, 'File type is not an image. Allowed type JPG, GIF, PNG') unless allowed_type
+    errors.add(:image, 'Image should be a portrait. width should be less than height') if size && size[0] > size[1]
+    return if invalid?
+
+    (File.delete("public/books/image/#{image}") rescue nil) if image?
+    update(image: SecureRandom.uuid)
+    FileUtils.mv uploaded_image, "public/books/image/#{image}"
+  end
 end
 
 class Shelf < ActiveRecord::Base
