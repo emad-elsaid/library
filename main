@@ -15,6 +15,7 @@ set :port, 3000
 set :sessions, true
 set :session_secret, ENV['SESSION_SECRET']
 set :strict_paths, false
+set :static_cache_control, [:public, { max_age: 60 * 60 * 24 * 365 }]
 
 use Rack::Protection::AuthenticityToken, allow_if: ->(env) {
   env['PATH_INFO'].start_with?('/auth/developer/callback') ||
