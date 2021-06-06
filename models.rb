@@ -10,7 +10,11 @@ class Book < ActiveRecord::Base
   validates_presence_of :title, :author, :isbn
 
   default_scope { order(created_at: :desc) }
-  before_destroy { File.delete "public/books/image/#{image}" if image }
+  before_destroy { File.delete image_path if image }
+
+  def image_path
+    "public/books/image/#{image}"
+  end
 
   def upload(uploaded_image)
     size = FastImage.size(uploaded_image)
@@ -20,9 +24,15 @@ class Book < ActiveRecord::Base
     errors.add(:image, 'Image should be a portrait. width should be less than height') if size && size[0] > size[1]
     return if invalid?
 
-    (File.delete("public/books/image/#{image}") rescue nil) if image?
+    File.delete(image_path) if image? && File.exist?(image_path)
     update(image: SecureRandom.uuid)
-    FileUtils.mv uploaded_image, "public/books/image/#{image}"
+    FileUtils.mv uploaded_image, image_path
+
+    begin
+      `mogrify -resize 432x576\\> -quality 60 -auto-orient -strip #{image_path}`
+    rescue e
+      puts "Encountered error while processing image for #{id} image: #{image_path}"
+    end
   end
 end
 
