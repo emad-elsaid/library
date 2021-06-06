@@ -13,8 +13,8 @@ So I sat down and wrote my own simple library program.
 - A reflection on my physical library
 - It's simple
 - Fast
-- Depends on my input (titles, images...etc)
-- Doesn't depend on any other system
+- ~~Depends on my input (titles, images...etc)~~ : This proved to be a lot of effort to do when I first tried inserting all my books
+- ~~Doesn't depend on any other system~~ : I needed the option to get the book information from google books
 - Free to use
 - Free to fork and modify and redistribute
 - Has a feature to lend my books to other people
@@ -22,8 +22,7 @@ So I sat down and wrote my own simple library program.
 
 # What's done so far:
 
-- So far it's single user. for local use
-- Allows adding books and taking pictures for covers from phones.
+- Allows adding books and taking pictures for covers from phone
 - Allows creating book shelves
 - Each book can be put in one shelf like real books. no multiple lists nonsense.
 - User login
@@ -34,7 +33,7 @@ So I sat down and wrote my own simple library program.
 - Minimize dependencies
 - Don't add javascript
 - Don't write custom CSS. use bulma.io
-- Don't depend on any external system like social login..etc.
+- ~~Don't depend on any external system like social login..etc.~~ I had to create login with google for easier implementation
 
 # Start the server
 
@@ -48,3 +47,10 @@ So I sat down and wrote my own simple library program.
 - Make it simpler
 - Make faster
 - Make it more secure
+
+# ToDo
+
+- Get book information from google books the book information can be fetched with
+```
+https://www.googleapis.com/books/v1/volumes?q=isbn:9780330514019
+```
