@@ -8,9 +8,18 @@ class Book < ActiveRecord::Base
   has_many :borrows
 
   validates_presence_of :title, :author, :isbn
+  validate :isbn13_format
 
   default_scope { order(created_at: :desc) }
   before_destroy { File.delete image_path if image }
+
+  def isbn13_format
+    digits = isbn.digits
+    return errors.add(:isbn, 'must be 13 digits ISBN') unless digits.length == 13
+
+    rem = digits.map.with_index {|digit, index| index.even? ? digit : digit * 3 }.reduce(:+) % 10
+    errors.add(:isbn, 'value is not a valid ISBN13') unless rem.zero?
+  end
 
   def image_path
     "public/books/image/#{image}"

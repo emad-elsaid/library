@@ -1,34 +1,6 @@
-<form action="/users/<%= user.slug %>/books/<%= book.isbn %>" method="POST">
+<form action="/users/<%= user.slug %>/books/<%= book.isbn if book.persisted? %>" method="POST">
   <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
 
-  <div class="field">
-    <label class="label">Title</label>
-    <div class="control">
-      <input
-          class="input <%= 'is-danger' if book.errors.include?(:title) %>"
-          type="text"
-          name="title"
-          value="<%=h book.title %>"
-          required>
-      <% if book.errors.include?(:title) %>
-        <p class="help is-danger"><%= book.errors.full_messages_for(:title).join %></p>
-      <% end %>
-    </div>
-  </div>
-  <div class="field">
-    <label class="label">Author</label>
-    <div class="control">
-      <input
-          class="input <%= 'is-danger' if book.errors.include?(:author) %>"
-          type="text"
-          name="author"
-          value="<%=h book.author %>"
-          required>
-      <% if book.errors.include?(:author) %>
-        <p class="help is-danger"><%= book.errors.full_messages_for(:author).join %></p>
-      <% end %>
-    </div>
-  </div>
   <% unless book.persisted? %>
     <div class="field">
       <label class="label">ISBN</label>
@@ -45,6 +17,36 @@
       </div>
     </div>
   <% end %>
+
+  <div class="field">
+    <label class="label">Title</label>
+    <div class="control">
+      <input
+          class="input <%= 'is-danger' if book.errors.include?(:title) %>"
+          type="text"
+          name="title"
+          value="<%=h book.title %>"
+          required>
+      <% if book.errors.include?(:title) %>
+        <p class="help is-danger"><%= book.errors.full_messages_for(:title).join %></p>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="field">
+    <label class="label">Author</label>
+    <div class="control">
+      <input
+          class="input <%= 'is-danger' if book.errors.include?(:author) %>"
+          type="text"
+          name="author"
+          value="<%=h book.author %>"
+          required>
+      <% if book.errors.include?(:author) %>
+        <p class="help is-danger"><%= book.errors.full_messages_for(:author).join %></p>
+      <% end %>
+    </div>
+  </div>
 
   <div class="field is-grouped">
     <div class="control">

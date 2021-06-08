@@ -36,12 +36,12 @@ helpers do
 
     when Book
       case verb
-      when :create then record.user == current_user
-      when :edit then record.user == current_user
-      when :delete then record.user == current_user
+      when :create then record.user_id == current_user.id
+      when :edit then record.user_id == current_user.id
+      when :delete then record.user_id == current_user.id
       when :borrow then
         loggedin? &&
-          record.user != current_user &&
+          record.user_id != current_user.id &&
           !record.borrows.exists?(user: current_user) &&
           current_user.accesses_from.accepted.exists?(owner: record)
       else raise "Verb #{verb} not handled for #{record}"
@@ -49,9 +49,9 @@ helpers do
 
     when Shelf
       case verb
-      when :create then record.user == current_user
-      when :edit then record.user == current_user
-      when :delete then record.user == current_user
+      when :create then record.user_id == current_user.id
+      when :edit then record.user_id == current_user.id
+      when :delete then record.user_id == current_user.id
       else raise "Verb #{verb} not handled for #{record}"
       end
 
@@ -65,21 +65,21 @@ helpers do
     when Borrow
       case verb
       when :show then loggedin?
-      when :delete then (record.user == current_user && record.borrowed_at.nil?) || record.owner == current_user
-      when :borrow then !record.book.borrows.borrowed.exists? && record.owner == current_user
-      when :return then record.borrowed_at.present? && record.owner == current_user
-      when :contact then record.owner == current_user
+      when :delete then (record.user_id == current_user.id && record.borrowed_at.nil?) || record.owner_id == current_user.id
+      when :borrow then !record.book.borrows.borrowed.exists? && record.owner_id == current_user.id
+      when :return then record.borrowed_at.present? && record.owner_id == current_user.id
+      when :contact then record.owner_id == current_user.id
       else raise "Verb #{verb} not handled for #{record}"
       end
 
     when Access
       case verb
-      when :show then record.user == current_user || record.owner == current_user
-      when :create then record.user == current_user && !Access.exists?(user: record.user, owner: record.owner)
-      when :accept then record.owner == current_user && record.accepted_at.nil?
-      when :reject then record.owner == current_user && record.rejected_at.nil?
-      when :delete then record.user == current_user || record.owner == current_user
-      when :contact then record.owner == current_user
+      when :show then record.user_id == current_user.id || record.owner_id == current_user.id
+      when :create then record.user_id == current_user.id && !Access.exists?(user: record.user_id, owner: record.owner_id)
+      when :accept then record.owner_id == current_user.id && record.accepted_at.nil?
+      when :reject then record.owner_id == current_user.id && record.rejected_at.nil?
+      when :delete then record.user_id == current_user.id || record.owner_id == current_user.id
+      when :contact then record.owner_id == current_user.id
       else raise "Verb #{verb} not handled for #{record}"
       end
 
