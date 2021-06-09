@@ -68,9 +68,13 @@ customElements.define('google-book', class GoogleBook extends HTMLElement {
   clickCallback() {
     let book = JSON.parse(this.getAttribute('book'));
     let isbn13 = book.volumeInfo.industryIdentifiers.find( i => i.type == 'ISBN_13').identifier;
-    document.getElementsByName('google_books_id')[0].value = book.id;
-    document.getElementsByName('isbn')[0].value = isbn13;
-    document.getElementsByName('title')[0].value = book.volumeInfo.title;
-    document.getElementsByName('author')[0].value = book.volumeInfo.authors.join(", ");
+    this.setValue('google_books_id', book.id);
+    this.setValue('isbn', isbn13);
+    this.setValue('title', book.volumeInfo.title);
+    this.setValue('author', book.volumeInfo.authors.join(', '));
+  }
+
+  setValue(name, value) {
+    document.getElementsByName(name).forEach( i => i.value = value );
   }
 });
