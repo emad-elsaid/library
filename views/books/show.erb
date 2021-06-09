@@ -44,17 +44,22 @@
     <h2 class="title">
       <%=h book.title %>
     </h2>
+
+    <% if book.subtitle? %>
+      <p class="subtitle">
+        <%=h book.subtitle %>
+      </p>
+    <% end %>
+
     <p class="subtitle is-capitalized">
-      by <%=h book.author %>
+      By <%=h book.author %>
     </p>
-    <ul>
-      <li>
-        ISBN:
-        <a href="https://www.google.com/search?tbm=bks&q=<%=h book.isbn %>" rel="noopener" target="_blank">
-          <%=h book.isbn %>
-        </a>
-      </li>
-    </ul>
+
+    <% if book.description? %>
+      <p class="content">
+        <%=h book.description %>
+      </p>
+    <% end %>
 
     <% if !loggedin? %>
       <div class="notification is-info is-light">

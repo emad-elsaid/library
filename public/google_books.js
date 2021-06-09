@@ -72,6 +72,10 @@ customElements.define('google-book', class GoogleBook extends HTMLElement {
     this.setValue('isbn', isbn13);
     this.setValue('title', book.volumeInfo.title);
     this.setValue('author', book.volumeInfo.authors.join(', '));
+    this.setValue('subtitle', book.volumeInfo.subtitle);
+    this.setValue('description', book.volumeInfo.description);
+    this.setValue('page_count', book.volumeInfo.pageCount);
+    this.setValue('publisher', book.volumeInfo.publisher);
   }
 
   setValue(name, value) {

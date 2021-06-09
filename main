@@ -63,7 +63,7 @@ end
 
 post '/users/:user/books' do
   user = User.find_by!(slug: params[:user])
-  attrs = params.slice(:title, :author, :isbn, :google_books_id)
+  attrs = params.slice(:title, :author, :isbn, :google_books_id, :subtitle, :description, :page_count, :publisher)
   book = user.books.new(attrs)
   halt 401 unless can? :create, book
 
@@ -93,7 +93,7 @@ post '/users/:user/books/:isbn' do
   book = user.books.find_by!(isbn: params[:isbn])
   halt 401 unless can? :edit, book
 
-  attrs = params.slice(:title, :author, :google_books_id)
+  attrs = params.slice(:title, :author, :google_books_id, :subtitle, :description, :page_count, :publisher)
   if book.update(attrs)
     redirect "/users/#{user.slug}/books/#{book.isbn}"
   else
