@@ -79,6 +79,8 @@ customElements.define('google-book', class GoogleBook extends HTMLElement {
   }
 
   setValue(name, value) {
+    if ( !value ) return;
+
     document.getElementsByName(name).forEach( i => i.value = value );
   }
 });
