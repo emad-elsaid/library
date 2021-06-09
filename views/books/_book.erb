@@ -1,13 +1,9 @@
 <div class="card is-shadowless">
   <div class="card-image">
     <figure class="image is-3by4">
-      <a href="/users/<%= book.user.slug %>/books/<%=h book.isbn %>">
+      <a href="/users/<%= book.user.slug %>/books/<%=h book.isbn %>" title="<%=h book.title %>">
         <img src="<%= book_cover book %>" loading="lazy">
       </a>
     </figure>
-  </div>
-  <div class="card-content">
-    <p class="title is-5 one-line"><%=h book.title %></p>
-    <p class="subtitle is-6 one-line is-capitalized">by <%=h book.author %></p>
   </div>
 </div>
