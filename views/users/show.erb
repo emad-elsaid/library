@@ -52,8 +52,8 @@
   <h1 class="title is-3">Books lying around</h1>
 
   <div class="columns is-multiline">
-    <% books.each do |book| %>
-      <div class="column is-3">
+    <% books.includes(:user).each do |book| %>
+      <div class="column is-2">
         <%= erb :'books/_book', locals: { book: book } %>
       </div>
     <% end %>
@@ -67,8 +67,8 @@
   </h2>
 
   <div class="columns is-multiline">
-    <% user.borrowed_books.each do |book| %>
-      <div class="column is-3">
+    <% user.borrowed_books.includes(:user).each do |book| %>
+      <div class="column is-2">
         <%= erb :'books/_book', locals: { book: book } %>
       </div>
     <% end %>
@@ -81,8 +81,8 @@
   </h2>
 
   <div class="columns is-multiline">
-    <% user.lent_books.each do |book| %>
-      <div class="column is-3">
+    <% user.lent_books.includes(:user).each do |book| %>
+      <div class="column is-2">
         <%= erb :'books/_book', locals: { book: book } %>
       </div>
     <% end %>
@@ -111,8 +111,8 @@
 
   <% if shelf.books.exists? %>
     <div class="columns is-multiline">
-      <% shelf.books.limit(4).each do |book| %>
-        <div class="column is-3">
+      <% shelf.books.limit(6).includes(:user).each do |book| %>
+        <div class="column is-2">
           <%= erb :'books/_book', locals: { book: book } %>
         </div>
       <% end %>

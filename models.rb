@@ -8,6 +8,7 @@ class Book < ActiveRecord::Base
   has_many :borrows
 
   validates_presence_of :title, :author, :isbn
+  validates :google_books_id, length: { in: 7..30, allow_nil: true }
   validate :isbn13_format
 
   default_scope { order(created_at: :desc) }
