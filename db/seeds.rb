@@ -29,7 +29,7 @@ the_subtle = Book.create!(
   shelf: self_dev,
   title: 'The subtle art of not giving a fuck',
   author: 'mark manson',
-  isbn: 978006247714
+  isbn: 9780062457714
 )
 
 borrow = Borrow.create!(
