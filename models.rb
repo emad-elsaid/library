@@ -12,7 +12,7 @@ class Book < ActiveRecord::Base
   validate :isbn13_format
 
   default_scope { order(created_at: :desc) }
-  before_destroy { File.delete image_path if image }
+  before_destroy { File.delete image_path if image? && File.exist?(image) }
 
   def isbn13_format
     digits = isbn.digits
