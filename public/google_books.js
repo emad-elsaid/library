@@ -29,15 +29,16 @@ customElements.define('google-books', class GoogleBooks extends HTMLElement {
 
     if(!data.items) return;
 
-    let columns = createElementWithAttrs('div', { class: 'columns' });
+    let columns = createElementWithAttrs('div', { class: 'columns is-multiline' });
     this.appendChild(columns);
 
     for( let i=0; i < data.items.length; i++ ) {
-      let column = createElementWithAttrs('div', { class: 'column' });
+      let column = createElementWithAttrs('div', { class: 'column is-2' });
       columns.appendChild(column);
 
       let book = createElementWithAttrs("google-book", {
-        book: JSON.stringify(data.items[i])
+        book: JSON.stringify(data.items[i]),
+        class: 'is-clickable'
       });
       column.appendChild(book);
     }

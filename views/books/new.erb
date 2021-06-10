@@ -1,6 +1,8 @@
 <script type="text/javascript" src="/google_books.js"></script>
 
-<google-books></google-books>
+<p>
+  <google-books></google-books>
+</p>
 
 <form action="/users/<%= user.slug %>/books/<%= book.isbn if book.persisted? %>" method="POST">
   <input type="hidden" name="authenticity_token" value="<%= env['rack.session'][:csrf] %>">
@@ -15,7 +17,8 @@
           name="title"
           value="<%=h book.title %>"
           onchange="document.getElementsByTagName('google-books')[0].setAttribute('keyword', this.value)"
-          required>
+          required
+          autofocus>
       <% if book.errors.include?(:title) %>
         <p class="help is-danger"><%= book.errors.full_messages_for(:title).join %></p>
       <% end %>

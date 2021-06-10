@@ -32,6 +32,7 @@ end
 
 get '/users/:user' do
   user = User.find_by!(slug: params[:user])
+  @title = user.name
   erb :'users/show', locals: { user: user, books: user.books.where.missing(:shelf), shelves: user.shelves }
 end
 
@@ -77,6 +78,7 @@ end
 get '/users/:user/books/:isbn' do
   user = User.find_by!(slug: params[:user])
   book = user.books.find_by!(isbn: params[:isbn])
+  @title = book.title
   erb :'books/show', locals: { user: user, book: book }
 end
 
