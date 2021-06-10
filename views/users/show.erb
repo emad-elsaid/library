@@ -93,6 +93,7 @@
   <h2 class="title is-3">
     <a href="/users/<%= user.slug %>/shelves/<%= shelf.id %>">
       <%=h shelf.name %>
+      <small class="subtitle is-size-7">More books...</small>
     </a>
 
     <% unless shelf.first? || !can?(:edit, shelf) %>
