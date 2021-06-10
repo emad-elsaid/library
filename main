@@ -345,3 +345,8 @@ get '/books/to_borrow' do
 
   erb :'books/to_borrow', locals: { user: user, books: user.books_to_borrow }
 end
+
+get '/privacy' do
+  user = current_user
+  erb :privacy, locals: { user: user }
+end
