@@ -25,20 +25,6 @@
     </div>
   </div>
 
-  <div class="field">
-    <label class="label">Subtitle</label>
-    <div class="control">
-      <input
-          class="input <%= 'is-danger' if book.errors.include?(:subtitle) %>"
-          type="text"
-          name="subtitle"
-          value="<%=h book.subtitle %>">
-      <% if book.errors.include?(:subtitle) %>
-        <p class="help is-danger"><%= book.errors.full_messages_for(:subtitle).join %></p>
-      <% end %>
-    </div>
-  </div>
-
   <% unless book.persisted? %>
     <div class="field">
       <label class="label">ISBN</label>
@@ -73,45 +59,64 @@
     </div>
   </div>
 
-  <div class="field">
-    <label class="label">Description</label>
-    <div class="control">
-      <textarea
-          class="textarea <%= 'is-danger' if book.errors.include?(:description) %>"
-          name="description"><%=h book.description %></textarea>
-      <% if book.errors.include?(:description) %>
-        <p class="help is-danger"><%=h book.errors.full_messages_for(:description).join %></p>
-      <% end %>
-    </div>
-  </div>
+  <details class="field">
+    <summary>Optional details</summary>
 
-  <div class="field">
-    <label class="label">Publisher</label>
-    <div class="control">
-      <input
-          class="input <%= 'is-danger' if book.errors.include?(:publisher) %>"
-          type="text"
-          name="publisher"
-          value="<%=h book.publisher %>">
-      <% if book.errors.include?(:publisher) %>
-        <p class="help is-danger"><%= book.errors.full_messages_for(:publisher).join %></p>
-      <% end %>
+    <div class="field">
+      <label class="label">Subtitle</label>
+      <div class="control">
+        <input
+            class="input <%= 'is-danger' if book.errors.include?(:subtitle) %>"
+            type="text"
+            name="subtitle"
+            value="<%=h book.subtitle %>">
+        <% if book.errors.include?(:subtitle) %>
+          <p class="help is-danger"><%= book.errors.full_messages_for(:subtitle).join %></p>
+        <% end %>
+      </div>
     </div>
-  </div>
 
-  <div class="field">
-    <label class="label">Pages</label>
-    <div class="control">
-      <input
-          class="input <%= 'is-danger' if book.errors.include?(:page_count) %>"
-          type="number"
-          name="page_count"
-          value="<%=h book.page_count %>">
-      <% if book.errors.include?(:page_count) %>
-        <p class="help is-danger"><%= book.errors.full_messages_for(:page_count).join %></p>
-      <% end %>
+    <div class="field">
+      <label class="label">Description</label>
+      <div class="control">
+        <textarea
+            class="textarea <%= 'is-danger' if book.errors.include?(:description) %>"
+            name="description"><%=h book.description %></textarea>
+        <% if book.errors.include?(:description) %>
+          <p class="help is-danger"><%=h book.errors.full_messages_for(:description).join %></p>
+        <% end %>
+      </div>
     </div>
-  </div>
+
+    <div class="field">
+      <label class="label">Publisher</label>
+      <div class="control">
+        <input
+            class="input <%= 'is-danger' if book.errors.include?(:publisher) %>"
+            type="text"
+            name="publisher"
+            value="<%=h book.publisher %>">
+        <% if book.errors.include?(:publisher) %>
+          <p class="help is-danger"><%= book.errors.full_messages_for(:publisher).join %></p>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="label">Pages</label>
+      <div class="control">
+        <input
+            class="input <%= 'is-danger' if book.errors.include?(:page_count) %>"
+            type="number"
+            name="page_count"
+            value="<%=h book.page_count %>">
+        <% if book.errors.include?(:page_count) %>
+          <p class="help is-danger"><%= book.errors.full_messages_for(:page_count).join %></p>
+        <% end %>
+      </div>
+    </div>
+
+  </details>
 
   <div class="field is-grouped">
     <div class="control">
