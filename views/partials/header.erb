@@ -1,49 +1,35 @@
 <section class="hero">
-  <div class="hero-body">
-    <div class="container">
-      <div class="columns">
-        <% if user %>
-          <div class="column is-narrow">
-            <figure class="image is-32x32">
-              <img class="is-rounded" src="<%= user.image || '/default_user' %>"/>
-            </figure>
-          </div>
-        <% end %>
-        <div class="column">
-          <h1 class="title is-capitalized">
-            <% if user %>
-              <a href="/users/<%= user.slug %>">
-                <% if current_user == user %>
-                  Your Library
-                <% else %>
-                  <%=h user.name + "\'s" if user %> Library
-                <% end %>
-              </a>
-            <% else %>
-              Library
-            <% end %>
-          </h1>
-        </div>
-        <div class="column has-text-right">
+  <div class="hero-body has-text-centered">
+    <% if user %>
+      <a href="/users/<%= user.slug %>">
+        <figure class="image is-64x64 container">
+          <img class="is-rounded" src="<%= user.image || '/default_user' %>"/>
+        </figure>
+      </a>
+    <% end %>
 
-          <% if current_user && can?(:create, user.books.new) %>
-            <a href="/users/<%= user.slug %>/books/new" class="button">
-              Add a Book 📕
-            </a>
+    <h1 class="title is-capitalized">
+      <% if user %>
+        <a href="/users/<%= user.slug %>">
+          <% if current_user == user %>
+            Your Library
+          <% else %>
+            <%=h user.name + "\'s" if user %> Library
           <% end %>
+        </a>
+      <% else %>
+        Library
+      <% end %>
+    </h1>
 
-          <% if can? :login %>
-            <form action="/auth/<%= settings.development? ? :developer : :google_oauth2 %>" method="POST">
-              <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
-              <input name="origin" type="hidden" value="<%=h request.path_info %>"/>
-              <button class="button">
-                Create/Access your library
-              </button>
-            </form>
-          <% end %>
-
-        </div>
-      </div>
-    </div>
+    <% if can? :login %>
+      <form action="/auth/<%= settings.development? ? :developer : :google_oauth2 %>" method="POST">
+        <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
+        <input name="origin" type="hidden" value="<%=h request.path_info %>"/>
+        <button class="button">
+          Create/Access your library
+        </button>
+      </form>
+    <% end %>
   </div>
 </section>

@@ -12,9 +12,9 @@
 </div>
 
 <% if shelf.books.exists? %>
-  <div class="columns is-multiline">
+  <div class="columns is-mobile is-multiline">
     <% shelf.books.each do |book| %>
-      <div class="column is-2">
+      <div class="column is-2-tablet is-6-mobile">
         <%= erb :'books/_book', locals: { book: book } %>
       </div>
     <% end %>
