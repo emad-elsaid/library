@@ -8,7 +8,7 @@
   </head>
   <body>
 
-    <%= erb :'partials/user_nav' if can? :logout %>
+    <%= erb :'partials/user_nav' if loggedin? %>
     <%= erb :'partials/header', locals: { user: user }  %>
 
     <section class="section">
