@@ -50,7 +50,7 @@ helpers do
         loggedin? &&
           record.user_id != current_user&.id &&
           !record.borrows.exists?(user: current_user) &&
-          current_user.accesses_from.accepted.exists?(owner: record)
+          current_user.accesses_from.accepted.exists?(owner: record.user_id)
       else raise "Verb #{verb} not handled for #{record}"
       end
 
