@@ -18,7 +18,7 @@ class Book < ActiveRecord::Base
     digits = isbn.digits
     return errors.add(:isbn, 'must be 13 digits ISBN') unless digits.length == 13
 
-    rem = digits.map.with_index {|digit, index| index.even? ? digit : digit * 3 }.reduce(:+) % 10
+    rem = digits.map.with_index { |digit, index| index.even? ? digit : digit * 3 }.reduce(:+) % 10
     errors.add(:isbn, 'value is not a valid ISBN13') unless rem.zero?
   end
 
@@ -58,6 +58,7 @@ class Borrow < ActiveRecord::Base
   belongs_to :user, required: true, inverse_of: :borrows
   belongs_to :owner, required: true, class_name: :User, inverse_of: :lends
   belongs_to :book, required: true
+  has_many :emails, as: :emailable, dependent: :destroy
 
   scope :by_creation, -> { order(created_at: :asc) }
   scope :wait_list, -> { where(borrowed_at: nil) }
@@ -68,6 +69,7 @@ end
 class Access < ActiveRecord::Base
   belongs_to :user, foreign_key: :user_id, required: true, class_name: :User, inverse_of: :accesses_from
   belongs_to :owner, foreign_key: :owner_id, required: true, class_name: :User, inverse_of: :accesses_to
+  has_many :emails, as: :emailable, dependent: :destroy
 
   default_scope { order(created_at: :desc) }
   scope :pending, -> { where(accepted_at: nil, rejected_at: nil) }
@@ -97,6 +99,8 @@ class User < ActiveRecord::Base
   has_many :accesses_from, foreign_key: :user_id, dependent: :destroy, class_name: :Access, inverse_of: :user
   has_many :accesses_to, foreign_key: :owner_id, dependent: :destroy, class_name: :Access, inverse_of: :owner
 
+  has_many :emails, dependent: :destroy
+
   validates :email, presence: true, uniqueness: true
   validates :slug, presence: true, uniqueness: true
   validates :description, length: { maximum: 500 }
@@ -105,4 +109,9 @@ class User < ActiveRecord::Base
     attrs = { name: name, image: image, slug: SecureRandom.uuid }
     User.create_with(attrs).find_or_create_by(email: email)
   end
+end
+
+class Email < ActiveRecord::Base
+  belongs_to :user
+  belongs_to :emailable, polymorphic: true, required: true
 end

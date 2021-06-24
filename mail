@@ -1,0 +1,30 @@
+#!/usr/bin/env ruby
+
+require 'net/smtp'
+require 'date'
+require 'securerandom'
+require 'bundler'
+require_relative './models'
+Bundler.require(:default)
+
+ActiveRecord::Base.establish_connection(url: ENV['DATABASE_URL'])
+
+def email(to_email:, to_name:, subject:, message:)
+  smtp_server = ENV['SMTP_SERVER']
+  smtp_usrename = ENV['SMTP_USERNAME']
+  smtp_user_display_name = ENV['SMTP_USER_DISPLAY_NAME']
+  smtp_password = ENV['SMTP_PASSWORD']
+  msgstr = <<~END_OF_MESSAGE
+    From: #{smtp_user_display_name} <#{smtp_usrename}>
+    To: #{to_name} <#{to_email}>
+    Subject: #{subject}
+    Date: #{DateTime.now.rfc822}
+    Message-Id: <#{SecureRandom.uuid}-#{smtp_username}>
+
+    #{message}
+  END_OF_MESSAGE
+
+  Net::SMTP.start(smtp_server, 25, smtp_server, smtp_usrename, smtp_password, :plain) do |smtp|
+    smtp.send_message msgstr, smtp_usrename, to_email
+  end
+end
