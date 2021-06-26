@@ -42,15 +42,14 @@ So I sat down and wrote my own simple library program.
 - Setup the database `rake db:setup`
 - Run the server `bundle exec ./main`
 
+# Sending emails
+
+- The `mail` service/script will run every hour
+- Emails are grouped into single message
+- `mail` uses ruby standard library SMTP module using the configuration in `.env`
+
 # Contributions
 
 - Make it simpler
 - Make faster
 - Make it more secure
-
-# ToDo
-
-- Get book information from google books the book information can be fetched with
-```
-https://www.googleapis.com/books/v1/volumes?q=isbn:9780330514019
-```
