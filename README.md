@@ -48,6 +48,14 @@ So I sat down and wrote my own simple library program.
 - Emails are grouped into single message
 - `mail` uses ruby standard library SMTP module using the configuration in `.env`
 
+# Deployment
+
+- a remote ssh access to a server with docker and docker-compose
+- clone the repo to you machine
+- copy `.env` to the remote server `/root/env/library/.env` and fill it
+- from your machine `bin/deploy master user@ip-address`
+- This will deploy all services to the remote server
+
 # Contributions
 
 - Make it simpler
