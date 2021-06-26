@@ -90,8 +90,7 @@ helpers do
       else raise "Verb #{verb} not handled for #{record}"
       end
 
-    else
-      raise "Error #{record} permissions not handled."
+    else raise "Error #{record} permissions not handled."
     end
   end
 

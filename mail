@@ -4,27 +4,85 @@ require 'net/smtp'
 require 'date'
 require 'securerandom'
 require 'bundler'
-require_relative './models'
 Bundler.require(:default)
 
-ActiveRecord::Base.establish_connection(url: ENV['DATABASE_URL'])
+require_relative './models'
 
-def email(to_email:, to_name:, subject:, message:)
-  smtp_server = ENV['SMTP_SERVER']
-  smtp_usrename = ENV['SMTP_USERNAME']
-  smtp_user_display_name = ENV['SMTP_USER_DISPLAY_NAME']
-  smtp_password = ENV['SMTP_PASSWORD']
+set :run, false
+
+ActiveRecord::Base.establish_connection(url: ENV['DATABASE_URL'])
+SMTP_SERVER = ENV['SMTP_SERVER']
+SMTP_USERNAME = ENV['SMTP_USERNAME']
+SMTP_USER_DISPLAY_NAME = ENV['SMTP_USER_DISPLAY_NAME']
+SMTP_PASSWORD = ENV['SMTP_PASSWORD']
+HOST_DOMAIN = ENV['HOST_DOMAIN']
+
+def send_email(to_email:, to_name:, subject:, message:)
   msgstr = <<~END_OF_MESSAGE
-    From: #{smtp_user_display_name} <#{smtp_usrename}>
+    From: #{SMTP_USER_DISPLAY_NAME} <#{SMTP_USERNAME}>
     To: #{to_name} <#{to_email}>
     Subject: #{subject}
     Date: #{DateTime.now.rfc822}
-    Message-Id: <#{SecureRandom.uuid}-#{smtp_username}>
+    Message-Id: <#{SecureRandom.uuid}-#{SMTP_USERNAME}>
 
     #{message}
   END_OF_MESSAGE
 
-  Net::SMTP.start(smtp_server, 25, smtp_server, smtp_usrename, smtp_password, :plain) do |smtp|
-    smtp.send_message msgstr, smtp_usrename, to_email
+  Net::SMTP.start(SMTP_SERVER, 25, SMTP_SERVER, SMTP_USERNAME, SMTP_PASSWORD, :plain) do |smtp|
+    smtp.send_message msgstr, SMTP_USERNAME, to_email
+  end
+end
+
+def render_email(email)
+  emailable = email.emailable
+
+  case emailable
+
+  when Access
+    case email.about
+    when 'requested' then "- #{emailable.user.name} requested access to your library"
+    when 'accepted' then "- #{emailable.owner.name} accepted your access to his library"
+    else raise "About #{email.about} not handled for #{Access}"
+    end
+
+  when Borrow
+    case email.about
+    when 'requested' then "- #{emailable.user.name} requested to borrow #{emailable.book.title}"
+    else raise "About #{email.about} not handled for #{Borrow}"
+    end
+
+  else raise "Error #{record} permissions not handled."
+  end
+end
+
+def render_emails(emails)
+  updates = emails.map { |email| render_email(email) }.sort.join("\n")
+
+  <<~END_OF_MESSAGE
+    Hello,
+
+    You have #{emails.count} update(s) in library:
+    #{updates}
+
+    You can check your updates when you login to library here:
+    #{HOST_DOMAIN}
+
+    Have a nice day,
+  END_OF_MESSAGE
+end
+
+loop do
+  sleep(60*60)
+  users_ids = Email.select(:user_id).distinct.pluck(:user_id)[0..20]
+  User.find(users_ids).each do |user|
+    emails = user.emails
+    send_email(
+      to_email: user.email,
+      to_name: user.name,
+      subject: 'Updates from Library',
+      message: render_emails(emails)
+    )
+
+    emails.destroy_all
   end
 end

@@ -3,6 +3,7 @@ class CreateEmails < ActiveRecord::Migration[6.1]
     create_table :emails do |t|
       t.belongs_to :user, foreign_key: true, null: false
       t.belongs_to :emailable, polymorphic: true, index: { unique: true }
+      t.string :about, null: false
 
       t.timestamps
     end

@@ -64,6 +64,7 @@ ActiveRecord::Schema.define(version: 2021_06_24_200935) do
     t.bigint "user_id", null: false
     t.string "emailable_type"
     t.bigint "emailable_id"
+    t.string "about", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["emailable_type", "emailable_id"], name: "index_emails_on_emailable", unique: true

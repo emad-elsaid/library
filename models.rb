@@ -112,6 +112,8 @@ class User < ActiveRecord::Base
 end
 
 class Email < ActiveRecord::Base
-  belongs_to :user
+  belongs_to :user, required: true
   belongs_to :emailable, polymorphic: true, required: true
+
+  validates :about, presence: true
 end

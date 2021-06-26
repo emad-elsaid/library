@@ -142,7 +142,8 @@ post '/users/:user/books/:isbn/borrows' do
   book = user.books.find_by!(isbn: params[:isbn])
   halt 401 unless can? :borrow, book
 
-  book.borrows.create(user: current_user, owner: book.user, days: params[:days])
+  borrow = book.borrows.create(user: current_user, owner: book.user, days: params[:days])
+  Email.create(user: user, emailable: borrow, about: :requested)
 
   redirect "/users/#{user.slug}/books/#{book.isbn}"
 end
@@ -290,6 +291,8 @@ post '/users/:user/accesses' do
   halt 401 unless can? :create, access
 
   access.save
+  Email.create(user: user, emailable: access, about: :requested)
+
   redirect back
 end
 
@@ -299,6 +302,8 @@ post '/users/:user/accesses/:access/accept' do
   halt 401 unless can? :accept, access
 
   access.update(accepted_at: Time.now)
+  Email.create(user: access.user, emailable: access, about: :accepted)
+
   redirect back
 end
 

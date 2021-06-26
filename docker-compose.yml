@@ -24,3 +24,14 @@ services:
       - '127.0.0.1:8200:3000'
     env_file:
       - .env
+
+  mail:
+    build: .
+    command: bundle exec ./mail
+    depends_on:
+      - db
+    links:
+      - db
+    restart: always
+    env_file:
+      - .env
