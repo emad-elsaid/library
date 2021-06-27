@@ -1,7 +1,7 @@
 LIBRARY
 =========
 
-I used share what I'm reading on Goodreads.com but over time:
+I used to share what I'm reading on Goodreads.com but over time:
 
 - It became very slow
 - It has 3 trackers as of writing this readme.
@@ -10,7 +10,7 @@ I used share what I'm reading on Goodreads.com but over time:
 
 So I sat down and wrote my own simple library program.
 
-- A reflection on my physical library
+- A reflection of my physical library
 - It's simple
 - Fast
 - ~~Depends on my input (titles, images...etc)~~ : This proved to be a lot of effort to do when I first tried inserting all my books
