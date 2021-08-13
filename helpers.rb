@@ -17,7 +17,7 @@ helpers do
 
   def book_cover(book)
     return "/books/image/#{book.image}" if book.image?
-    return "http://books.google.com/books/content?id=#{book.google_books_id}&printsec=frontcover&img=1&zoom=1" if book.google_books_id?
+    return "https://books.google.com/books/content?id=#{book.google_books_id}&printsec=frontcover&img=1&zoom=1" if book.google_books_id?
 
     '/default_book'
   end

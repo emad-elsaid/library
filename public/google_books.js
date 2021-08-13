@@ -61,7 +61,7 @@ customElements.define('google-book', class GoogleBook extends HTMLElement {
 
     let img = createElementWithAttrs('img', {
       title: book.volumeInfo.title,
-      src: `http://books.google.com/books/content?id=${book.id}&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api`
+      src: `https://books.google.com/books/content?id=${book.id}&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api`
     });
     figure.appendChild(img)
   }
