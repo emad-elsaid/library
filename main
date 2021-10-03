@@ -79,6 +79,17 @@ get '/users/:user/books/:isbn' do
   user = User.find_by!(slug: params[:user])
   book = user.books.find_by!(isbn: params[:isbn])
   @title = book.title
+
+  set_meta("og:title", book.title)
+  set_meta(:author, book.author)
+  set_meta(:description, book.description)
+  set_meta("og:description", book.description)
+  set_meta("og:type", "article")
+  set_meta("og:image", book_cover(book) )
+  set_meta("twitter:image", book_cover(book) )
+  set_meta("twitter:card", "summary")
+  set_meta("twitter:title", book.title)
+
   erb :'books/show', locals: { user: user, book: book }
 end
 

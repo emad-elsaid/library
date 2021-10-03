@@ -97,4 +97,23 @@ helpers do
   def format_date(date)
     date.to_date
   end
+
+  def meta_property(name)
+    return unless @meta
+    return unless @meta.key?(name)
+
+    "<meta property=\"#{name}\" value=\"#{h @meta[name]}\"/>"
+  end
+
+  def meta_name(name)
+    return unless @meta
+    return unless @meta.key?(name)
+
+    "<meta name=\"#{name}\" value=\"#{h @meta[name]}\"/>"
+  end
+
+  def set_meta(name, value)
+    @meta ||= {}
+    @meta[name] = value
+  end
 end

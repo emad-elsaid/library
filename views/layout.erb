@@ -3,6 +3,18 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:site_name" content="Library" />
+
+    <%= meta_property "og:title" %>
+    <%= meta_name :author %>
+    <%= meta_name :description %>
+    <%= meta_property "og:description" %>
+    <%= meta_property "og:type" %>
+    <%= meta_property "og:image" %>
+    <%= meta_name "twitter:card" %>
+    <%= meta_property "twitter:image" %>
+    <%= meta_property "twitter:title" %>
+
     <title><%=h [@title, 'LIBRARY'].compact.join ' | ' %></title>
     <link rel="stylesheet" href="/style.css">
   </head>
