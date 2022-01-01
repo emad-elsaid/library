@@ -4,7 +4,7 @@ source "https://rubygems.org"
 
 gem 'sinatra'
 gem 'sinatra-activerecord'
-gem 'activerecord'
+gem 'activerecord', '~>6.0'
 
 gem 'fastimage'
 gem 'rake'
