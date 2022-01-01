@@ -1,17 +1,16 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    activemodel (6.1.4.4)
-      activesupport (= 6.1.4.4)
-    activerecord (6.1.4.4)
-      activemodel (= 6.1.4.4)
-      activesupport (= 6.1.4.4)
-    activesupport (6.1.4.4)
+    activemodel (7.0.0)
+      activesupport (= 7.0.0)
+    activerecord (7.0.0)
+      activemodel (= 7.0.0)
+      activesupport (= 7.0.0)
+    activesupport (7.0.0)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 1.6, < 2)
       minitest (>= 5.1)
       tzinfo (~> 2.0)
-      zeitwerk (~> 2.3)
     acts_as_list (1.0.4)
       activerecord (>= 4.2)
     concurrent-ruby (1.1.9)
@@ -77,7 +76,7 @@ GEM
       rack (~> 2.2)
       rack-protection (= 2.1.0)
       tilt (~> 2.0)
-    sinatra-activerecord (2.0.23)
+    sinatra-activerecord (2.0.25)
       activerecord (>= 4.1)
       sinatra (>= 1.0)
     tilt (2.0.10)
@@ -102,4 +101,4 @@ DEPENDENCIES
   sinatra-activerecord
 
 BUNDLED WITH
-   2.2.22
+   2.2.26
