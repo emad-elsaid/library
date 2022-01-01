@@ -10,6 +10,8 @@ services:
     volumes:
       - /root/data/library/db_13_3:/var/lib/postgresql/data
     shm_size: '2gb'
+    logging:
+      driver: journald
 
   web:
     build: .
@@ -24,6 +26,24 @@ services:
       - '127.0.0.1:8200:3000'
     env_file:
       - .env
+    logging:
+      driver: journald
+
+  backup:
+    build: .
+    command: bundle exec ./backup
+    restart: always
+    volumes:
+      - /root/data/library/backups:/backups
+    depends_on:
+      - db
+    links:
+      - db
+    restart: always
+    env_file:
+      - .env
+    logging:
+      driver: journald
 
   mail:
     build: .
@@ -35,3 +55,5 @@ services:
     restart: always
     env_file:
       - .env
+    logging:
+      driver: journald

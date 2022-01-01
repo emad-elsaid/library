@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+function sleep_until {
+    # Use $* to eliminate need for quotes
+    seconds=$(( $(date -d "$*" +%s) - $(date +%s) ))
+
+    # if it passed today, get it tomorrow
+    if [ $seconds -le 0 ]
+    then
+        seconds=$(( $(date -d "tomorrow $*" +%s) - $(date +%s) ))
+    fi
+
+    echo "Sleeping for $seconds seconds"
+    sleep $seconds
+}
+
+while [ true ]
+do
+    sleep_until '4:00'
+
+    mkdir -p $BACKUPS_PATH
+    filename="${BACKUPS_PATH}/`date +%F`.dump"
+
+    echo "Taking backup ${filename}"
+    pg_dump -f $filename -Fc $DATABASE_URL
+    sync
+
+    # delete backups older than the limit
+    echo "Deleting old backup older than ${BACKUPS_LIMIT}"
+    find $BACKUPS_PATH -mtime +$BACKUPS_LIMIT -exec rm {} \;
+done
