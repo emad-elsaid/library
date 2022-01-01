@@ -53,7 +53,7 @@
 
   <div class="columns is-mobile is-multiline">
     <% books.includes(:user).each do |book| %>
-      <div class="column is-2-tablet is-6-mobile">
+      <div class="column is-1-tablet is-4-mobile">
         <%= erb :'books/_book', locals: { book: book } %>
       </div>
     <% end %>
@@ -68,7 +68,7 @@
 
   <div class="columns is-mobile is-multiline">
     <% user.borrowed_books.includes(:user).each do |book| %>
-      <div class="column is-2-tablet is-6-mobile">
+      <div class="column is-1-tablet is-4-mobile">
         <%= erb :'books/_book', locals: { book: book } %>
       </div>
     <% end %>
@@ -82,7 +82,7 @@
 
   <div class="columns is-mobile is-multiline">
     <% user.lent_books.includes(:user).each do |book| %>
-      <div class="column is-2-tablet is-6-mobile">
+      <div class="column is-1-tablet is-4-mobile">
         <%= erb :'books/_book', locals: { book: book } %>
       </div>
     <% end %>
@@ -91,11 +91,11 @@
 
 <% shelves.each do |shelf| %>
   <h2 class="title is-3">
-    <a href="/users/<%= user.slug %>/shelves/<%= shelf.id %>">
-      <%=h shelf.name %>
-      <small class="subtitle is-size-7">More books...</small>
-    </a>
+    <%=h shelf.name %>
 
+    <% if can? :edit, shelf %>
+        <a class="button is-small is-pulled-right" href="/users/<%= user.slug %>/shelves/<%= shelf.id %>/edit">Edit</a>
+    <% end %>
     <% unless shelf.first? || !can?(:edit, shelf) %>
     <form action="/users/<%= user.slug %>/shelves/<%=shelf.id %>/up" class="is-pulled-right" method="POST">
       <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
@@ -112,8 +112,8 @@
 
   <% if shelf.books.exists? %>
     <div class="columns is-mobile is-multiline">
-      <% shelf.books.limit(6).includes(:user).each do |book| %>
-        <div class="column is-2-tablet is-6-mobile">
+      <% shelf.books.includes(:user).each do |book| %>
+        <div class="column is-1-tablet is-4-mobile">
           <%= erb :'books/_book', locals: { book: book } %>
         </div>
       <% end %>
