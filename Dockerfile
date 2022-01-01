@@ -1,4 +1,4 @@
-FROM ruby:3.0.1
+FROM ruby:3.1.0
 
 ENV LANG=C.UTF-8
 RUN apt-get update && apt-get install -qq -y build-essential libpq-dev postgresql-client imagemagick --fix-missing --no-install-recommends
