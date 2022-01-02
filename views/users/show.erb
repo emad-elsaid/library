@@ -95,7 +95,7 @@
 <% end %>
 
 <% shelves.each do |shelf| %>
-  <h2 class="title is-3">
+  <h2 class="title is-3" id="shelf-<%= shelf.id %>">
     <%=h shelf.name %>
   </h2>
 
