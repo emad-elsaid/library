@@ -1,39 +1,62 @@
-<div class="container my-4  is-max-widescreen">
-  <div class="columns is-mobile">
-    <div class="column is-narrow">
-      <figure class="image is-32x32">
+<nav class="navbar container is-max-widescreen" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <div class="columns is-mobile navbar-item my-0">
+      <div class="column is-narrow">
+        <figure class="image is-32x32">
+          <a href="/users/<%= current_user.slug %>">
+            <img class="is-rounded" src="<%= current_user.image || '/default_user' %>"/>
+          </a>
+        </figure>
+      </div>
+      <div class="column">
         <a href="/users/<%= current_user.slug %>">
-          <img class="is-rounded" src="<%= current_user.image || '/default_user' %>"/>
-        </a>
-      </figure>
-    </div>
-    <div class="column">
-      <a href="/users/<%= current_user.slug %>">
-        <%= current_user.name %>
-      </a>
-    </div>
-
-    <% if can?(:create, current_user.books.new) %>
-      <div class="column is-narrow">
-        <a href="/users/<%= current_user.slug %>/books/new">
-          Add a Book 📕
+          <%= current_user.name %>
         </a>
       </div>
-    <% end %>
-
-    <% if can?(:list_shelves, current_user) %>
-      <div class="column is-narrow">
-        <a href="/users/<%= current_user.slug %>/shelves">
-          Manage Shelves 📚
-        </a>
-      </div>
-    <% end %>
-
-    <div class="column is-narrow">
-      <a href="/users/<%= current_user.slug %>/edit">Settings ⚙️</a>
     </div>
-    <div class="column is-narrow">
-      <a href="/logout" class="has-text-danger">Logout 👋</a>
+
+
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbar-menu">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+
+  <div id="navbar-menu" class="navbar-menu">
+    <div class="navbar-end">
+      <% if can?(:create, current_user.books.new) %>
+        <a href="/users/<%= current_user.slug %>/books/new" class="navbar-item">
+          📕 Add a Book
+        </a>
+      <% end %>
+
+      <% if can?(:list_shelves, current_user) %>
+        <a href="/users/<%= current_user.slug %>/shelves" class="navbar-item">
+          📚 Manage Shelves
+        </a>
+      <% end %>
+
+      <a href="/users/<%= current_user.slug %>/edit" class="navbar-item">⚙️ Settings</a>
+      <a href="/logout" class="has-text-danger navbar-item">👋 Logout</a>
     </div>
   </div>
-</div>
+</nav>
+
+<script type="application/javascript">
+ document.addEventListener('DOMContentLoaded', () => {
+     const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+
+     $navbarBurgers.forEach(function(el) {
+         el.addEventListener('click', function() {
+
+             // Get the target from the "data-target" attribute
+             const target = el.dataset.target;
+             const $target = document.getElementById(target);
+
+             el.classList.toggle('is-active');
+             $target.classList.toggle('is-active');
+         });
+     });
+ });
+</script>
