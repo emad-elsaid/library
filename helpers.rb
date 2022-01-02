@@ -3,6 +3,10 @@
 require 'rack/utils'
 
 helpers do
+  def partial (template, locals = {})
+    erb(template.to_sym, layout: false, locals: locals)
+  end
+
   def h(text)
     Rack::Utils.escape_html(text)
   end
@@ -66,6 +70,7 @@ helpers do
       case verb
       when :edit then record == current_user
       when :access then loggedin? && (record == current_user || current_user.accesses_from.exists?(owner: record))
+      when :list_shelves then loggedin? && record == current_user
       else raise "Verb #{verb} not handled for #{record}"
       end
 

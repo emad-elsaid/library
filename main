@@ -208,6 +208,13 @@ get '/users/:user/shelves/new' do
   erb :'shelves/new', locals: { user: user, shelf: user.shelves.new }
 end
 
+get '/users/:user/shelves' do
+  user = User.find_by!(slug: params[:user])
+  halt 401 unless can? :list_shelves, user
+
+  erb :'shelves/index', locals: { user: user, shelves: user.shelves }
+end
+
 post '/users/:user/shelves' do
   user = User.find_by!(slug: params[:user])
   attrs = params.slice(:name)
@@ -219,13 +226,6 @@ post '/users/:user/shelves' do
   else
     erb :'shelves/new', locals: { user: user, shelf: shelf }
   end
-end
-
-get '/users/:user/shelves/:shelf' do
-  user = User.find_by!(slug: params[:user])
-  shelf = user.shelves.find(params[:shelf])
-
-  erb :'shelves/show', locals: { user: user, shelf: shelf }
 end
 
 get '/users/:user/shelves/:shelf/edit' do
@@ -244,7 +244,7 @@ post '/users/:user/shelves/:shelf' do
   attrs = params.slice(:name)
   shelf.update(attrs)
 
-  redirect "/users/#{user.slug}/shelves/#{shelf.id}"
+  redirect "/users/#{user.slug}/shelves"
 end
 
 post '/users/:user/shelves/:shelf/up' do
@@ -253,7 +253,7 @@ post '/users/:user/shelves/:shelf/up' do
   halt 401 unless can? :edit, shelf
 
   shelf.move_higher
-  redirect '/'
+  redirect "/users/#{user.slug}/shelves"
 end
 
 post '/users/:user/shelves/:shelf/down' do
@@ -262,7 +262,7 @@ post '/users/:user/shelves/:shelf/down' do
   halt 401 unless can? :edit, shelf
 
   shelf.move_lower
-  redirect '/'
+  redirect "/users/#{user.slug}/shelves"
 end
 
 delete '/users/:user/shelves/:shelf' do
@@ -271,7 +271,7 @@ delete '/users/:user/shelves/:shelf' do
   halt 401 unless can? :delete, shelf
 
   shelf.destroy
-  redirect '/'
+  redirect "/users/#{user.slug}/shelves"
 end
 
 post '/auth/developer/callback' do

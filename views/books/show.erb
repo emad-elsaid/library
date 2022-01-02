@@ -39,7 +39,7 @@
   </div>
   <div class="column content">
     <% if book.shelf %>
-      <a class="tag is-info is-light" href="/users/<%= user.slug %>/shelves/<%= book.shelf_id %>"><%=h book.shelf.name %></a>
+      <span class="tag is-info is-light"><%=h book.shelf.name %></span>
     <% end %>
     <h2 class="title">
       <%=h book.title %>

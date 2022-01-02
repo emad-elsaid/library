@@ -59,6 +59,7 @@
     <% end %>
   </div>
 
+  <%= partial 'common/_separator' %>
 <% end %>
 
 <% if current_user == user && user.borrowed_books.exists? %>
@@ -73,6 +74,8 @@
       </div>
     <% end %>
   </div>
+
+  <%= partial 'common/_separator' %>
 <% end %>
 
 <% if current_user == user && user.lent_books.exists? %>
@@ -87,27 +90,13 @@
       </div>
     <% end %>
   </div>
+
+  <%= partial 'common/_separator' %>
 <% end %>
 
 <% shelves.each do |shelf| %>
   <h2 class="title is-3">
     <%=h shelf.name %>
-
-    <% if can? :edit, shelf %>
-        <a class="button is-small is-pulled-right" href="/users/<%= user.slug %>/shelves/<%= shelf.id %>/edit">Edit</a>
-    <% end %>
-    <% unless shelf.first? || !can?(:edit, shelf) %>
-    <form action="/users/<%= user.slug %>/shelves/<%=shelf.id %>/up" class="is-pulled-right" method="POST">
-      <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
-      <button class="button is-small">↑</button>
-    </form>
-    <% end %>
-    <% unless shelf.last? || !can?(:edit, shelf) %>
-    <form action="/users/<%= user.slug %>/shelves/<%=shelf.id %>/down" class="is-pulled-right" method="POST">
-      <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
-      <button class="button is-small">↓</button>
-    </form>
-    <% end %>
   </h2>
 
   <% if shelf.books.exists? %>
@@ -123,21 +112,6 @@
       &nbsp;
     </div>
   <% end %>
-<% end %>
 
-<% if can? :create, user.shelves.new %>
-  <div class="content">
-    <form action="/users/<%= user.slug %>/shelves" method="POST">
-      <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
-
-      <div class="field has-addons">
-        <div class="control is-expanded">
-          <input class="input is-medium" type="text" name="name" placeholder="Shelf name..." required>
-        </div>
-        <div class="control">
-          <button class="button is-medium">New Shelf 📚</button>
-        </div>
-      </div>
-    </form>
-  </div>
+  <%= partial 'common/_separator' %>
 <% end %>
