@@ -127,9 +127,9 @@ post '/users/:user/books/:isbn/image' do
   book = user.books.find_by!(isbn: params[:isbn])
   halt 401 unless can? :edit, book
 
-  book.upload(params[:image][:tempfile])
 
-  if book.invalid?
+
+  unless book.upload(params[:image][:tempfile])
     erb :'books/image', locals: { user: user, book: book }
   else
     redirect "/users/#{user.slug}/books/#{book.isbn}"

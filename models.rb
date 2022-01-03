@@ -32,7 +32,10 @@ class Book < ActiveRecord::Base
 
     errors.add(:image, 'File type is not an image. Allowed type JPG, GIF, PNG') unless allowed_type
     errors.add(:image, 'Image should be a portrait. width should be less than height') if size && size[0] > size[1]
-    return if invalid?
+    if errors[:image].present?
+      File.delete(uploaded_image)
+      return false
+    end
 
     File.delete(image_path) if image? && File.exist?(image_path)
     update(image: SecureRandom.uuid)
@@ -43,6 +46,8 @@ class Book < ActiveRecord::Base
     rescue e
       puts "Encountered error while processing image for #{id} image: #{image_path}"
     end
+
+    true
   end
 end
 
