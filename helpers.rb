@@ -50,6 +50,7 @@ helpers do
       when :create then record.user_id == current_user&.id
       when :edit then record.user_id == current_user&.id
       when :delete then record.user_id == current_user&.id
+      when :highlight then record.user_id == current_user&.id
       when :borrow then
         loggedin? &&
           record.user_id != current_user&.id &&
@@ -92,6 +93,13 @@ helpers do
       when :reject then record.owner_id == current_user&.id && record.rejected_at.nil?
       when :delete then record.user_id == current_user&.id || record.owner_id == current_user&.id
       when :contact then record.owner_id == current_user&.id
+      else raise "Verb #{verb} not handled for #{record}"
+      end
+
+    when Highlight
+      case verb
+      when :edit then record.book.user_id == current_user&.id
+      when :delete then record.book.user_id == current_user&.id
       else raise "Verb #{verb} not handled for #{record}"
       end
 

@@ -1,11 +1,13 @@
 require 'securerandom'
+require_relative 'uploader'
 
 class Book < ActiveRecord::Base
-  ALLOWED_TYPES = [:gif, :png, :jpeg]
+  IMAGES_PATH = 'public/books/image'
 
   belongs_to :shelf
   belongs_to :user, required: true
-  has_many :borrows
+  has_many :borrows, dependent: :destroy
+  has_many :highlights, dependent: :destroy
 
   validates_presence_of :title, :author, :isbn
   validates :google_books_id, length: { in: 0..30, allow_nil: true }
@@ -23,31 +25,16 @@ class Book < ActiveRecord::Base
   end
 
   def image_path
-    "public/books/image/#{image}"
+    "#{IMAGES_PATH}/#{image}"
   end
 
   def upload(uploaded_image)
-    size = FastImage.size(uploaded_image)
-    allowed_type = ALLOWED_TYPES.include? FastImage.type(uploaded_image)
-
-    errors.add(:image, 'File type is not an image. Allowed type JPG, GIF, PNG') unless allowed_type
-    errors.add(:image, 'Image should be a portrait. width should be less than height') if size && size[0] > size[1]
-    if errors[:image].present?
-      File.delete(uploaded_image)
-      return false
-    end
-
-    File.delete(image_path) if image? && File.exist?(image_path)
-    update(image: SecureRandom.uuid)
-    FileUtils.mv uploaded_image, image_path
-
-    begin
-      `mogrify -resize 432x576\\> -quality 60 -auto-orient -strip #{image_path}`
-    rescue e
-      puts "Encountered error while processing image for #{id} image: #{image_path}"
-    end
-
-    true
+    name = upload_image(uploaded_image, IMAGES_PATH, 432, 576, 60, :portrait)
+    File.delete(image_path) rescue nil
+    update(image: name)
+  rescue StandardError => e
+    errors.add(:image, e.message)
+    false
   end
 end
 
@@ -121,4 +108,33 @@ class Email < ActiveRecord::Base
   belongs_to :emailable, polymorphic: true, required: true
 
   validates :about, presence: true
+end
+
+class Highlight < ActiveRecord::Base
+  IMAGES_SERVE_PATH = '/highlights/image'
+  IMAGES_PATH = "public#{IMAGES_SERVE_PATH}"
+
+  belongs_to :book, required: true
+
+  validates :content, length: { minimum: 20, maximum: 2000 }
+  validates :page, presence: true
+
+  default_scope { order(:page, :created_at) }
+
+  def image_path
+    "#{IMAGES_PATH}/#{image}"
+  end
+
+  def image_url
+    "#{IMAGES_SERVE_PATH}/#{image}"
+  end
+
+  def upload(uploaded_image)
+    name = upload_image(uploaded_image, IMAGES_PATH, 600, 600, 60, :nil)
+    File.delete(image_path) rescue nil
+    update(image: name)
+  rescue StandardError => e
+    errors.add(:image, e.message)
+    false
+  end
 end

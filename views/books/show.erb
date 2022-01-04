@@ -33,10 +33,22 @@
             <button class="button">Move</button>
           </div>
         </div>
+
+        <% if can? :highlight, book %>
+          <div class="field">
+            <div class="control">
+              <a class="button is-warning is-fullwidth" href="/users/<%= user.slug %>/books/<%=h book.isbn %>/highlights/new">
+                Create Highlight
+              </a>
+            </div>
+          </div>
+        <% end %>
+
       </form>
     <% end %>
 
   </div>
+
   <div class="column content">
     <% if book.shelf %>
       <a class="tag is-info is-light" href="/users/<%= user.slug %>#shelf-<%= book.shelf.id %>"><%=h book.shelf.name %></a>
@@ -187,6 +199,29 @@
         <% end %>
 
       </div>
+    <% end %>
+
+
+    <%= partial 'common/_separator' %>
+    <% book.highlights.each do |highlight| %>
+
+      <p class="has-text-centered has-text-weight-bold has-text-grey">
+        « PAGE <%= highlight.page %> »
+      </p>
+
+      <p>
+        <% if can? :edit, highlight %>
+          <a href="/users/<%= user.slug %>/books/<%= book.isbn %>/highlights/<%= highlight.id %>/edit">✏️</a>
+        <% end %>
+        <%= highlight.content %>
+      </p>
+
+      <% if highlight.image? %>
+        <figure class="image">
+          <img src="<%= highlight.image_url %>" loading="lazy">
+        </figure>
+      <% end %>
+
     <% end %>
 
   </div>

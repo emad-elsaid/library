@@ -368,3 +368,61 @@ get '/privacy' do
   user = current_user
   erb :privacy, locals: { user: user }
 end
+
+get '/users/:user/books/:isbn/highlights/new' do
+  user = User.find_by!(slug: params[:user])
+  book = user.books.find_by!(isbn: params[:isbn])
+  highlight = book.highlights.new
+  halt 401 unless can? :highlight, book
+
+  erb :'highlights/new', locals: { user: user, book: book, highlight: highlight }
+end
+
+post '/users/:user/books/:isbn/highlights' do
+  user = User.find_by!(slug: params[:user])
+  book = user.books.find_by!(isbn: params[:isbn])
+  halt 401 unless can? :highlight, book
+
+  attrs = params.slice(:content, :page)
+  highlight = book.highlights.new(attrs)
+
+  if highlight.save
+    redirect "/users/#{user.slug}/books/#{book.isbn}"
+  else
+    erb :'highlights/new', locals: { user: user, book: book, highlight: highlight }
+  end
+end
+
+get '/users/:user/books/:isbn/highlights/:id/edit' do
+  user = User.find_by!(slug: params[:user])
+  book = user.books.find_by!(isbn: params[:isbn])
+  highlight = book.highlights.find_by!(id: params[:id])
+  halt 401 unless can? :edit, highlight
+
+  erb :'highlights/new', locals: { user: user, book: book, highlight: highlight }
+end
+
+
+post '/users/:user/books/:isbn/highlights/:id' do
+  user = User.find_by!(slug: params[:user])
+  book = user.books.find_by!(isbn: params[:isbn])
+  highlight = book.highlights.find_by!(id: params[:id])
+  halt 401 unless can? :edit, highlight
+
+  attrs = params.slice(:content, :page)
+  if highlight.update(attrs)
+    redirect "/users/#{user.slug}/books/#{book.isbn}"
+  else
+    erb :'highlights/new', locals: { user: user, book: book, highlight: highlight }
+  end
+end
+
+delete '/users/:user/books/:isbn/highlights/:id' do
+  user = User.find_by!(slug: params[:user])
+  book = user.books.find_by!(isbn: params[:isbn])
+  highlight = book.highlights.find_by!(id: params[:id])
+  halt 401 unless can? :delete, highlight
+
+  highlight.destroy
+  redirect "/users/#{user.slug}/books/#{book.isbn}"
+end
