@@ -8,7 +8,7 @@
 <% if shelf.books.exists? %>
   <div class="columns is-mobile is-multiline">
     <% shelf.books.each do |book| %>
-      <div class="column is-1-tablet is-4-mobile">
+      <div class="column is-2-tablet is-4-mobile">
         <%= erb :'books/_book', locals: { book: book } %>
       </div>
     <% end %>

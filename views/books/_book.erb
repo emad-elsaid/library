@@ -1,9 +1,5 @@
-<div class="card is-shadowless">
-  <div class="card-image">
-    <figure class="image is-3by4">
-      <a href="/users/<%= book.user.slug %>/books/<%=h book.isbn %>" title="<%=h book.title %>">
-        <img src="<%= book_cover book %>" loading="lazy">
-      </a>
-    </figure>
-  </div>
-</div>
+<figure class="image is-3by4">
+  <a href="/users/<%= book.user.slug %>/books/<%=h book.isbn %>" title="<%=h book.title %>">
+    <img src="<%= book_cover book %>" loading="lazy">
+  </a>
+</figure>
