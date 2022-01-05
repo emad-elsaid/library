@@ -1,3 +1,10 @@
+<h2 class="title">
+  <a href="/users/<%= user.slug %>/books/<%= book.isbn %>">
+    <%=h book.title %>
+  </a>
+</h2>
+
+
 <form action="/users/<%= user.slug %>/books/<%= book.isbn %>/highlights/<%= highlight.id if highlight.persisted? %>" method="POST">
   <input type="hidden" name="authenticity_token" value="<%= env['rack.session'][:csrf] %>">
 
