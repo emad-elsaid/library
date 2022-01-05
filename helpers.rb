@@ -11,6 +11,10 @@ helpers do
     Rack::Utils.escape_html(text)
   end
 
+  def simple_format(text)
+    h(text).lines.join("<br/>")
+  end
+
   def guest?
     current_user.nil?
   end

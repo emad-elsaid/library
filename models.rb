@@ -116,6 +116,8 @@ class Highlight < ActiveRecord::Base
 
   belongs_to :book, required: true
 
+  before_validation :reformat_content
+
   validates :content, length: { minimum: 20, maximum: 2000 }
   validates :page, presence: true
 
@@ -136,5 +138,10 @@ class Highlight < ActiveRecord::Base
   rescue StandardError => e
     errors.add(:image, e.message)
     false
+  end
+
+  # TODO review any multiline input on the other models and have this function for it. and use simple format to print them
+  def reformat_content
+    self.content = content.to_s.lines.map(&:strip).join("\n").gsub(/\n{3,}/, "\n\n")
   end
 end

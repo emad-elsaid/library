@@ -213,7 +213,7 @@
         <% if can? :edit, highlight %>
           <a href="/users/<%= user.slug %>/books/<%= book.isbn %>/highlights/<%= highlight.id %>/edit">✏️</a>
         <% end %>
-        <%= highlight.content %>
+        <%= simple_format highlight.content %>
       </p>
 
       <% if highlight.image? %>
