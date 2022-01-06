@@ -13,4 +13,4 @@ RUN bundle install -j8
 
 WORKDIR $app
 ADD . $app
-RUN bundle outdated --strict
+RUN bundle outdated --strict --only-explicit
