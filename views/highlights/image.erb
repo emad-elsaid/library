@@ -1,0 +1,30 @@
+<h2 class="title">
+  <a href="/users/<%= user.slug %>/books/<%= book.isbn %>">
+    <%=h book.title %>
+  </a>
+</h2>
+
+<div class="notification is-info is-light">
+  When accessing this page from your phone it'll prompt you to capture a photo using your phone camera. <br/>
+  Use <strong>square images</strong> when taking your picture for best result.
+</div>
+
+<form action="/users/<%= user.slug %>/books/<%= book.isbn %>/highlights/<%= highlight.id %>/image" method="POST" enctype="multipart/form-data">
+  <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
+
+  <div class="field">
+    <label class="label">Image</label>
+    <div class="control">
+      <input class="input <%= 'is-danger' if highlight.errors.include?(:image) %>" type="file" name="image"  accept="image/*;capture=camera" required>
+      <% if highlight.errors.include?(:image) %>
+        <p class="help is-danger"><%= highlight.errors.full_messages_for(:image).join %></p>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="field is-grouped">
+    <div class="control">
+      <button class="button is-link">Save</button>
+    </div>
+  </div>
+</form>

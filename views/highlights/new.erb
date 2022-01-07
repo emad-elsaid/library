@@ -5,7 +5,7 @@
 </h2>
 
 
-<form action="/users/<%= user.slug %>/books/<%= book.isbn %>/highlights/<%= highlight.id if highlight.persisted? %>" method="POST">
+<form action="/users/<%= user.slug %>/books/<%= book.isbn %>/highlights/<%= highlight.id if highlight.persisted? %>" method="POST" enctype="multipart/form-data">
   <input type="hidden" name="authenticity_token" value="<%= env['rack.session'][:csrf] %>">
 
   <div class="field">

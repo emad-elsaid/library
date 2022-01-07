@@ -211,16 +211,23 @@
 
       <p>
         <% if can? :edit, highlight %>
-          <a href="/users/<%= user.slug %>/books/<%= book.isbn %>/highlights/<%= highlight.id %>/edit">✏️</a>
+          <a href="/users/<%= user.slug %>/books/<%= book.isbn %>/highlights/<%= highlight.id %>/edit" class="icon is-medium">✏️</a>
+          <a href="/users/<%= user.slug %>/books/<%= book.isbn %>/highlights/<%= highlight.id %>/image" class="icon is-medium">📸</a>
         <% end %>
         <%= simple_format highlight.content %>
       </p>
 
-      <% if highlight.image? %>
-        <figure class="image">
-          <img src="<%= highlight.image_url %>" loading="lazy">
-        </figure>
-      <% end %>
+        <% if highlight.image? %>
+          <div class="columns">
+            <div class="column"></div>
+            <div class="column is-8">
+              <figure class="image">
+                <img src="<%= highlight.image_url %>" loading="lazy">
+              </figure>
+            </div>
+            <div class="column"></div>
+          </div>
+        <% end %>
 
     <% end %>
 

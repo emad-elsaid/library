@@ -426,3 +426,25 @@ delete '/users/:user/books/:isbn/highlights/:id' do
   highlight.destroy
   redirect "/users/#{user.slug}/books/#{book.isbn}"
 end
+
+get '/users/:user/books/:isbn/highlights/:id/image' do
+  user = User.find_by!(slug: params[:user])
+  book = user.books.find_by!(isbn: params[:isbn])
+  highlight = book.highlights.find_by!(id: params[:id])
+  halt 401 unless can? :edit, highlight
+
+  erb :'highlights/image', locals: { user: user, book: book, highlight: highlight }
+end
+
+post '/users/:user/books/:isbn/highlights/:id/image' do
+  user = User.find_by!(slug: params[:user])
+  book = user.books.find_by!(isbn: params[:isbn])
+  highlight = book.highlights.find_by!(id: params[:id])
+  halt 401 unless can? :edit, highlight
+
+  unless params[:image] && highlight.upload(params[:image][:tempfile])
+    erb :'highlights/image', locals: { user: user, book: book, highlight: highlight }
+  else
+    redirect "/users/#{user.slug}/books/#{book.isbn}"
+  end
+end
