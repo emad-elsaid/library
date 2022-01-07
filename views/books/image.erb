@@ -5,7 +5,7 @@
 </h2>
 
 <div class="notification is-info is-light">
-  When accessing this page from your phone it'll prompt you to captuer a photo using your phone camera. <br/>
+  When accessing this page from your phone it'll prompt you to capture a photo using your phone camera. <br/>
   Use <strong>3:4 aspect ratio</strong> when taking your picture for best result.
 </div>
 
@@ -13,7 +13,7 @@
   <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
 
   <div class="field">
-    <label class="label">Conver Image</label>
+    <label class="label">Cover Image</label>
     <div class="control">
       <input class="input <%= 'is-danger' if book.errors.include?(:image) %>" type="file" name="image"  accept="image/*;capture=camera" required>
       <% if book.errors.include?(:image) %>
