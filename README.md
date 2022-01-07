@@ -59,5 +59,5 @@ So I sat down and wrote my own simple library program.
 # Contributions
 
 - Make it simpler
-- Make faster
+- Make it faster
 - Make it more secure
