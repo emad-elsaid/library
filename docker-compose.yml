@@ -22,6 +22,7 @@ services:
     restart: always
     volumes:
       - /root/data/library/books:/app/public/books/image
+      - /root/data/library/highlights:/app/public/highlights/image
     ports:
       - '127.0.0.1:8200:3000'
     env_file:
