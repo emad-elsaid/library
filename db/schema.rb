@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_01_03_113949) do
+ActiveRecord::Schema.define(version: 2022_01_13_204455) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -105,6 +105,7 @@ ActiveRecord::Schema.define(version: 2022_01_03_113949) do
     t.string "phone"
     t.string "whatsapp"
     t.string "telegram"
+    t.string "amazon_associates_id"
     t.index ["slug"], name: "index_users_on_slug", unique: true
   end
 

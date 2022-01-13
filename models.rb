@@ -96,6 +96,7 @@ class User < ActiveRecord::Base
   validates :email, presence: true, uniqueness: true
   validates :slug, presence: true, uniqueness: true
   validates :description, length: { maximum: 500 }
+  validates :amazon_associates_id, length: { maximum: 50 }
 
   def self.signup(name, email, image)
     attrs = { name: name, image: image, slug: SecureRandom.uuid }

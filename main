@@ -49,7 +49,7 @@ post '/users/:user' do
   user = User.find_by!(slug: params[:user])
   halt 401 unless can? :edit, user
 
-  attrs = params.slice(:description, *User::PROFILES)
+  attrs = params.slice(:description, :amazon_associates_id, *User::PROFILES)
   if user.update(attrs)
     redirect "/users/#{user.slug}"
   else
