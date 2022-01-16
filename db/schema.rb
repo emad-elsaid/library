@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_01_13_204455) do
+ActiveRecord::Schema.define(version: 2022_01_16_114024) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -32,7 +32,7 @@ ActiveRecord::Schema.define(version: 2022_01_13_204455) do
     t.string "title"
     t.string "author"
     t.string "image"
-    t.bigint "isbn"
+    t.string "isbn", limit: 13
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.integer "shelf_id"

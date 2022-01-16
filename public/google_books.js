@@ -68,7 +68,7 @@ customElements.define('google-book', class GoogleBook extends HTMLElement {
 
   clickCallback() {
     let book = JSON.parse(this.getAttribute('book'));
-    let isbn13 = book.volumeInfo.industryIdentifiers.find( i => i.type == 'ISBN_13');
+    let isbn13 = book.volumeInfo.industryIdentifiers ? book.volumeInfo.industryIdentifiers.find( i => i.type == 'ISBN_13') : null;
     if ( isbn13 ) this.setValue('isbn', isbn13.identifier);
     this.setValue('google_books_id', book.id);
     this.setValue('title', book.volumeInfo.title);

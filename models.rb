@@ -11,15 +11,14 @@ class Book < ActiveRecord::Base
 
   validates_presence_of :title, :author, :isbn
   validates :google_books_id, length: { in: 0..30, allow_nil: true }
+  validates :isbn, length: { is: 13 }, numericality: true, uniqueness: { scope: :user }
   validate :isbn13_format
 
   default_scope { order(created_at: :desc) }
   before_destroy { File.delete image_path if image? && File.exist?(image) }
 
   def isbn13_format
-    digits = isbn.digits
-    return errors.add(:isbn, 'must be 13 digits ISBN') unless digits.length == 13
-
+    digits = isbn.chars.map(&:to_i)
     rem = digits.map.with_index { |digit, index| index.even? ? digit : digit * 3 }.reduce(:+) % 10
     errors.add(:isbn, 'value is not a valid ISBN13') unless rem.zero?
   end
