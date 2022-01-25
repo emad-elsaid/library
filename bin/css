@@ -14,6 +14,22 @@ cat << EOT > bulma.scss
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
 }
+
+#menu-switch {
+ display: none;
+}
+#menu-switch:checked + .navbar-brand .navbar-burger span:nth-child(1) {
+  transform: translateY(5px) rotate(45deg);
+}
+#menu-switch:checked + .navbar-brand .navbar-burger span:nth-child(2) {
+  opacity: 0;
+}
+#menu-switch:checked + .navbar-brand .navbar-burger span:nth-child(3) {
+  transform: translateY(-5px) rotate(-45deg);
+}
+#menu-switch:checked ~ .navbar-menu{
+ display: block;
+}
 EOT
 
 sass --sourcemap=none \
