@@ -48,7 +48,6 @@ class User < ActiveRecord::Base
   PROFILES = [:facebook, :twitter, :linkedin, :instagram, :phone, :whatsapp, :telegram]
   has_many :books, dependent: :destroy
   has_many :shelves, -> { order(position: :asc) }, dependent: :destroy
-  has_many :emails, dependent: :destroy
 
   validates :email, presence: true, uniqueness: true
   validates :slug, presence: true, uniqueness: true
@@ -59,13 +58,6 @@ class User < ActiveRecord::Base
     attrs = { name: name, image: image, slug: SecureRandom.uuid }
     User.create_with(attrs).find_or_create_by(email: email)
   end
-end
-
-class Email < ActiveRecord::Base
-  belongs_to :user, required: true
-  belongs_to :emailable, polymorphic: true, required: true
-
-  validates :about, presence: true
 end
 
 class Highlight < ActiveRecord::Base

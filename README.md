@@ -6,7 +6,6 @@ I used to share what I'm reading on Goodreads.com but over time:
 - It became very slow
 - It has 3 trackers as of writing this readme.
 - It has many features that is confusing for me.
-- It doesn't offer a way to lend books to my friends
 
 So I sat down and wrote my own simple library program.
 
@@ -41,12 +40,6 @@ So I sat down and wrote my own simple library program.
 - Install dependencies `bundle install`
 - Setup the database `rake db:setup`
 - Run the server `bundle exec ./main`
-
-# Sending emails
-
-- The `mail` service/script will run every hour
-- Emails are grouped into single message
-- `mail` uses ruby standard library SMTP module using the configuration in `.env`
 
 # Deployment
 

@@ -45,16 +45,3 @@ services:
       - .env
     logging:
       driver: journald
-
-  mail:
-    build: .
-    command: bundle exec ./mail
-    depends_on:
-      - db
-    links:
-      - db
-    restart: always
-    env_file:
-      - .env
-    logging:
-      driver: journald
