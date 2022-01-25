@@ -10,23 +10,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_01_16_114024) do
+ActiveRecord::Schema.define(version: 2022_01_25_191717) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
-
-  create_table "accesses", force: :cascade do |t|
-    t.integer "user_id", null: false
-    t.integer "owner_id", null: false
-    t.datetime "accepted_at"
-    t.datetime "rejected_at"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.index ["accepted_at"], name: "index_accesses_on_accepted_at"
-    t.index ["owner_id"], name: "index_accesses_on_owner_id"
-    t.index ["rejected_at"], name: "index_accesses_on_rejected_at"
-    t.index ["user_id"], name: "index_accesses_on_user_id"
-  end
 
   create_table "books", force: :cascade do |t|
     t.string "title"
@@ -44,20 +31,6 @@ ActiveRecord::Schema.define(version: 2022_01_16_114024) do
     t.string "publisher"
     t.index ["shelf_id"], name: "index_books_on_shelf_id"
     t.index ["user_id"], name: "index_books_on_user_id"
-  end
-
-  create_table "borrows", force: :cascade do |t|
-    t.integer "user_id", null: false
-    t.integer "book_id", null: false
-    t.integer "owner_id", null: false
-    t.integer "days"
-    t.datetime "borrowed_at"
-    t.datetime "returned_at"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.index ["book_id"], name: "index_borrows_on_book_id"
-    t.index ["owner_id"], name: "index_borrows_on_owner_id"
-    t.index ["user_id"], name: "index_borrows_on_user_id"
   end
 
   create_table "emails", force: :cascade do |t|
@@ -109,13 +82,8 @@ ActiveRecord::Schema.define(version: 2022_01_16_114024) do
     t.index ["slug"], name: "index_users_on_slug", unique: true
   end
 
-  add_foreign_key "accesses", "users"
-  add_foreign_key "accesses", "users", column: "owner_id"
   add_foreign_key "books", "shelves"
   add_foreign_key "books", "users"
-  add_foreign_key "borrows", "books"
-  add_foreign_key "borrows", "users"
-  add_foreign_key "borrows", "users", column: "owner_id"
   add_foreign_key "emails", "users"
   add_foreign_key "highlights", "books"
   add_foreign_key "shelves", "users"

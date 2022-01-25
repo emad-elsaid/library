@@ -34,25 +34,7 @@ def send_email(to_email:, to_name:, subject:, message:)
 end
 
 def render_email(email)
-  emailable = email.emailable
-
-  case emailable
-
-  when Access
-    case email.about
-    when 'requested' then "- #{emailable.user.name} requested access to your library"
-    when 'accepted' then "- #{emailable.owner.name} accepted your access to his library"
-    else raise "About #{email.about} not handled for #{Access}"
-    end
-
-  when Borrow
-    case email.about
-    when 'requested' then "- #{emailable.user.name} requested to borrow #{emailable.book.title}"
-    else raise "About #{email.about} not handled for #{Borrow}"
-    end
-
-  else raise "Error #{record} permissions not handled."
-  end
+  raise "Email not supported"
 end
 
 def render_emails(emails)

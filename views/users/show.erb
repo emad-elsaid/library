@@ -4,87 +4,12 @@
   </div>
 <% end %>
 
-<% if user == current_user %>
-<nav class="level my-6">
-  <div class="level-item has-text-centered">
-    <div>
-      <p class="heading">Have</p>
-      <p class="title"><%= current_user.books.count %></p>
-    </div>
-  </div>
-  <div class="level-item has-text-centered">
-    <div>
-      <p class="heading">Books to Lend</p>
-      <p class="title">
-        <a href="/books/to_lend"><%= current_user.books_to_lend.count %></a>
-      </p>
-    </div>
-  </div>
-  <div class="level-item has-text-centered">
-    <div>
-      <p class="heading">Books to borrow</p>
-      <p class="title">
-        <a href="/books/to_borrow"><%= current_user.books_to_borrow.count %></a>
-      </p>
-    </div>
-  </div>
-  <div class="level-item has-text-centered">
-    <div>
-      <p class="heading">Pending access requests</p>
-      <p class="title">
-        <a href="/accesses/to"><%= current_user.accesses_to.pending.count %></a>
-      </p>
-    </div>
-  </div>
-  <div class="level-item has-text-centered">
-    <div>
-      <p class="heading">Open libraries</p>
-      <p class="title">
-        <a href="/accesses/from"><%= current_user.accesses_from.accepted.count %></a>
-      </p>
-    </div>
-  </div>
-</nav>
-<% end %>
-
 <% if books.exists? %>
 
   <h1 class="title is-3">Books lying around</h1>
 
   <div class="columns is-mobile is-multiline">
     <% books.includes(:user).each do |book| %>
-      <div class="column is-2-tablet is-4-mobile">
-        <%= erb :'books/_book', locals: { book: book } %>
-      </div>
-    <% end %>
-  </div>
-
-  <%= partial 'common/_separator' %>
-<% end %>
-
-<% if current_user == user && user.borrowed_books.exists? %>
-  <h2 class="title is-3">
-    Borrowed Books
-  </h2>
-
-  <div class="columns is-mobile is-multiline">
-    <% user.borrowed_books.includes(:user).each do |book| %>
-      <div class="column is-2-tablet is-4-mobile">
-        <%= erb :'books/_book', locals: { book: book } %>
-      </div>
-    <% end %>
-  </div>
-
-  <%= partial 'common/_separator' %>
-<% end %>
-
-<% if current_user == user && user.lent_books.exists? %>
-  <h2 class="title is-3">
-    Lent Books
-  </h2>
-
-  <div class="columns is-mobile is-multiline">
-    <% user.lent_books.includes(:user).each do |book| %>
       <div class="column is-2-tablet is-4-mobile">
         <%= erb :'books/_book', locals: { book: book } %>
       </div>

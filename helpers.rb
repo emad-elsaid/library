@@ -43,9 +43,6 @@ helpers do
       case verb
       when :login then guest?
       when :logout then loggedin?
-      when :list_access then loggedin?
-      when :to_lend then loggedin?
-      when :to_borrow then loggedin?
       else raise "Verb #{verb} not handled for #{record}"
       end
 
@@ -55,11 +52,6 @@ helpers do
       when :edit then record.user_id == current_user&.id
       when :delete then record.user_id == current_user&.id
       when :highlight then record.user_id == current_user&.id
-      when :borrow then
-        loggedin? &&
-          record.user_id != current_user&.id &&
-          !record.borrows.exists?(user: current_user) &&
-          current_user.accesses_from.accepted.exists?(owner: record.user_id)
       else raise "Verb #{verb} not handled for #{record}"
       end
 
@@ -74,29 +66,7 @@ helpers do
     when User
       case verb
       when :edit then record == current_user
-      when :access then loggedin? && (record == current_user || current_user.accesses_from.exists?(owner: record))
       when :list_shelves then loggedin? && record == current_user
-      else raise "Verb #{verb} not handled for #{record}"
-      end
-
-    when Borrow
-      case verb
-      when :show then loggedin?
-      when :delete then (record.user_id == current_user&.id && record.borrowed_at.nil?) || record.owner_id == current_user&.id
-      when :borrow then !record.book.borrows.borrowed.exists? && record.owner_id == current_user&.id
-      when :return then record.borrowed_at.present? && record.owner_id == current_user&.id
-      when :contact then record.owner_id == current_user&.id
-      else raise "Verb #{verb} not handled for #{record}"
-      end
-
-    when Access
-      case verb
-      when :show then record.user_id == current_user&.id || record.owner_id == current_user&.id
-      when :create then record.user_id == current_user&.id && !Access.exists?(user: record.user_id, owner: record.owner_id)
-      when :accept then record.owner_id == current_user&.id && record.accepted_at.nil?
-      when :reject then record.owner_id == current_user&.id && record.rejected_at.nil?
-      when :delete then record.user_id == current_user&.id || record.owner_id == current_user&.id
-      when :contact then record.owner_id == current_user&.id
       else raise "Verb #{verb} not handled for #{record}"
       end
 

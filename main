@@ -148,50 +148,6 @@ post '/users/:user/books/:isbn/shelf' do
   redirect "/users/#{user.slug}/books/#{book.isbn}"
 end
 
-post '/users/:user/books/:isbn/borrows' do
-  user = User.find_by!(slug: params[:user])
-  book = user.books.find_by!(isbn: params[:isbn])
-  halt 401 unless can? :borrow, book
-
-  borrow = book.borrows.create(user: current_user, owner: book.user, days: params[:days])
-  Email.create(user: user, emailable: borrow, about: :requested)
-
-  redirect "/users/#{user.slug}/books/#{book.isbn}"
-end
-
-post '/users/:user/books/:isbn/borrows/:borrow/borrow' do
-  user = User.find_by!(slug: params[:user])
-  book = user.books.find_by!(isbn: params[:isbn])
-  borrow = book.borrows.wait_list.find(params[:borrow])
-  halt 401 unless can? :borrow, borrow
-
-  borrow.update(borrowed_at: Time.now)
-
-  redirect back
-end
-
-post '/users/:user/books/:isbn/borrows/:borrow/return' do
-  user = User.find_by!(slug: params[:user])
-  book = user.books.find_by!(isbn: params[:isbn])
-  borrow = book.borrows.borrowed.find(params[:borrow])
-  halt 401 unless can? :return, borrow
-
-  borrow.update(returned_at: Time.now)
-
-  redirect back
-end
-
-delete '/users/:user/books/:isbn/borrows/:borrow' do
-  user = User.find_by!(slug: params[:user])
-  book = user.books.find_by!(isbn: params[:isbn])
-  borrow = book.borrows.find(params[:borrow])
-  halt 401 unless can? :delete, borrow
-
-  borrow.destroy
-
-  redirect back
-end
-
 delete '/users/:user/books/:isbn' do
   user = User.find_by!(slug: params[:user])
   book = user.books.find_by!(isbn: params[:isbn])
@@ -294,74 +250,6 @@ get '/logout' do
 
   session[:user] = nil
   redirect '/'
-end
-
-post '/users/:user/accesses' do
-  user = User.find_by!(slug: params[:user])
-  access = user.accesses_to.new(user: current_user)
-  halt 401 unless can? :create, access
-
-  access.save
-  Email.create(user: user, emailable: access, about: :requested)
-
-  redirect back
-end
-
-post '/users/:user/accesses/:access/accept' do
-  user = User.find_by!(slug: params[:user])
-  access = user.accesses_to.find(params[:access])
-  halt 401 unless can? :accept, access
-
-  access.update(accepted_at: Time.now)
-  Email.create(user: access.user, emailable: access, about: :accepted)
-
-  redirect back
-end
-
-post '/users/:user/accesses/:access/reject' do
-  user = User.find_by!(slug: params[:user])
-  access = user.accesses_to.find(params[:access])
-  halt 401 unless can? :reject, access
-
-  access.update(rejected_at: Time.now)
-  redirect back
-end
-
-delete '/users/:user/accesses/:access' do
-  user = User.find_by!(slug: params[:user])
-  access = user.accesses_to.find(params[:access])
-  halt 401 unless can? :delete, access
-
-  access.destroy
-  redirect back
-end
-
-get '/accesses/from' do
-  user = current_user
-  halt 401 unless can? :list_access
-
-  erb :'accesses/from', locals: { accesses: current_user.accesses_from, user: user }
-end
-
-get '/accesses/to' do
-  user = current_user
-  halt 401 unless can? :list_access
-
-  erb :'accesses/to', locals: { accesses: current_user.accesses_to, user: user }
-end
-
-get '/books/to_lend' do
-  user = current_user
-  halt 401 unless can? :to_lend
-
-  erb :'books/to_lend', locals: { user: user, books: user.books_to_lend }
-end
-
-get '/books/to_borrow' do
-  user = current_user
-  halt 401 unless can? :to_borrow
-
-  erb :'books/to_borrow', locals: { user: user, books: user.books_to_borrow }
 end
 
 get '/privacy' do
