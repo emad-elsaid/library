@@ -115,6 +115,20 @@ func staticWithoutDirectoryListingHandler() http.Handler {
 	})
 }
 
+// ROUTES HELPERS ==========================================
+
+func GET(path string, handler http.HandlerFunc) {
+	router.Methods("GET").Path(path).HandlerFunc(handler)
+}
+
+func POST(path string, handler http.HandlerFunc) {
+	router.Methods("POST").Path(path).HandlerFunc(handler)
+}
+
+func DELETE(path string, handler http.HandlerFunc) {
+	router.Methods("DELETE").Path(path).HandlerFunc(handler)
+}
+
 // VIEWS ====================
 
 //go:embed views
