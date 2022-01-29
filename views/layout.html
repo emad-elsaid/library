@@ -6,17 +6,17 @@
     <meta property="og:site_name" content="Library" />
     <link rel="shortcut icon" href="/favicon.ico">
 
-    <%= meta_property "og:title" %>
-    <%= meta_name :author %>
-    <%= meta_name :description %>
-    <%= meta_property "og:description" %>
-    <%= meta_property "og:type" %>
-    <%= meta_property "og:image" %>
-    <%= meta_name "twitter:card" %>
-    <%= meta_property "twitter:image" %>
-    <%= meta_property "twitter:title" %>
+    {{ meta_property .meta "og:title" }}
+    {{ meta_name .meta "author" }}
+    {{ meta_name .meta "description" }}
+    {{ meta_property .meta "og:description" }}
+    {{ meta_property .meta "og:type" }}
+    {{ meta_property .meta "og:image" }}
+    {{ meta_name .meta "twitter:card" }}
+    {{ meta_property .meta "twitter:image" }}
+    {{ meta_property .meta "twitter:title" }}
 
-    <title><%=h [@title, 'LIBRARY'].compact.join ' | ' %></title>
+    <title>{{ if .title }} {{ .title }} | {{end }} LIBRARY </title>
     <link rel="stylesheet" href="/style.css?v=1">
     <style>
      .cover {
@@ -35,21 +35,21 @@
     </style>
   </head>
   <body>
-
     <section class="hero">
       <div class="hero-head">
-        <%= erb :'partials/user_nav' if loggedin? %>
+        {{ if .current_user }}
+          {{ partial "partials/user_nav" .current_user }}
+        {{ end }}
       </div>
 
       <div class="hero-body has-text-centered">
-        <%= erb :'partials/header', locals: { user: user }  %>
+        {{ partial "partials/header" . }}
       </div>
     </section>
 
-
     <section class="section">
       <div class="container is-max-widescreen">
-        <%= yield %>
+        {{ .yield }}
       </div>
     </section>
 
