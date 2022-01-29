@@ -15,7 +15,7 @@ package main
 // 2. Make sure you have sqlc.yaml
 // 3. Write queries in query.sql
 // 4. Everytime you edit query.sql run `go generate`
-// 5. Use `router` to add your gorilla routes
+// 5. Use `router` to add your gorilla routes, or shorthand methods GET, POST, DELETE...etc
 // 6. Add Helpers to `helpers` map
 // 7. call `Start()` to start the server
 
