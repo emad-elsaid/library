@@ -1,0 +1,25 @@
+<form action="/users/{{ .user.slug }}/shelves/{{ .shelf.id }}" method="POST">
+  <input type=hidden name=authenticity_token value="{{ .csrf }}">
+
+  <div class="field">
+    <label class="label">Name</label>
+    <div class="control">
+      <input
+          class="input {{ if include .shelf.errors "name" }}is-danger{{ end }}"
+          type="text"
+          name="name"
+          value="{{ .shelf.name }}"
+          required>
+      {{ if include .shelf.errors "name" }}
+      <p class="help is-danger">{{ call .shelf.errors.full_messages_for "name" }}</p>
+      {{ end }}
+    </div>
+  </div>
+
+  <div class="field is-grouped">
+    <div class="control">
+      <button class="button is-link">Save</button>
+    </div>
+  </div>
+
+</form>

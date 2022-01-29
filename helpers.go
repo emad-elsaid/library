@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"html/template"
+	"strings"
 )
 
 func Helpers() {
@@ -38,5 +39,32 @@ func Helpers() {
 
 	helpers["can"] = func(verb string, record interface{}) bool {
 		return true
+	}
+
+	helpers["include"] = func(list []string, str string) bool {
+		for _, i := range list {
+			if i == str {
+				return true
+			}
+		}
+
+		return false
+	}
+
+	helpers["book_cover"] = func(book Book) string {
+		if book.Image.Valid {
+			return "/books/image/" + book.Image.String
+		}
+
+		if book.GoogleBooksID.Valid {
+			googleBookURL := "https://books.google.com/books/content?id=%s&printsec=frontcover&img=1&zoom=1"
+			return fmt.Sprintf(googleBookURL, book.GoogleBooksID.String)
+		}
+
+		return "/default_book"
+	}
+
+	helpers["simple_format"] = func(str string) (template.HTML, error) {
+		return template.HTML(strings.ReplaceAll(template.HTMLEscapeString(str), "\n", "<br/>")), nil
 	}
 }

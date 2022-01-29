@@ -1,0 +1,51 @@
+<form action="/users/{{ .user.slug }}" method="POST">
+  <input type=hidden name=authenticity_token value="{{ .csrf }}">
+
+  <div class="field">
+    <label class="label">Library description</label>
+    <div class="control">
+      <textarea
+          class="textarea {{ if include .user.errors "description" }}is-danger{{ end }}"
+          name="description">{{ .user.description }}</textarea>
+      <p class="help">Maximum 500 character.</p>
+      {{ if include .user.errors "description" }}
+      <p class="help is-danger">{{ call .user.errors.full_messages_for "description" }}</p>
+      {{ end }}
+    </div>
+  </div>
+
+  <div class="field">
+    <label class="label">Amazon Associates ID</label>
+    <div class="control">
+      <input
+          class="input {{ if include .user.errors "amazon_associates_id" }}is-danger{{ end }}"
+          name="amazon_associates_id" value="{{ .user.amazon_associates_id }}"/>
+        {{ if include .user.errors "amazon_associates_id" }}
+        <p class="help is-danger">{{ call .user.errors.full_messages_for "amazon_associates_id" }}</p>
+        {{ end }}
+    </div>
+  </div>
+
+  <div class="title">
+    Social Profiles
+  </div>
+  {{ range .PROFILES }}
+    <div class="field">
+      <label class="label is-capitalized">{{ . }}</label>
+      <div class="control">
+        <input
+            class="input {{ if include .user.errors . }}is-danger{{ end }}"
+            name="{{ . }}" value="{{ index .user . }}"/>
+        {{ if include .user.errors . }}
+        <p class="help is-danger">{{ call .user.errors.full_messages_for . }}</p>
+        {{ end }}
+      </div>
+    </div>
+  {{ end }}
+
+  <div class="field is-grouped">
+    <div class="control">
+      <button class="button is-link">Save</button>
+    </div>
+  </div>
+</form>

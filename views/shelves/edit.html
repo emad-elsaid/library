@@ -1,5 +1,5 @@
-<form action="/users/<%= user.slug %>/shelves/<%= shelf.id %>" method="POST">
-  <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
+<form action="/users/{{ .user.slug }}/shelves/{{ .shelf.id }}" method="POST">
+  <input type=hidden name=authenticity_token value="{{ .csrf }}">
 
   <div class="field">
     <label class="label">Shelf name</label>
@@ -9,7 +9,7 @@
           type="text"
           name="name"
           placeholder="Shelf name..."
-          value="<%=h shelf.name %>"
+          value="{{ .shelf.name }}"
           required
           autofocus>
     </div>
@@ -22,8 +22,8 @@
   </div>
 </form>
 
-<form action="/users/<%= user.slug %>/shelves/<%= shelf.id %>" method="POST" class="has-text-right">
+<form action="/users/{{ .user.slug }}/shelves/{{ .shelf.id }}" method="POST" class="has-text-right">
   <input type="hidden" name="_method" value="DELETE">
-  <input type=hidden name=authenticity_token value="<%= env['rack.session'][:csrf] %>">
+  <input type=hidden name=authenticity_token value="{{ .csrf }}">
   <button class="button is-danger">Delete!</button>
 </form>

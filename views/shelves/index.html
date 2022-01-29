@@ -1,0 +1,57 @@
+{{ if not .shelves.exists }}
+  <div class="notification has-text-centered">
+    You don't have any shelves in your library yet.
+  </div>
+{{ else }}
+  <table class="table is-striped is-hoverable is-fullwidth">
+    <thead>
+      <tr>
+        <th> Shelf </th>
+        <th> </th>
+      </tr>
+    </thead>
+    <tbody>
+      {{ range .shelves }}
+        <tr>
+          <td>
+            {{ .name }}
+          </td>
+          <td>
+            {{ if can "edit" . }}
+              <a class="button is-small is-pulled-right" href="/users/{{ .user.slug }}/shelves/{{ .shelf.id }}/edit">Edit</a>
+            {{ end }}
+            {{ if or not .first not can "edit" . }}
+              <form action="/users/{{ .user.slug }}/shelves/{{.id }}/up" class="is-pulled-right" method="POST">
+                <input type=hidden name=authenticity_token value="{{ .csrf }}">
+                <button class="button is-small">↑</button>
+              </form>
+            {{ end }}
+            {{ if or not .last not can "edit" . }}
+              <form action="/users/{{ .user.slug }}/shelves/{{.id }}/down" class="is-pulled-right" method="POST">
+                <input type=hidden name=authenticity_token value="{{ .csrf }}">
+                <button class="button is-small">↓</button>
+              </form>
+            {{ end }}
+          </td>
+        </tr>
+      {{ end }}
+    </tbody>
+  </table>
+{{ end }}
+
+{{ if can "create" .user.shelves.new }}
+  <div class="content">
+    <form action="/users/{{ .user.slug }}/shelves" method="POST">
+      <input type=hidden name=authenticity_token value="{{ .csrf }}">
+
+      <div class="field has-addons">
+        <div class="control is-expanded">
+          <input class="input" type="text" name="name" placeholder="Shelf name..." required>
+        </div>
+        <div class="control">
+          <button class="button">New Shelf 📚</button>
+        </div>
+      </div>
+    </form>
+  </div>
+{{ end }}
