@@ -290,6 +290,13 @@ CREATE INDEX index_shelves_on_user_id ON public.shelves USING btree (user_id);
 
 
 --
+-- Name: index_users_on_email; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_users_on_email ON public.users USING btree (email);
+
+
+--
 -- Name: index_users_on_slug; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -346,6 +353,7 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20220113204455'),
 ('20220116114024'),
 ('20220125191717'),
-('20220125193806');
+('20220125193806'),
+('20220129201723');
 
 

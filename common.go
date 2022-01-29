@@ -25,6 +25,8 @@ package main
 
 import (
 	"bytes"
+	"context"
+	"database/sql"
 	"embed"
 	"html/template"
 	"io/fs"
@@ -56,13 +58,39 @@ var (
 	router  *mux.Router
 )
 
+type QueryLogger struct {
+	db     *sqlx.DB
+	logger *log.Logger
+}
+
+func (p QueryLogger) ExecContext(ctx context.Context, q string, args ...interface{}) (sql.Result, error) {
+	p.logger.Print(q)
+	p.logger.Print(args...)
+	return p.db.ExecContext(ctx, q, args...)
+}
+func (p QueryLogger) PrepareContext(ctx context.Context, q string) (*sql.Stmt, error) {
+	p.logger.Print(q)
+	return p.db.PrepareContext(ctx, q)
+}
+func (p QueryLogger) QueryContext(ctx context.Context, q string, args ...interface{}) (*sql.Rows, error) {
+	p.logger.Print(q)
+	p.logger.Print(args...)
+	return p.db.QueryContext(ctx, q, args...)
+}
+func (p QueryLogger) QueryRowContext(ctx context.Context, q string, args ...interface{}) *sql.Row {
+	p.logger.Print(q)
+	p.logger.Print(args...)
+	return p.db.QueryRowContext(ctx, q, args...)
+}
+
 func init() {
 	db, err := connectToDB()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	queries = New(db)
+	ql := QueryLogger{db, log.Default()}
+	queries = New(ql)
 	createRouter()
 }
 

@@ -5,6 +5,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 )
 
 const getUser = `-- name: GetUser :one
@@ -36,4 +37,29 @@ func (q *Queries) GetUser(ctx context.Context, id int64) (User, error) {
 		&i.AmazonAssociatesID,
 	)
 	return i, err
+}
+
+const signup = `-- name: Signup :exec
+INSERT
+ INTO users(name, image, slug, email)
+VALUES($1,$2,$3,$4)
+       ON CONFLICT (email)
+       DO UPDATE SET name = $1, image = $2
+`
+
+type SignupParams struct {
+	Name  sql.NullString
+	Image sql.NullString
+	Slug  string
+	Email sql.NullString
+}
+
+func (q *Queries) Signup(ctx context.Context, arg SignupParams) error {
+	_, err := q.db.ExecContext(ctx, signup,
+		arg.Name,
+		arg.Image,
+		arg.Slug,
+		arg.Email,
+	)
+	return err
 }
