@@ -1,5 +1,5 @@
 <h2 class="title">
-  <a href="/users/{{ .user.slug }}/books/{{ .book.isbn }}">
+  <a href="/users/{{ .user.Slug }}/books/{{ .book.isbn }}">
     {{ .book.title }}
   </a>
 </h2>
@@ -9,7 +9,7 @@
   Use <strong>3:4 aspect ratio</strong> when taking your picture for best result.
 </div>
 
-<form action="/users/{{ .user.slug }}/books/{{ .book.isbn }}/image" method="POST" enctype="multipart/form-data">
+<form action="/users/{{ .user.Slug }}/books/{{ .book.isbn }}/image" method="POST" enctype="multipart/form-data">
   <input type=hidden name=authenticity_token value="{{ .csrf }}">
 
   <div class="field">

@@ -10,6 +10,7 @@ import (
 	"os"
 
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 )
@@ -78,10 +79,10 @@ func main() {
 		}
 
 		u, err := queries.Signup(context.Background(), SignupParams{
-			Name:  sql.NullString{String: user.Name},
-			Image: sql.NullString{String: user.Picture},
+			Name:  sql.NullString{String: user.Name, Valid: true},
+			Image: sql.NullString{String: user.Picture, Valid: true},
 			Slug:  uuid.New().String(),
-			Email: sql.NullString{String: user.Email},
+			Email: sql.NullString{String: user.Email, Valid: true},
 		})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -105,7 +106,19 @@ func main() {
 		http.Redirect(w, r, "/", http.StatusFound)
 	})
 
-	GET("/users/{user}", func(w http.ResponseWriter, r *http.Request) {})
+	GET("/users/{user}", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+
+		render(w, "layout", "users/show", map[string]interface{}{
+			"current_user": current_user(r),
+			"user":         user,
+		})
+	})
 	GET("/users/{user}/edit", func(w http.ResponseWriter, r *http.Request) {})
 	POST("/users/{user}", func(w http.ResponseWriter, r *http.Request) {})
 

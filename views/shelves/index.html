@@ -18,16 +18,16 @@
           </td>
           <td>
             {{ if can "edit" . }}
-              <a class="button is-small is-pulled-right" href="/users/{{ .user.slug }}/shelves/{{ .shelf.id }}/edit">Edit</a>
+              <a class="button is-small is-pulled-right" href="/users/{{ .user.Slug }}/shelves/{{ .shelf.id }}/edit">Edit</a>
             {{ end }}
             {{ if or not .first not can "edit" . }}
-              <form action="/users/{{ .user.slug }}/shelves/{{.id }}/up" class="is-pulled-right" method="POST">
+              <form action="/users/{{ .user.Slug }}/shelves/{{.id }}/up" class="is-pulled-right" method="POST">
                 <input type=hidden name=authenticity_token value="{{ .csrf }}">
                 <button class="button is-small">↑</button>
               </form>
             {{ end }}
             {{ if or not .last not can "edit" . }}
-              <form action="/users/{{ .user.slug }}/shelves/{{.id }}/down" class="is-pulled-right" method="POST">
+              <form action="/users/{{ .user.Slug }}/shelves/{{.id }}/down" class="is-pulled-right" method="POST">
                 <input type=hidden name=authenticity_token value="{{ .csrf }}">
                 <button class="button is-small">↓</button>
               </form>
@@ -41,7 +41,7 @@
 
 {{ if can "create" .user.shelves.new }}
   <div class="content">
-    <form action="/users/{{ .user.slug }}/shelves" method="POST">
+    <form action="/users/{{ .user.Slug }}/shelves" method="POST">
       <input type=hidden name=authenticity_token value="{{ .csrf }}">
 
       <div class="field has-addons">

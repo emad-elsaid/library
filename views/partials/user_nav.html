@@ -4,14 +4,14 @@
     <div class="columns is-mobile navbar-item my-0">
       <div class="column is-narrow">
         <figure class="image is-32x32">
-          <a href="/users/{{ .current_user.slug }}">
-            <img class="is-rounded" src="{{ or .current_user.image "/default_user" }}"/>
+          <a href="/users/{{ .current_user.Slug }}">
+            <img class="is-rounded" src="{{ or .current_user.Image "/default_user" }}"/>
           </a>
         </figure>
       </div>
       <div class="column is-hidden-mobile">
-        <a href="/users/{{ .current_user.slug }}">
-          {{ .current_user.name }}
+        <a href="/users/{{ .current_user.Slug }}">
+          {{ .current_user.Name.String }}
         </a>
       </div>
     </div>
@@ -26,19 +26,19 @@
 
   <div id="navbar-menu" class="navbar-menu">
     <div class="navbar-end">
-      {{ if can "create" .current_user.books.new }}
-        <a href="/users/{{ .current_user.slug }}/books/new" class="navbar-item">
+      {{ if can "create" .current_user.Books.new }}
+        <a href="/users/{{ .current_user.Slug }}/books/new" class="navbar-item">
           📕 Add a Book
         </a>
       {{ end }}
 
       {{ if can "list_shelves" .current_user }}
-        <a href="/users/{{ .current_user.slug }}/shelves" class="navbar-item">
+        <a href="/users/{{ .current_user.Slug }}/shelves" class="navbar-item">
           📚 Manage Shelves
         </a>
       {{ end }}
 
-      <a href="/users/{{ .current_user.slug }}/edit" class="navbar-item">⚙️ Settings</a>
+      <a href="/users/{{ .current_user.Slug }}/edit" class="navbar-item">⚙️ Settings</a>
       <a href="/logout" class="has-text-danger navbar-item">👋 Logout</a>
     </div>
   </div>

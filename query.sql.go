@@ -66,3 +66,78 @@ func (q *Queries) User(ctx context.Context, id int64) (User, error) {
 	)
 	return i, err
 }
+
+const userBySlug = `-- name: UserBySlug :one
+SELECT id, name, email, image, created_at, updated_at, slug, description, facebook, twitter, linkedin, instagram, phone, whatsapp, telegram, amazon_associates_id
+  FROM users
+ WHERE slug = $1
+ LIMIT 1
+`
+
+func (q *Queries) UserBySlug(ctx context.Context, slug string) (User, error) {
+	row := q.db.QueryRowContext(ctx, userBySlug, slug)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.Image,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Slug,
+		&i.Description,
+		&i.Facebook,
+		&i.Twitter,
+		&i.Linkedin,
+		&i.Instagram,
+		&i.Phone,
+		&i.Whatsapp,
+		&i.Telegram,
+		&i.AmazonAssociatesID,
+	)
+	return i, err
+}
+
+const usreBooks = `-- name: UsreBooks :many
+SELECT id, title, author, image, isbn, created_at, updated_at, shelf_id, user_id, google_books_id, subtitle, description, page_count, publisher
+  FROM books
+ WHERE user_id = $1
+`
+
+func (q *Queries) UsreBooks(ctx context.Context, userID sql.NullInt32) ([]Book, error) {
+	rows, err := q.db.QueryContext(ctx, usreBooks, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Book
+	for rows.Next() {
+		var i Book
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Author,
+			&i.Image,
+			&i.Isbn,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.ShelfID,
+			&i.UserID,
+			&i.GoogleBooksID,
+			&i.Subtitle,
+			&i.Description,
+			&i.PageCount,
+			&i.Publisher,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

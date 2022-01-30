@@ -5,16 +5,16 @@
     </figure>
 
     {{ if can "edit" .book }}
-      <form action="/users/{{ .user.slug }}/books/{{ .book.isbn }}/shelf" method="POST">
+      <form action="/users/{{ .user.Slug }}/books/{{ .book.isbn }}/shelf" method="POST">
         <input type=hidden name=authenticity_token value="{{ .csrf }}">
         <div class="field">
           <div class="control">
-            <a class="button is-fullwidth" href="/users/{{ .user.slug }}/books/{{ .book.isbn }}/image">Change Cover</a>
+            <a class="button is-fullwidth" href="/users/{{ .user.Slug }}/books/{{ .book.isbn }}/image">Change Cover</a>
           </div>
         </div>
         <div class="field">
           <div class="control">
-            <a class="button is-fullwidth" href="/users/{{ .user.slug }}/books/{{ .book.isbn }}/edit">Edit</a>
+            <a class="button is-fullwidth" href="/users/{{ .user.Slug }}/books/{{ .book.isbn }}/edit">Edit</a>
           </div>
         </div>
         <div class="field has-addons">
@@ -37,7 +37,7 @@
         {{ if can "highlight" .book }}
           <div class="field">
             <div class="control">
-              <a class="button is-warning is-fullwidth" href="/users/{{ .user.slug }}/books/{{ .book.isbn }}/highlights/new">
+              <a class="button is-warning is-fullwidth" href="/users/{{ .user.Slug }}/books/{{ .book.isbn }}/highlights/new">
                 Create Highlight
               </a>
             </div>
@@ -58,7 +58,7 @@
 
   <div class="column content">
     {{ if .book.shelf }}
-      <a class="tag is-info is-light" href="/users/{{ .user.slug }}#shelf-{{ .book.shelf.id }}">{{ .book.shelf.name }}</a>
+      <a class="tag is-info is-light" href="/users/{{ .user.Slug }}#shelf-{{ .book.shelf.id }}">{{ .book.shelf.name }}</a>
     {{ end }}
     <h2 class="title">
       {{ .book.title }}
@@ -89,8 +89,8 @@
 
       <p>
         {{ if can "edit" . }}
-          <a href="/users/{{ .user.slug }}/books/{{ .book.isbn }}/highlights/{{ .id }}/edit" class="icon is-medium">✏️</a>
-          <a href="/users/{{ .user.slug }}/books/{{ .book.isbn }}/highlights/{{ .id }}/image" class="icon is-medium">📸</a>
+          <a href="/users/{{ .user.Slug }}/books/{{ .book.isbn }}/highlights/{{ .id }}/edit" class="icon is-medium">✏️</a>
+          <a href="/users/{{ .user.Slug }}/books/{{ .book.isbn }}/highlights/{{ .id }}/image" class="icon is-medium">📸</a>
         {{ end }}
         {{ simple_format .content }}
       </p>

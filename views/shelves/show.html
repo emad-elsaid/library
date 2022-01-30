@@ -1,7 +1,7 @@
 <h2 class="title is-3">
   {{ .shelf.name }}
   {{ if can "edit" .shelf }}
-    <a class="button is-small is-pulled-right" href="/users/{{ .user.slug }}/shelves/{{ .shelf.id }}/edit">Edit</a>
+    <a class="button is-small is-pulled-right" href="/users/{{ .user.Slug }}/shelves/{{ .shelf.id }}/edit">Edit</a>
   {{ end }}
 </h2>
 

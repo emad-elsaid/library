@@ -1,11 +1,11 @@
 <h2 class="title">
-  <a href="/users/{{ .user.slug }}/books/{{ .book.isbn }}">
+  <a href="/users/{{ .user.Slug }}/books/{{ .book.isbn }}">
     {{ .book.title }}
   </a>
 </h2>
 
 
-<form action="/users/{{ .user.slug }}/books/{{ .book.isbn }}/highlights/{{ if .highlight.persisted }}{{ .highlight.id }}{{ end }}" method="POST" enctype="multipart/form-data">
+<form action="/users/{{ .user.Slug }}/books/{{ .book.isbn }}/highlights/{{ if .highlight.persisted }}{{ .highlight.id }}{{ end }}" method="POST" enctype="multipart/form-data">
   <input type="hidden" name="authenticity_token" value="{{ .csrf }}">
 
   <div class="field">
@@ -42,7 +42,7 @@
 </form>
 
 {{ if .highlight.persisted }}
-  <form action="/users/{{ .user.slug }}/books/{{ .book.isbn }}/highlights/{{ .highlight.id }}" method="POST" class="has-text-right">
+  <form action="/users/{{ .user.Slug }}/books/{{ .book.isbn }}/highlights/{{ .highlight.id }}" method="POST" class="has-text-right">
     <input type="hidden" name="_method" value="DELETE">
     <input type=hidden name=authenticity_token value="{{ .csrf }}">
     <button class="button is-danger">Delete!</button>

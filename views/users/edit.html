@@ -1,4 +1,4 @@
-<form action="/users/{{ .user.slug }}" method="POST">
+<form action="/users/{{ .user.Slug }}" method="POST">
   <input type=hidden name=authenticity_token value="{{ .csrf }}">
 
   <div class="field">
