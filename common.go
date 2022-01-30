@@ -147,16 +147,16 @@ func staticWithoutDirectoryListingHandler() http.Handler {
 
 // ROUTES HELPERS ==========================================
 
-func GET(path string, handler http.HandlerFunc) {
-	router.Methods("GET").Path(path).HandlerFunc(handler)
+func GET(path string, handler http.HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) {
+	router.Methods("GET").Path(path).HandlerFunc(applyMiddlewares(handler, middlewares...))
 }
 
-func POST(path string, handler http.HandlerFunc) {
-	router.Methods("POST").Path(path).HandlerFunc(handler)
+func POST(path string, handler http.HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) {
+	router.Methods("POST").Path(path).HandlerFunc(applyMiddlewares(handler, middlewares...))
 }
 
-func DELETE(path string, handler http.HandlerFunc) {
-	router.Methods("DELETE").Path(path).HandlerFunc(handler)
+func DELETE(path string, handler http.HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) {
+	router.Methods("DELETE").Path(path).HandlerFunc(applyMiddlewares(handler, middlewares...))
 }
 
 // VIEWS ====================
@@ -207,7 +207,7 @@ func partial(path string, data interface{}) string {
 func render(w http.ResponseWriter, path string, view string, data map[string]interface{}) {
 	v, ok := templates[path]
 	if !ok {
-		fmt.Fprintln(w, "layout %s not found", path)
+		fmt.Fprintf(w, "layout %s not found", path)
 	}
 
 	data["yield"] = template.HTML(partial(view, nil))
@@ -223,4 +223,11 @@ func render(w http.ResponseWriter, path string, view string, data map[string]int
 func SESSION(r *http.Request) *sessions.Session {
 	s, _ := session.Get(r, SESSION_COOKIE_NAME)
 	return s
+}
+
+func applyMiddlewares(handler http.HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) http.HandlerFunc {
+	for _, h := range middlewares {
+		handler = h(handler)
+	}
+	return handler
 }

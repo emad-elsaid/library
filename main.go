@@ -119,37 +119,325 @@ func main() {
 			"user":         user,
 		})
 	})
-	GET("/users/{user}/edit", func(w http.ResponseWriter, r *http.Request) {})
-	POST("/users/{user}", func(w http.ResponseWriter, r *http.Request) {})
 
-	GET("/users/{user}/books/new", func(w http.ResponseWriter, r *http.Request) {})
-	POST("/users/{user}/books", func(w http.ResponseWriter, r *http.Request) {})
-	GET("/users/{user}/books/{isbn}", func(w http.ResponseWriter, r *http.Request) {})
-	POST("/users/{user}/books/{isbn}", func(w http.ResponseWriter, r *http.Request) {})
-	GET("/users/{user}/books/{isbn}/edit", func(w http.ResponseWriter, r *http.Request) {})
-	DELETE("/users/{user}/books/{isbn}", func(w http.ResponseWriter, r *http.Request) {})
+	GET("/users/{user}/edit", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
 
-	POST("/users/{user}/books/{isbn}/shelf", func(w http.ResponseWriter, r *http.Request) {})
+		render(w, "layout", "users/edit", map[string]interface{}{
+			"current_user": current_user(r),
+			"user":         user,
+		})
+	}, loggedinMiddleware)
 
-	GET("/users/{user}/books/{isbn}/image", func(w http.ResponseWriter, r *http.Request) {})
-	POST("/users/{user}/books/{isbn}/image", func(w http.ResponseWriter, r *http.Request) {})
+	POST("/users/{user}", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
 
-	GET("/users/{user}/shelves/new", func(w http.ResponseWriter, r *http.Request) {})
-	GET("/users/{user}/shelves", func(w http.ResponseWriter, r *http.Request) {})
-	POST("/users/{user}/shelves", func(w http.ResponseWriter, r *http.Request) {})
-	GET("/users/{user}/shelves/{shelf}/edit", func(w http.ResponseWriter, r *http.Request) {})
-	POST("/users/{user}/shelves/{shelf}", func(w http.ResponseWriter, r *http.Request) {})
-	POST("/users/{user}/shelves/{shelf}/up", func(w http.ResponseWriter, r *http.Request) {})
-	POST("/users/{user}/shelves/{shelf}/down", func(w http.ResponseWriter, r *http.Request) {})
-	DELETE("/users/{user}/shelves/{shelf}", func(w http.ResponseWriter, r *http.Request) {})
+		http.Redirect(w, r, fmt.Sprintf("/users/%s", user.Slug), http.StatusFound)
+	}, loggedinMiddleware)
 
-	GET("/users/{user}/books/{isbn}/highlights/new", func(w http.ResponseWriter, r *http.Request) {})
-	POST("/users/{user}/books/{isbn}/highlights", func(w http.ResponseWriter, r *http.Request) {})
-	GET("/users/{user}/books/{isbn}/highlights/{id}/edit", func(w http.ResponseWriter, r *http.Request) {})
-	POST("/users/{user}/books/{isbn}/highlights/{id}", func(w http.ResponseWriter, r *http.Request) {})
-	DELETE("/users/{user}/books/{isbn}/highlights/{id}", func(w http.ResponseWriter, r *http.Request) {})
-	GET("/users/{user}/books/{isbn}/highlights/{id}/image", func(w http.ResponseWriter, r *http.Request) {})
-	POST("/users/{user}/books/{isbn}/highlights/{id}/image", func(w http.ResponseWriter, r *http.Request) {})
+	GET("/users/{user}/books/new", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+
+		render(w, "layout", "books/new", map[string]interface{}{
+			"current_user": current_user(r),
+			"user":         user,
+		})
+	}, loggedinMiddleware)
+
+	POST("/users/{user}/books", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+
+		http.Redirect(w, r, fmt.Sprintf("/users/%s/books", user.Slug), http.StatusFound)
+	})
+
+	GET("/users/{user}/books/{isbn}", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+
+		render(w, "layout", "books/show", map[string]interface{}{
+			"current_user": current_user(r),
+			"user":         user,
+		})
+	})
+
+	POST("/users/{user}/books/{isbn}", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+
+		http.Redirect(w, r, fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]), http.StatusFound)
+	}, loggedinMiddleware)
+
+	GET("/users/{user}/books/{isbn}/edit", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+
+		render(w, "layout", "books/edit", map[string]interface{}{
+			"current_user": current_user(r),
+			"user":         user,
+		})
+	}, loggedinMiddleware)
+
+	DELETE("/users/{user}/books/{isbn}", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+
+		http.Redirect(w, r, fmt.Sprintf("/users/%s", user.Slug), http.StatusFound)
+	}, loggedinMiddleware)
+
+	POST("/users/{user}/books/{isbn}/shelf", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+
+		http.Redirect(w, r, fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]), http.StatusFound)
+	}, loggedinMiddleware)
+
+	GET("/users/{user}/books/{isbn}/image", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+
+		render(w, "layout", "books/image", map[string]interface{}{
+			"current_user": current_user(r),
+			"user":         user,
+		})
+	}, loggedinMiddleware)
+
+	POST("/users/{user}/books/{isbn}/image", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+
+		http.Redirect(w, r, fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]), http.StatusFound)
+	}, loggedinMiddleware)
+
+	GET("/users/{user}/shelves/new", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+
+		render(w, "layout", "shelves/new", map[string]interface{}{
+			"current_user": current_user(r),
+			"user":         user,
+		})
+	}, loggedinMiddleware)
+
+	GET("/users/{user}/shelves", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+
+		render(w, "layout", "shelves/index", map[string]interface{}{
+			"current_user": current_user(r),
+			"user":         user,
+		})
+	}, loggedinMiddleware)
+
+	POST("/users/{user}/shelves", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+
+		http.Redirect(w, r, fmt.Sprintf("/users/%s/shelves", user.Slug), http.StatusFound)
+	}, loggedinMiddleware)
+
+	GET("/users/{user}/shelves/{shelf}/edit", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+
+		render(w, "layout", "shelves/edit", map[string]interface{}{
+			"current_user": current_user(r),
+			"user":         user,
+		})
+	}, loggedinMiddleware)
+
+	POST("/users/{user}/shelves/{shelf}", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+
+		http.Redirect(w, r, fmt.Sprintf("/users/%s/shelves", user.Slug), http.StatusFound)
+	}, loggedinMiddleware)
+
+	POST("/users/{user}/shelves/{shelf}/up", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+
+		http.Redirect(w, r, fmt.Sprintf("/users/%s/shelves", user.Slug), http.StatusFound)
+	}, loggedinMiddleware)
+
+	POST("/users/{user}/shelves/{shelf}/down", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+
+		http.Redirect(w, r, fmt.Sprintf("/users/%s/shelves", user.Slug), http.StatusFound)
+	}, loggedinMiddleware)
+
+	DELETE("/users/{user}/shelves/{shelf}", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+
+		http.Redirect(w, r, fmt.Sprintf("/users/%s/shelves", user.Slug), http.StatusFound)
+	}, loggedinMiddleware)
+
+	GET("/users/{user}/books/{isbn}/highlights/new", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+
+		render(w, "layout", "highlights/new", map[string]interface{}{
+			"current_user": current_user(r),
+			"user":         user,
+		})
+	}, loggedinMiddleware)
+
+	POST("/users/{user}/books/{isbn}/highlights", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+
+		http.Redirect(w, r, fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]), http.StatusFound)
+	}, loggedinMiddleware)
+
+	GET("/users/{user}/books/{isbn}/highlights/{id}/edit", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+
+		render(w, "layout", "highlights/edit", map[string]interface{}{
+			"current_user": current_user(r),
+			"user":         user,
+		})
+	}, loggedinMiddleware)
+
+	POST("/users/{user}/books/{isbn}/highlights/{id}", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+
+		http.Redirect(w, r, fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]), http.StatusFound)
+	}, loggedinMiddleware)
+
+	DELETE("/users/{user}/books/{isbn}/highlights/{id}", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+
+		http.Redirect(w, r, fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]), http.StatusFound)
+	}, loggedinMiddleware)
+
+	GET("/users/{user}/books/{isbn}/highlights/{id}/image", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+
+		render(w, "layout", "highlights/image", map[string]interface{}{
+			"current_user": current_user(r),
+			"user":         user,
+		})
+	}, loggedinMiddleware)
+
+	POST("/users/{user}/books/{isbn}/highlights/{id}/image", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+
+		http.Redirect(w, r, fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]), http.StatusFound)
+	}, loggedinMiddleware)
 
 	Helpers()
 	Start()

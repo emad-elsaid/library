@@ -6,7 +6,7 @@
 
 <form action="/users/{{ .user.Slug }}/books/{{ if .book.persisted }}{{ .book.isbn }}{{ end }}" method="POST">
   <input type="hidden" name="authenticity_token" value"{{ .csrf }}">
-  <input type="hidden" name="google_books_id" value="{{ .book.google_books_id }}">
+  <input type="hidden" name="google_books_id" value="{{ .book.GoogleBooksID }}">
 
   <div class="field">
     <label class="label">Title</label>
