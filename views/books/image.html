@@ -10,7 +10,7 @@
 </div>
 
 <form action="/users/{{ .user.Slug }}/books/{{ .book.isbn }}/image" method="POST" enctype="multipart/form-data">
-  <input type=hidden name=authenticity_token value="{{ .csrf }}">
+  {{ .csrf }}
 
   <div class="field">
     <label class="label">Cover Image</label>

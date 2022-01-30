@@ -4,11 +4,14 @@ go 1.17
 
 require (
 	github.com/google/uuid v1.3.0
+	github.com/gorilla/csrf v1.7.1
 	github.com/gorilla/mux v1.8.0
 	github.com/jmoiron/sqlx v1.3.4
 	github.com/lib/pq v1.10.4
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 )
+
+require github.com/pkg/errors v0.9.1 // indirect
 
 require (
 	cloud.google.com/go v0.65.0 // indirect

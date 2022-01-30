@@ -6,7 +6,7 @@
 
 
 <form action="/users/{{ .user.Slug }}/books/{{ .book.isbn }}/highlights/{{ if .highlight.persisted }}{{ .highlight.id }}{{ end }}" method="POST" enctype="multipart/form-data">
-  <input type="hidden" name="authenticity_token" value="{{ .csrf }}">
+  {{ .csrf }}
 
   <div class="field">
     <label class="label">Page</label>
@@ -44,7 +44,7 @@
 {{ if .highlight.persisted }}
   <form action="/users/{{ .user.Slug }}/books/{{ .book.isbn }}/highlights/{{ .highlight.id }}" method="POST" class="has-text-right">
     <input type="hidden" name="_method" value="DELETE">
-    <input type=hidden name=authenticity_token value="{{ .csrf }}">
+   {{ .csrf }}
     <button class="button is-danger">Delete!</button>
   </form>
 {{ end }}

@@ -10,6 +10,7 @@ import (
 	"os"
 
 	"github.com/google/uuid"
+	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -156,6 +157,7 @@ func main() {
 		render(w, "layout", "books/new", map[string]interface{}{
 			"current_user": current_user(r),
 			"user":         user,
+			"csrf":         csrf.TemplateField(r),
 		})
 	}, loggedinMiddleware)
 
@@ -167,7 +169,7 @@ func main() {
 			return
 		}
 
-		http.Redirect(w, r, fmt.Sprintf("/users/%s/books", user.Slug), http.StatusFound)
+		http.Redirect(w, r, fmt.Sprintf("/users/%s", user.Slug), http.StatusFound)
 	})
 
 	GET("/users/{user}/books/{isbn}", func(w http.ResponseWriter, r *http.Request) {
@@ -267,6 +269,7 @@ func main() {
 		render(w, "layout", "shelves/new", map[string]interface{}{
 			"current_user": current_user(r),
 			"user":         user,
+			"csrf":         csrf.TemplateField(r),
 		})
 	}, loggedinMiddleware)
 
@@ -306,6 +309,7 @@ func main() {
 		render(w, "layout", "shelves/edit", map[string]interface{}{
 			"current_user": current_user(r),
 			"user":         user,
+			"csrf":         csrf.TemplateField(r),
 		})
 	}, loggedinMiddleware)
 
@@ -364,6 +368,7 @@ func main() {
 		render(w, "layout", "highlights/new", map[string]interface{}{
 			"current_user": current_user(r),
 			"user":         user,
+			"csrf":         csrf.TemplateField(r),
 		})
 	}, loggedinMiddleware)
 
@@ -389,6 +394,7 @@ func main() {
 		render(w, "layout", "highlights/edit", map[string]interface{}{
 			"current_user": current_user(r),
 			"user":         user,
+			"csrf":         csrf.TemplateField(r),
 		})
 	}, loggedinMiddleware)
 

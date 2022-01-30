@@ -22,13 +22,13 @@
             {{ end }}
             {{ if or not .first not can "edit" . }}
               <form action="/users/{{ .user.Slug }}/shelves/{{.id }}/up" class="is-pulled-right" method="POST">
-                <input type=hidden name=authenticity_token value="{{ .csrf }}">
+                {{ .csrf }}
                 <button class="button is-small">↑</button>
               </form>
             {{ end }}
             {{ if or not .last not can "edit" . }}
               <form action="/users/{{ .user.Slug }}/shelves/{{.id }}/down" class="is-pulled-right" method="POST">
-                <input type=hidden name=authenticity_token value="{{ .csrf }}">
+                {{ .csrf }}
                 <button class="button is-small">↓</button>
               </form>
             {{ end }}
@@ -42,7 +42,7 @@
 {{ if can "create" .user.shelves.new }}
   <div class="content">
     <form action="/users/{{ .user.Slug }}/shelves" method="POST">
-      <input type=hidden name=authenticity_token value="{{ .csrf }}">
+      {{ .csrf }}
 
       <div class="field has-addons">
         <div class="control is-expanded">

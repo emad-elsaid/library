@@ -33,6 +33,7 @@ import (
 
 	_ "embed"
 
+	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/jmoiron/sqlx"
@@ -49,7 +50,6 @@ const (
 )
 
 var (
-	// queries functions as a result to sqlc compilation
 	queries *Queries
 	router  *mux.Router
 	session *sessions.CookieStore
@@ -91,6 +91,7 @@ func init() {
 
 	router = mux.NewRouter()
 	session = sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET")))
+	csrf.TemplateTag = "csrf"
 }
 
 func connectToDB() (*sqlx.DB, error) {
@@ -109,8 +110,9 @@ func Start() {
 	compileViews()
 
 	router.PathPrefix("/").Handler(staticWithoutDirectoryListingHandler())
+	csrfMiddleware := csrf.Protect([]byte(os.Getenv("SESSION_SECRET")))
 
-	http.Handle("/", router)
+	http.Handle("/", csrfMiddleware(router))
 
 	srv := &http.Server{
 		Handler:      router,
@@ -203,7 +205,7 @@ func render(w http.ResponseWriter, path string, view string, data map[string]int
 		fmt.Fprintf(w, "layout %s not found", path)
 	}
 
-	data["yield"] = template.HTML(partial(view, nil))
+	data["yield"] = template.HTML(partial(view, data))
 
 	err := v.Execute(w, data)
 	if err != nil {

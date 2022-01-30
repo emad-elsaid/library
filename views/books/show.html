@@ -6,7 +6,7 @@
 
     {{ if can "edit" .book }}
       <form action="/users/{{ .user.Slug }}/books/{{ .book.isbn }}/shelf" method="POST">
-        <input type=hidden name=authenticity_token value="{{ .csrf }}">
+        {{ .csrf }}
         <div class="field">
           <div class="control">
             <a class="button is-fullwidth" href="/users/{{ .user.Slug }}/books/{{ .book.isbn }}/image">Change Cover</a>

@@ -22,7 +22,7 @@
 
     {{ if can .current_user "login" nil }}
       <form action="/auth/google" method="POST">
-        <input type=hidden name=authenticity_token value="{{ .csrf }}">
+        {{ .csrf }}
         <input name="origin" type="hidden" value="{{ .path_info }}"/>
         <button class="button">
           Login with Google

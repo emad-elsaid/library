@@ -1,5 +1,5 @@
 <form action="/users/{{ .user.Slug }}" method="POST">
-  <input type=hidden name=authenticity_token value="{{ .csrf }}">
+  {{ .csrf }}
 
   <div class="field">
     <label class="label">Library description</label>

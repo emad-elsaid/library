@@ -5,7 +5,7 @@
 </p>
 
 <form action="/users/{{ .user.Slug }}/books/{{ if .book.persisted }}{{ .book.isbn }}{{ end }}" method="POST">
-  <input type="hidden" name="authenticity_token" value"{{ .csrf }}">
+  {{ .csrf }}
   <input type="hidden" name="google_books_id" value="{{ .book.GoogleBooksID }}">
 
   <div class="field">
@@ -128,7 +128,7 @@
 {{ if .book.persisted }}
   <form action="/users/{{ .user.Slug }}/books/{{ .book.isbn }}" method="POST" class="has-text-right">
     <input type="hidden" name="_method" value="DELETE">
-    <input type=hidden name=authenticity_token value="{{ .csrf }}">
+    {{ .csrf }}
     <button class="button is-danger">Delete!</button>
   </form>
 {{ end }}
