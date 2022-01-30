@@ -11,17 +11,11 @@ package main
 
 // HOW TO USE
 
-// 1. Copy the file to your project. set environment variables. check the constants values.
-// 2. Make sure you have sqlc.yaml
-// 3. Write queries in query.sql
-// 4. Everytime you edit query.sql run `go generate`
-// 5. Use `router` to add your gorilla routes, or shorthand methods GET, POST, DELETE...etc
-// 6. Add Helpers to `helpers` map
-// 7. call `Start()` to start the server
-
-// ENV Variables
-// =============
-// DATABASE_URL : postgres database URL
+// 1. Copy common.go, .env.sample, sqlc.yaml
+// 2. Write queries in query.sql and use `go generate` to generate functions with sqlc
+// 3. Use `router` to add your gorilla routes, or shorthand methods GET, POST, DELETE...etc
+// 4. Add Helpers to `helpers` map
+// 5. call `Start()` to start the server
 
 import (
 	"bytes"
@@ -224,6 +218,8 @@ func SESSION(r *http.Request) *sessions.Session {
 	s, _ := session.Get(r, SESSION_COOKIE_NAME)
 	return s
 }
+
+// MIDDLEWARES =============================
 
 func applyMiddlewares(handler http.HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) http.HandlerFunc {
 	for _, h := range middlewares {
