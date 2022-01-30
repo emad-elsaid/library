@@ -42,7 +42,6 @@ import (
 const (
 	MAX_DB_OPEN_CONNECTIONS = 5
 	MAX_DB_IDLE_CONNECTIONS = 5
-	HTTP_ROOT_PATH          = "/"
 	STATIC_DIR_PATH         = "public"
 	BIND_ADDRESS            = "127.0.0.1:3000"
 	VIEWS_EXTENSION         = ".html"
@@ -111,7 +110,7 @@ func Start() {
 
 	router.PathPrefix("/").Handler(staticWithoutDirectoryListingHandler())
 
-	http.Handle(HTTP_ROOT_PATH, router)
+	http.Handle("/", router)
 
 	srv := &http.Server{
 		Handler:      router,
