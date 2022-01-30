@@ -118,6 +118,7 @@ func main() {
 		render(w, "layout", "users/show", map[string]interface{}{
 			"current_user": current_user(r),
 			"user":         user,
+			"books":        user.Books(),
 		})
 	})
 

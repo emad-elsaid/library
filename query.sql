@@ -18,7 +18,7 @@ VALUES($1,$2,$3,$4)
        DO UPDATE SET name = $1, image = $2
        RETURNING id;
 
--- name: UsreBooks :many
+-- name: UserBooks :many
 SELECT *
   FROM books
  WHERE user_id = $1;

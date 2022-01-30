@@ -1,22 +1,21 @@
-{{ if .user.description.present }}
+{{ if .user.Description }}
   <div class="notification">
-    {{ simple_format .user.description }}
+    {{ simple_format .user.Description.String }}
   </div>
 {{ end }}
 
-{{ if .books.exists }}
-
+{{ if .books }}
   <h1 class="title is-3">Books lying around</h1>
 
   <div class="columns is-mobile is-multiline">
     {{ range .books }}
       <div class="column is-2-tablet is-4-mobile">
-        {{ partial "books/_book" . }}
+        {{ partial "books/book" . }}
       </div>
     {{ end }}
   </div>
 
-  {{ partial "common/_separator" }}
+  {{ partial "common/_separator" . }}
 {{ end }}
 
 {{ range .shelves }}
@@ -38,5 +37,5 @@
     </div>
   {{ end }}
 
-  {{ partial "common/_separator" }}
+  {{ partial "common/_separator" . }}
 {{ end }}
