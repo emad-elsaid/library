@@ -73,7 +73,7 @@ SELECT id, title, author, image, isbn, created_at, updated_at, shelf_id, user_id
  WHERE user_id = $1
 `
 
-func (q *Queries) UserBooks(ctx context.Context, userID sql.NullInt32) ([]Book, error) {
+func (q *Queries) UserBooks(ctx context.Context, userID int32) ([]Book, error) {
 	rows, err := q.db.QueryContext(ctx, userBooks, userID)
 	if err != nil {
 		return nil, err

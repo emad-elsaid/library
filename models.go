@@ -16,19 +16,19 @@ type ArInternalMetadatum struct {
 
 type Book struct {
 	ID            int64
-	Title         sql.NullString
-	Author        sql.NullString
+	Title         string
+	Author        string
 	Image         sql.NullString
-	Isbn          sql.NullString
+	Isbn          string
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 	ShelfID       sql.NullInt32
-	UserID        sql.NullInt32
+	UserID        int32
 	GoogleBooksID sql.NullString
-	Subtitle      sql.NullString
-	Description   sql.NullString
-	PageCount     sql.NullInt32
-	Publisher     sql.NullString
+	Subtitle      string
+	Description   string
+	PageCount     int32
+	Publisher     string
 }
 
 type Highlight struct {

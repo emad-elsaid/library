@@ -31,19 +31,19 @@ CREATE TABLE public.ar_internal_metadata (
 
 CREATE TABLE public.books (
     id bigint NOT NULL,
-    title character varying,
-    author character varying,
+    title character varying NOT NULL,
+    author character varying NOT NULL,
     image character varying,
-    isbn character varying(13),
+    isbn character varying(13) NOT NULL,
     created_at timestamp(6) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp(6) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     shelf_id integer,
-    user_id integer,
+    user_id integer NOT NULL,
     google_books_id character varying,
-    subtitle character varying,
-    description character varying,
-    page_count integer,
-    publisher character varying
+    subtitle character varying NOT NULL,
+    description character varying NOT NULL,
+    page_count integer NOT NULL,
+    publisher character varying NOT NULL
 );
 
 
@@ -355,6 +355,7 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20220125191717'),
 ('20220125193806'),
 ('20220129201723'),
-('20220130120749');
+('20220130120749'),
+('20220130212907');
 
 
