@@ -39,6 +39,7 @@ import (
 	_ "embed"
 
 	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
@@ -50,12 +51,14 @@ const (
 	STATIC_DIR_PATH         = "public"
 	BIND_ADDRESS            = "127.0.0.1:3000"
 	VIEWS_EXTENSION         = ".html"
+	SESSION_COOKIE_NAME     = "library"
 )
 
 var (
 	// queries functions as a result to sqlc compilation
 	queries *Queries
 	router  *mux.Router
+	session *sessions.CookieStore
 )
 
 type QueryLogger struct {
@@ -91,7 +94,9 @@ func init() {
 
 	ql := QueryLogger{db, log.Default()}
 	queries = New(ql)
-	createRouter()
+
+	router = mux.NewRouter()
+	session = sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET")))
 }
 
 func connectToDB() (*sqlx.DB, error) {
@@ -104,10 +109,6 @@ func connectToDB() (*sqlx.DB, error) {
 	db.SetMaxIdleConns(MAX_DB_IDLE_CONNECTIONS)
 
 	return db, err
-}
-
-func createRouter() {
-	router = mux.NewRouter()
 }
 
 func Start() {
@@ -218,4 +219,11 @@ func render(path string, view string, data map[string]interface{}) string {
 	}
 
 	return w.String()
+}
+
+// SESSION =================================
+
+func SESSION(r *http.Request) *sessions.Session {
+	s, _ := session.Get(r, SESSION_COOKIE_NAME)
+	return s
 }

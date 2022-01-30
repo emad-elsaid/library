@@ -1,12 +1,13 @@
--- name: GetUser :one
+-- name: User :one
 SELECT *
   FROM users
  WHERE id = $1
  LIMIT 1;
 
--- name: Signup :exec
+-- name: Signup :one
 INSERT
- INTO users(name, image, slug, email)
+ INTO public.users(name, image, slug, email)
 VALUES($1,$2,$3,$4)
        ON CONFLICT (email)
-       DO UPDATE SET name = $1, image = $2;
+       DO UPDATE SET name = $1, image = $2
+       RETURNING id;

@@ -8,15 +8,43 @@ import (
 	"database/sql"
 )
 
-const getUser = `-- name: GetUser :one
+const signup = `-- name: Signup :one
+INSERT
+ INTO public.users(name, image, slug, email)
+VALUES($1,$2,$3,$4)
+       ON CONFLICT (email)
+       DO UPDATE SET name = $1, image = $2
+       RETURNING id
+`
+
+type SignupParams struct {
+	Name  sql.NullString
+	Image sql.NullString
+	Slug  string
+	Email sql.NullString
+}
+
+func (q *Queries) Signup(ctx context.Context, arg SignupParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, signup,
+		arg.Name,
+		arg.Image,
+		arg.Slug,
+		arg.Email,
+	)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
+}
+
+const user = `-- name: User :one
 SELECT id, name, email, image, created_at, updated_at, slug, description, facebook, twitter, linkedin, instagram, phone, whatsapp, telegram, amazon_associates_id
   FROM users
  WHERE id = $1
  LIMIT 1
 `
 
-func (q *Queries) GetUser(ctx context.Context, id int64) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUser, id)
+func (q *Queries) User(ctx context.Context, id int64) (User, error) {
+	row := q.db.QueryRowContext(ctx, user, id)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -37,29 +65,4 @@ func (q *Queries) GetUser(ctx context.Context, id int64) (User, error) {
 		&i.AmazonAssociatesID,
 	)
 	return i, err
-}
-
-const signup = `-- name: Signup :exec
-INSERT
- INTO users(name, image, slug, email)
-VALUES($1,$2,$3,$4)
-       ON CONFLICT (email)
-       DO UPDATE SET name = $1, image = $2
-`
-
-type SignupParams struct {
-	Name  sql.NullString
-	Image sql.NullString
-	Slug  string
-	Email sql.NullString
-}
-
-func (q *Queries) Signup(ctx context.Context, arg SignupParams) error {
-	_, err := q.db.ExecContext(ctx, signup,
-		arg.Name,
-		arg.Image,
-		arg.Slug,
-		arg.Email,
-	)
-	return err
 }

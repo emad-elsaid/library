@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"html/template"
+	"net/http"
 	"strings"
 )
 
@@ -67,4 +69,28 @@ func Helpers() {
 	helpers["simple_format"] = func(str string) (template.HTML, error) {
 		return template.HTML(strings.ReplaceAll(template.HTMLEscapeString(str), "\n", "<br/>")), nil
 	}
+}
+
+func loggedin(r *http.Request) bool {
+	_, ok := SESSION(r).Values["current_user"]
+	return ok
+}
+
+func current_user(r *http.Request) *User {
+	id, ok := SESSION(r).Values["current_user"]
+	if !ok {
+		return nil
+	}
+
+	user_id, ok := id.(int64)
+	if !ok {
+		return nil
+	}
+
+	user, err := queries.User(context.Background(), user_id)
+	if err != nil {
+		return nil
+	}
+
+	return &user
 }

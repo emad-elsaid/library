@@ -35,8 +35,8 @@ CREATE TABLE public.books (
     author character varying,
     image character varying,
     isbn character varying(13),
-    created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL,
+    created_at timestamp(6) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp(6) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     shelf_id integer,
     user_id integer,
     google_books_id character varying,
@@ -76,8 +76,8 @@ CREATE TABLE public.highlights (
     page integer NOT NULL,
     content character varying NOT NULL,
     image character varying,
-    created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
+    created_at timestamp(6) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp(6) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 
@@ -116,8 +116,8 @@ CREATE TABLE public.schema_migrations (
 CREATE TABLE public.shelves (
     id bigint NOT NULL,
     name character varying,
-    created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL,
+    created_at timestamp(6) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp(6) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     user_id integer,
     "position" integer
 );
@@ -151,8 +151,8 @@ CREATE TABLE public.users (
     name character varying,
     email character varying,
     image character varying,
-    created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL,
+    created_at timestamp(6) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp(6) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     slug character varying NOT NULL,
     description text,
     facebook character varying,
@@ -354,6 +354,7 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20220116114024'),
 ('20220125191717'),
 ('20220125193806'),
-('20220129201723');
+('20220129201723'),
+('20220130120749');
 
 

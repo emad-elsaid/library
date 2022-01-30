@@ -24,9 +24,15 @@ func main() {
 	}
 
 	GET("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, render("layout", "index", map[string]interface{}{
-			"meta": map[string]string{},
-		}))
+		user := current_user(r)
+		if user != nil {
+			http.Redirect(w, r, fmt.Sprintf("/users/%s", user.Slug), http.StatusFound)
+			return
+		} else {
+			fmt.Fprintf(w, render("layout", "index", map[string]interface{}{
+				"meta": map[string]string{},
+			}))
+		}
 	})
 
 	GET("/privacy", func(w http.ResponseWriter, r *http.Request) {
@@ -43,20 +49,20 @@ func main() {
 	GET("/auth/google/callback", func(w http.ResponseWriter, r *http.Request) {
 		tok, err := google_conf.Exchange(oauth2.NoContext, r.URL.Query().Get("code"))
 		if err != nil {
-			fmt.Fprintln(w, err)
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
 		client := google_conf.Client(oauth2.NoContext, tok)
 		resp, err := client.Get("https://www.googleapis.com/oauth2/v2/userinfo")
 		if err != nil {
-			fmt.Fprintln(w, err)
+			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
 
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
-			fmt.Fprintln(w, err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
@@ -67,18 +73,25 @@ func main() {
 		}{}
 		err = json.Unmarshal(body, &user)
 		if err != nil {
-			fmt.Fprintln(w, err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		queries.Signup(context.Background(), SignupParams{
+		u, err := queries.Signup(context.Background(), SignupParams{
 			Name:  sql.NullString{String: user.Name},
 			Image: sql.NullString{String: user.Picture},
 			Slug:  uuid.New().String(),
 			Email: sql.NullString{String: user.Email},
 		})
 		if err != nil {
-			fmt.Fprintln(w, err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		s := SESSION(r)
+		s.Values["current_user"] = u
+		if err = s.Save(r, w); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
