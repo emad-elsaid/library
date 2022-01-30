@@ -28,6 +28,7 @@ import (
 	"context"
 	"database/sql"
 	"embed"
+	"fmt"
 	"html/template"
 	"io/fs"
 	"log"
@@ -203,22 +204,18 @@ func partial(path string, data interface{}) string {
 	return w.String()
 }
 
-func render(path string, view string, data map[string]interface{}) string {
+func render(w http.ResponseWriter, path string, view string, data map[string]interface{}) {
 	v, ok := templates[path]
 	if !ok {
-		return "layout %s not found"
+		fmt.Fprintln(w, "layout %s not found", path)
 	}
 
 	data["yield"] = template.HTML(partial(view, nil))
 
-	w := bytes.NewBufferString("")
 	err := v.Execute(w, data)
-
 	if err != nil {
-		return "rendering layout error " + err.Error()
+		fmt.Fprintf(w, "rendering layout error %s", err.Error())
 	}
-
-	return w.String()
 }
 
 // SESSION =================================

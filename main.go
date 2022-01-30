@@ -29,16 +29,16 @@ func main() {
 			http.Redirect(w, r, fmt.Sprintf("/users/%s", user.Slug), http.StatusFound)
 			return
 		} else {
-			fmt.Fprintf(w, render("layout", "index", map[string]interface{}{
+			render(w, "layout", "index", map[string]interface{}{
 				"meta": map[string]string{},
-			}))
+			})
 		}
 	})
 
 	GET("/privacy", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, render("layout", "privacy", map[string]interface{}{
+		render(w, "layout", "privacy", map[string]interface{}{
 			"meta": map[string]string{},
-		}))
+		})
 	})
 
 	POST("/auth/google", func(w http.ResponseWriter, r *http.Request) {
