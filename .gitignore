@@ -1,4 +1,5 @@
 *.sqlite3
+/.env
 
 /public/books/image/*
 !/public/books/image/
