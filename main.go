@@ -98,7 +98,12 @@ func main() {
 		http.Redirect(w, r, "/", http.StatusFound)
 	})
 
-	GET("/logout", func(w http.ResponseWriter, r *http.Request) {})
+	GET("/logout", func(w http.ResponseWriter, r *http.Request) {
+		s := SESSION(r)
+		s.Values = map[interface{}]interface{}{}
+		s.Save(r, w)
+		http.Redirect(w, r, "/", http.StatusFound)
+	})
 
 	GET("/users/{user}", func(w http.ResponseWriter, r *http.Request) {})
 	GET("/users/{user}/edit", func(w http.ResponseWriter, r *http.Request) {})
