@@ -1,7 +1,7 @@
     {{ if .user }}
       <a href="/users/{{ .user.Slug }}">
         <figure class="image is-64x64 container">
-          <img class="is-rounded" src="{{ or .user.Image "/default_user" }}"/>
+          <img class="is-rounded" src="{{ or .user.Image.String "/default_user" }}"/>
         </figure>
       </a>
     {{ end }}
@@ -20,7 +20,7 @@
       {{ end }}
     </h1>
 
-    {{ if can "login" .current_user }}
+    {{ if can .current_user "login" nil }}
       <form action="/auth/google" method="POST">
         <input type=hidden name=authenticity_token value="{{ .csrf }}">
         <input name="origin" type="hidden" value="{{ .path_info }}"/>
