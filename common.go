@@ -174,10 +174,11 @@ func DELETE(path string, handler http.HandlerFunc, middlewares ...func(http.Hand
 
 //go:embed views
 var views embed.FS
-var templates map[string]*template.Template = map[string]*template.Template{}
+var templates *template.Template
 var helpers = template.FuncMap{}
 
 func compileViews() {
+	templates = template.New("")
 	fs.WalkDir(views, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -193,7 +194,7 @@ func compileViews() {
 				return err
 			}
 
-			templates[name] = template.Must(template.New(name).Funcs(helpers).Parse(string(c)))
+			template.Must(templates.New(name).Funcs(helpers).Parse(string(c)))
 		}
 
 		return nil
@@ -201,8 +202,8 @@ func compileViews() {
 }
 
 func partial(path string, data interface{}) string {
-	v, ok := templates[path]
-	if !ok {
+	v := templates.Lookup(path)
+	if v == nil {
 		return "view %s not found"
 	}
 
@@ -216,17 +217,8 @@ func partial(path string, data interface{}) string {
 }
 
 func render(w http.ResponseWriter, path string, view string, data map[string]interface{}) {
-	v, ok := templates[path]
-	if !ok {
-		fmt.Fprintf(w, "layout %s not found", path)
-	}
-
-	data["yield"] = template.HTML(partial(view, data))
-
-	err := v.Execute(w, data)
-	if err != nil {
-		fmt.Fprintf(w, "rendering layout error %s", err.Error())
-	}
+	data["view"] = view
+	fmt.Fprint(w, partial(path, data))
 }
 
 // SESSION =================================
