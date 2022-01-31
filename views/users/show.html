@@ -22,10 +22,10 @@
   <h2 class="title is-3" id="shelf-{{ .ID }}">
     {{ .Name }}
   </h2>
-
-  {{ if shelf_books .ID }}
+  {{ $b:=shelf_books .ID }}
+  {{ if $b }}
     <div class="columns is-mobile is-multiline">
-      {{ range shelf_books .ID }}
+      {{ range $b }}
         <div class="column is-2-tablet is-4-mobile">
           {{ partial "books/book" . }}
         </div>
