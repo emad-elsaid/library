@@ -65,6 +65,12 @@ func Helpers() {
 				log.Fatal(err)
 			}
 
+		case BookByIsbnAndUserRow:
+			switch do {
+			case "edit", "highlight":
+				return who != nil && who.ID == w.UserID
+			}
+
 		default:
 			log.Fatal(err)
 		}

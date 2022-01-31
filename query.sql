@@ -37,3 +37,17 @@ SELECT books.id id, title, books.image image, google_books_id, slug, isbn
  WHERE users.id = books.user_id
    AND shelf_id = $1
  ORDER BY books.created_at DESC;
+
+-- name: BookByIsbnAndUser :one
+SELECT books.*, slug, shelves.name shelf_name
+  FROM books, users, shelves
+ WHERE users.id = books.user_id
+   AND shelves.id = books.shelf_id
+   AND books.user_id = $1
+   AND isbn = $2
+ LIMIT 1;
+
+-- name: Highlights :many
+SELECT *
+  FROM highlights
+ WHERE book_id = $1;

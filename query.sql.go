@@ -6,7 +6,103 @@ package main
 import (
 	"context"
 	"database/sql"
+	"time"
 )
+
+const bookByIsbnAndUser = `-- name: BookByIsbnAndUser :one
+SELECT books.id, books.title, books.author, books.image, books.isbn, books.created_at, books.updated_at, books.shelf_id, books.user_id, books.google_books_id, books.subtitle, books.description, books.page_count, books.publisher, slug, shelves.name shelf_name
+  FROM books, users, shelves
+ WHERE users.id = books.user_id
+   AND shelves.id = books.shelf_id
+   AND books.user_id = $1
+   AND isbn = $2
+ LIMIT 1
+`
+
+type BookByIsbnAndUserParams struct {
+	UserID int64
+	Isbn   string
+}
+
+type BookByIsbnAndUserRow struct {
+	ID            int64
+	Title         string
+	Author        string
+	Image         sql.NullString
+	Isbn          string
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	ShelfID       sql.NullInt32
+	UserID        int64
+	GoogleBooksID sql.NullString
+	Subtitle      string
+	Description   string
+	PageCount     int32
+	Publisher     string
+	Slug          string
+	ShelfName     string
+}
+
+func (q *Queries) BookByIsbnAndUser(ctx context.Context, arg BookByIsbnAndUserParams) (BookByIsbnAndUserRow, error) {
+	row := q.db.QueryRowContext(ctx, bookByIsbnAndUser, arg.UserID, arg.Isbn)
+	var i BookByIsbnAndUserRow
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.Author,
+		&i.Image,
+		&i.Isbn,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.ShelfID,
+		&i.UserID,
+		&i.GoogleBooksID,
+		&i.Subtitle,
+		&i.Description,
+		&i.PageCount,
+		&i.Publisher,
+		&i.Slug,
+		&i.ShelfName,
+	)
+	return i, err
+}
+
+const highlights = `-- name: Highlights :many
+SELECT id, book_id, page, content, image, created_at, updated_at
+  FROM highlights
+ WHERE book_id = $1
+`
+
+func (q *Queries) Highlights(ctx context.Context, bookID int64) ([]Highlight, error) {
+	rows, err := q.db.QueryContext(ctx, highlights, bookID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Highlight
+	for rows.Next() {
+		var i Highlight
+		if err := rows.Scan(
+			&i.ID,
+			&i.BookID,
+			&i.Page,
+			&i.Content,
+			&i.Image,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
 
 const shelfBooks = `-- name: ShelfBooks :many
 SELECT books.id id, title, books.image image, google_books_id, slug, isbn

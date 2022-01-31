@@ -1,29 +1,29 @@
 <div class="columns">
   <div class="column is-3">
     <figure class="image is-3by4 mb-5">
-      <img src="{{ .book_cover .book }}" loading="lazy" class="cover">
+      <img src="{{ book_cover .book.Image.String .book.GoogleBooksID.String }}" loading="lazy" class="cover">
     </figure>
 
-    {{ if can "edit" .book }}
-      <form action="/users/{{ .user.Slug }}/books/{{ .book.isbn }}/shelf" method="POST">
+    {{ if can .current_user "edit" .book }}
+      <form action="/users/{{ .user.Slug }}/books/{{ .book.Isbn }}/shelf" method="POST">
         {{ .csrf }}
         <div class="field">
           <div class="control">
-            <a class="button is-fullwidth" href="/users/{{ .user.Slug }}/books/{{ .book.isbn }}/image">Change Cover</a>
+            <a class="button is-fullwidth" href="/users/{{ .user.Slug }}/books/{{ .book.Isbn }}/image">Change Cover</a>
           </div>
         </div>
         <div class="field">
           <div class="control">
-            <a class="button is-fullwidth" href="/users/{{ .user.Slug }}/books/{{ .book.isbn }}/edit">Edit</a>
+            <a class="button is-fullwidth" href="/users/{{ .user.Slug }}/books/{{ .book.Isbn }}/edit">Edit</a>
           </div>
         </div>
         <div class="field has-addons">
           <div class="control is-expanded">
             <span class="select is-fullwidth">
               <select name="shelf_id">
-                <option value="" {{ if not .book.shelf }}selected{{ end }}>No Shelf</option>
-                {{ range .current_user.shelves }}
-                <option value="{{ .id }}" {{ if eq . .book.shelf }}selected{{ end }}>{{ .name }}</option>
+                <option value="" {{ if not .book.ShelfID }}selected{{ end }}>No Shelf</option>
+                {{ range .current_user.Shelves }}
+                <option value="{{ .ID }}" {{ if eq . $.book.ShelfID }}selected{{ end }}>{{ .Name }}</option>
                 {{ end }}
               </select>
             </span>
@@ -34,10 +34,10 @@
           </div>
         </div>
 
-        {{ if can "highlight" .book }}
+        {{ if can .current_user "highlight" .book }}
           <div class="field">
             <div class="control">
-              <a class="button is-warning is-fullwidth" href="/users/{{ .user.Slug }}/books/{{ .book.isbn }}/highlights/new">
+              <a class="button is-warning is-fullwidth" href="/users/{{ .user.Slug }}/books/{{ .book.Isbn }}/highlights/new">
                 Create Highlight
               </a>
             </div>
@@ -50,57 +50,57 @@
     <hr/>
 
     <div class="buttons">
-      <a class="button is-fullwidth" href="https://www.amazon.de/s?k={{ .book.isbn }}&tag={{ .user.amazon_associates_id }}" target="_blank" rel="noopener">On Amazon.de</a>
-      <a class="button is-fullwidth" href="https://www.goodreads.com/search?q={{ .book.isbn }}" target="_blank" rel="noopener">On Goodreads.com</a>
+      <a class="button is-fullwidth" href="https://www.amazon.de/s?k={{ .book.Isbn }}&tag={{ .user.AmazonAssociatesID }}" target="_blank" rel="noopener">On Amazon.de</a>
+      <a class="button is-fullwidth" href="https://www.goodreads.com/search?q={{ .book.Isbn }}" target="_blank" rel="noopener">On Goodreads.com</a>
     </div>
 
   </div>
 
   <div class="column content">
-    {{ if .book.shelf }}
-      <a class="tag is-info is-light" href="/users/{{ .user.Slug }}#shelf-{{ .book.shelf.id }}">{{ .book.shelf.name }}</a>
+    {{ if .book.ShelfID }}
+      <a class="tag is-info is-light" href="/users/{{ .user.Slug }}#shelf-{{ .book.ShelfID }}">{{ .book.ShelfName }}</a>
     {{ end }}
     <h2 class="title">
-      {{ .book.title }}
+      {{ .book.Title }}
     </h2>
 
-    {{ if .book.subtitle }}
+    {{ if .book.Subtitle }}
       <p class="subtitle">
-        {{ .book.subtitle }}
+        {{ .book.Subtitle }}
       </p>
     {{ end }}
 
     <p class="subtitle is-capitalized">
-      👤 {{ .book.author }}
+      👤 {{ .book.Author }}
     </p>
 
-    {{ if .book.description }}
+    {{ if .book.Description }}
       <p class="content">
-        {{ .book.description }}
+        {{ .book.Description }}
       </p>
     {{ end }}
 
-    {{ partial "common/_separator" }}
-    {{ range .book.highlights }}
+    {{ partial "common/separator" . }}
 
+    {{ range .highlights }}
       <p class="has-text-centered has-text-weight-bold has-text-grey">
-        « PAGE {{ .page }} »
+        « PAGE {{ .Page }} »
       </p>
 
       <p>
-        {{ if can "edit" . }}
-          <a href="/users/{{ .user.Slug }}/books/{{ .book.isbn }}/highlights/{{ .id }}/edit" class="icon is-medium">✏️</a>
-          <a href="/users/{{ .user.Slug }}/books/{{ .book.isbn }}/highlights/{{ .id }}/image" class="icon is-medium">📸</a>
+        {{ if can $.current_user "highlight" $.book }}
+          <a href="/users/{{ $.user.Slug }}/books/{{ $.book.Isbn }}/highlights/{{ .ID }}/edit" class="icon is-medium">✏️</a>
+          <a href="/users/{{ $.user.Slug }}/books/{{ $.book.Isbn }}/highlights/{{ .ID }}/image" class="icon is-medium">📸</a>
         {{ end }}
-        {{ simple_format .content }}
+        {{ simple_format .Content }}
       </p>
 
-        {{ if .image }}
+        {{ if .Image.Valid }}
           <div class="columns">
             <div class="column"></div>
             <div class="column is-8">
               <figure class="image">
-                <img src="{{ .image_url }}" loading="lazy">
+                <img src="/highlights/image/{{ .Image.String }}" loading="lazy">
               </figure>
             </div>
             <div class="column"></div>

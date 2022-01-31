@@ -244,3 +244,10 @@ func applyMiddlewares(handler http.HandlerFunc, middlewares ...func(http.Handler
 	}
 	return handler
 }
+
+// CONTEXTS ================================
+
+func DbCtx() context.Context {
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+	return ctx
+}

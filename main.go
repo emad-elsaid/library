@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -79,7 +78,7 @@ func main() {
 			return
 		}
 
-		u, err := queries.Signup(context.Background(), SignupParams{
+		u, err := queries.Signup(DbCtx(), SignupParams{
 			Name:  sql.NullString{String: user.Name, Valid: true},
 			Image: sql.NullString{String: user.Picture, Valid: true},
 			Slug:  uuid.New().String(),
@@ -109,7 +108,7 @@ func main() {
 
 	GET("/users/{user}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
 			http.NotFound(w, r)
 			return
@@ -120,19 +119,19 @@ func main() {
 			"user":         user,
 		}
 
-		unshelved_books, err := queries.UserUnshelvedBooks(context.Background(), user.ID)
+		unshelved_books, err := queries.UserUnshelvedBooks(DbCtx(), user.ID)
 		if len(unshelved_books) > 0 {
 			data["unshelved_books"] = unshelved_books
 		}
 
-		data["shelves"], err = queries.Shelves(context.Background(), user.ID)
+		data["shelves"], err = queries.Shelves(DbCtx(), user.ID)
 
 		render(w, "layout", "users/show", data)
 	})
 
 	GET("/users/{user}/edit", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
 			http.NotFound(w, r)
 			return
@@ -146,7 +145,7 @@ func main() {
 
 	POST("/users/{user}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
 			http.NotFound(w, r)
 			return
@@ -157,7 +156,7 @@ func main() {
 
 	GET("/users/{user}/books/new", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
 			http.NotFound(w, r)
 			return
@@ -172,7 +171,7 @@ func main() {
 
 	POST("/users/{user}/books", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
 			http.NotFound(w, r)
 			return
@@ -183,21 +182,38 @@ func main() {
 
 	GET("/users/{user}/books/{isbn}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
-			http.NotFound(w, r)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		book, err := queries.BookByIsbnAndUser(DbCtx(), BookByIsbnAndUserParams{
+			UserID: user.ID,
+			Isbn:   vars["isbn"],
+		})
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		highlights, err := queries.Highlights(DbCtx(), book.ID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		render(w, "layout", "books/show", map[string]interface{}{
 			"current_user": current_user(r),
 			"user":         user,
+			"book":         book,
+			"highlights":   highlights,
 		})
 	})
 
 	POST("/users/{user}/books/{isbn}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
 			http.NotFound(w, r)
 			return
@@ -208,7 +224,7 @@ func main() {
 
 	GET("/users/{user}/books/{isbn}/edit", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
 			http.NotFound(w, r)
 			return
@@ -222,7 +238,7 @@ func main() {
 
 	DELETE("/users/{user}/books/{isbn}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
 			http.NotFound(w, r)
 			return
@@ -233,7 +249,7 @@ func main() {
 
 	POST("/users/{user}/books/{isbn}/shelf", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
 			http.NotFound(w, r)
 			return
@@ -244,7 +260,7 @@ func main() {
 
 	GET("/users/{user}/books/{isbn}/image", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
 			http.NotFound(w, r)
 			return
@@ -258,7 +274,7 @@ func main() {
 
 	POST("/users/{user}/books/{isbn}/image", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
 			http.NotFound(w, r)
 			return
@@ -269,7 +285,7 @@ func main() {
 
 	GET("/users/{user}/shelves/new", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
 			http.NotFound(w, r)
 			return
@@ -284,7 +300,7 @@ func main() {
 
 	GET("/users/{user}/shelves", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
 			http.NotFound(w, r)
 			return
@@ -298,7 +314,7 @@ func main() {
 
 	POST("/users/{user}/shelves", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
 			http.NotFound(w, r)
 			return
@@ -309,7 +325,7 @@ func main() {
 
 	GET("/users/{user}/shelves/{shelf}/edit", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
 			http.NotFound(w, r)
 			return
@@ -324,7 +340,7 @@ func main() {
 
 	POST("/users/{user}/shelves/{shelf}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
 			http.NotFound(w, r)
 			return
@@ -335,7 +351,7 @@ func main() {
 
 	POST("/users/{user}/shelves/{shelf}/up", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
 			http.NotFound(w, r)
 			return
@@ -346,7 +362,7 @@ func main() {
 
 	POST("/users/{user}/shelves/{shelf}/down", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
 			http.NotFound(w, r)
 			return
@@ -357,7 +373,7 @@ func main() {
 
 	DELETE("/users/{user}/shelves/{shelf}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
 			http.NotFound(w, r)
 			return
@@ -368,7 +384,7 @@ func main() {
 
 	GET("/users/{user}/books/{isbn}/highlights/new", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
 			http.NotFound(w, r)
 			return
@@ -383,7 +399,7 @@ func main() {
 
 	POST("/users/{user}/books/{isbn}/highlights", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
 			http.NotFound(w, r)
 			return
@@ -394,7 +410,7 @@ func main() {
 
 	GET("/users/{user}/books/{isbn}/highlights/{id}/edit", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
 			http.NotFound(w, r)
 			return
@@ -409,7 +425,7 @@ func main() {
 
 	POST("/users/{user}/books/{isbn}/highlights/{id}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
 			http.NotFound(w, r)
 			return
@@ -420,7 +436,7 @@ func main() {
 
 	DELETE("/users/{user}/books/{isbn}/highlights/{id}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
 			http.NotFound(w, r)
 			return
@@ -431,7 +447,7 @@ func main() {
 
 	GET("/users/{user}/books/{isbn}/highlights/{id}/image", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
 			http.NotFound(w, r)
 			return
@@ -445,7 +461,7 @@ func main() {
 
 	POST("/users/{user}/books/{isbn}/highlights/{id}/image", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		user, err := queries.UserBySlug(context.Background(), vars["user"])
+		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
 			http.NotFound(w, r)
 			return
