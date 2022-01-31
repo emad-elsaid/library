@@ -58,7 +58,7 @@
 
   <div class="column content">
     {{ if .book.ShelfID }}
-      <a class="tag is-info is-light" href="/users/{{ .user.Slug }}#shelf-{{ .book.ShelfID }}">{{ .book.ShelfName }}</a>
+      <a class="tag is-info is-light" href="/users/{{ .user.Slug }}#shelf-{{ .book.ShelfID.Int32 }}">{{ .book.ShelfName }}</a>
     {{ end }}
     <h2 class="title">
       {{ .book.Title }}
