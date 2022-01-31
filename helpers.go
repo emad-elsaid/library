@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"html/template"
 	"log"
@@ -95,6 +96,10 @@ func Helpers() {
 
 	helpers["simple_format"] = func(str string) (template.HTML, error) {
 		return template.HTML(strings.ReplaceAll(template.HTMLEscapeString(str), "\n", "<br/>")), nil
+	}
+
+	helpers["shelf_books"] = func(shelfID int64) ([]ShelfBooksRow, error) {
+		return queries.ShelfBooks(context.Background(), sql.NullInt32{Valid: true, Int32: int32(shelfID)})
 	}
 }
 

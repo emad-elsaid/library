@@ -47,7 +47,7 @@ type SchemaMigration struct {
 
 type Shelf struct {
 	ID        int64
-	Name      sql.NullString
+	Name      string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	UserID    int64

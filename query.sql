@@ -30,3 +30,10 @@ SELECT id, name
   FROM shelves
  WHERE user_id = $1
  ORDER BY position;
+
+-- name: ShelfBooks :many
+SELECT books.id id, title, books.image image, google_books_id, slug, isbn
+  FROM books, users
+ WHERE users.id = books.user_id
+   AND shelf_id = $1
+ ORDER BY books.created_at DESC;

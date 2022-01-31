@@ -23,11 +23,11 @@
     {{ .Name }}
   </h2>
 
-  {{ if .books }}
+  {{ if shelf_books .ID }}
     <div class="columns is-mobile is-multiline">
-      {{ range .books }}
+      {{ range shelf_books .ID }}
         <div class="column is-2-tablet is-4-mobile">
-          {{ partial "books/_book" . }}
+          {{ partial "books/book" . }}
         </div>
       {{ end }}
     </div>
@@ -37,5 +37,5 @@
     </div>
   {{ end }}
 
-  {{ partial "common/_separator" . }}
+  {{ partial "common/separator" . }}
 {{ end }}

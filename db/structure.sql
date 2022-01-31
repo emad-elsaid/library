@@ -115,7 +115,7 @@ CREATE TABLE public.schema_migrations (
 
 CREATE TABLE public.shelves (
     id bigint NOT NULL,
-    name character varying,
+    name character varying NOT NULL,
     created_at timestamp(6) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp(6) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     user_id bigint NOT NULL,
@@ -358,6 +358,7 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20220130120749'),
 ('20220130212907'),
 ('20220131112523'),
-('20220131115959');
+('20220131115959'),
+('20220131124929');
 
 

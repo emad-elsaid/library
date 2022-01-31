@@ -8,6 +8,53 @@ import (
 	"database/sql"
 )
 
+const shelfBooks = `-- name: ShelfBooks :many
+SELECT books.id id, title, books.image image, google_books_id, slug, isbn
+  FROM books, users
+ WHERE users.id = books.user_id
+   AND shelf_id = $1
+ ORDER BY books.created_at DESC
+`
+
+type ShelfBooksRow struct {
+	ID            int64
+	Title         string
+	Image         sql.NullString
+	GoogleBooksID sql.NullString
+	Slug          string
+	Isbn          string
+}
+
+func (q *Queries) ShelfBooks(ctx context.Context, shelfID sql.NullInt32) ([]ShelfBooksRow, error) {
+	rows, err := q.db.QueryContext(ctx, shelfBooks, shelfID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ShelfBooksRow
+	for rows.Next() {
+		var i ShelfBooksRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Image,
+			&i.GoogleBooksID,
+			&i.Slug,
+			&i.Isbn,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const shelves = `-- name: Shelves :many
 SELECT id, name
   FROM shelves
@@ -17,7 +64,7 @@ SELECT id, name
 
 type ShelvesRow struct {
 	ID   int64
-	Name sql.NullString
+	Name string
 }
 
 func (q *Queries) Shelves(ctx context.Context, userID int64) ([]ShelvesRow, error) {
