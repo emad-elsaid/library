@@ -61,23 +61,39 @@ type QueryLogger struct {
 }
 
 func (p QueryLogger) ExecContext(ctx context.Context, q string, args ...interface{}) (sql.Result, error) {
-	p.logger.Print(q)
+	r, err := p.db.ExecContext(ctx, q, args...)
+	a, _ := r.RowsAffected()
+
+	p.logger.Print("DB Exec:", strings.ReplaceAll(q, "\n", " "))
 	p.logger.Print(args...)
-	return p.db.ExecContext(ctx, q, args...)
+	p.logger.Printf("RowsAffected: %d", a)
+	return r, err
 }
 func (p QueryLogger) PrepareContext(ctx context.Context, q string) (*sql.Stmt, error) {
-	p.logger.Print(q)
 	return p.db.PrepareContext(ctx, q)
 }
 func (p QueryLogger) QueryContext(ctx context.Context, q string, args ...interface{}) (*sql.Rows, error) {
-	p.logger.Print(q)
+	r, err := p.db.QueryContext(ctx, q, args...)
+
+	p.logger.Print("DB Query: ", strings.ReplaceAll(q, "\n", " "))
 	p.logger.Print(args...)
-	return p.db.QueryContext(ctx, q, args...)
+	if err != nil {
+		p.logger.Printf("Error: %s", err.Error())
+	}
+
+	return r, err
 }
 func (p QueryLogger) QueryRowContext(ctx context.Context, q string, args ...interface{}) *sql.Row {
-	p.logger.Print(q)
+	r := p.db.QueryRowContext(ctx, q, args...)
+
+	p.logger.Print("Query Row:", strings.ReplaceAll(q, "\n", " "))
 	p.logger.Print(args...)
-	return p.db.QueryRowContext(ctx, q, args...)
+	err := r.Err()
+	if err != nil {
+		p.logger.Printf("Error: %s", err.Error())
+	}
+
+	return r
 }
 
 func init() {

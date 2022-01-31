@@ -1,5 +1,5 @@
 <figure class="image is-3by4">
-  <a href="/users/{{ .User.Slug }}/books/{{ .Isbn }}" title="{{ .Title }}">
-    <img src="{{ book_cover . }}" loading="lazy" class="cover">
+  <a href="/users/{{ .Slug }}/books/{{ .Isbn }}" title="{{ .Title }}">
+    <img src="{{ book_cover .Image.String .GoogleBooksID.String }}" loading="lazy" class="cover">
   </a>
 </figure>

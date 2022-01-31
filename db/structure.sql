@@ -38,7 +38,7 @@ CREATE TABLE public.books (
     created_at timestamp(6) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp(6) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     shelf_id integer,
-    user_id integer NOT NULL,
+    user_id bigint NOT NULL,
     google_books_id character varying,
     subtitle character varying NOT NULL,
     description character varying NOT NULL,
@@ -118,7 +118,7 @@ CREATE TABLE public.shelves (
     name character varying,
     created_at timestamp(6) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp(6) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    user_id integer,
+    user_id bigint NOT NULL,
     "position" integer
 );
 
@@ -356,6 +356,8 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20220125193806'),
 ('20220129201723'),
 ('20220130120749'),
-('20220130212907');
+('20220130212907'),
+('20220131112523'),
+('20220131115959');
 
 

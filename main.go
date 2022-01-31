@@ -115,11 +115,19 @@ func main() {
 			return
 		}
 
-		render(w, "layout", "users/show", map[string]interface{}{
+		data := map[string]interface{}{
 			"current_user": current_user(r),
 			"user":         user,
-			"books":        user.Books(),
-		})
+		}
+
+		unshelved_books, err := queries.UserUnshelvedBooks(context.Background(), user.ID)
+		if len(unshelved_books) > 0 {
+			data["unshelved_books"] = unshelved_books
+		}
+
+		data["shelves"], err = queries.Shelves(context.Background(), user.ID)
+
+		render(w, "layout", "users/show", data)
 	})
 
 	GET("/users/{user}/edit", func(w http.ResponseWriter, r *http.Request) {

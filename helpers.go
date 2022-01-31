@@ -80,14 +80,14 @@ func Helpers() {
 		return false
 	}
 
-	helpers["book_cover"] = func(book Book) string {
-		if book.Image.Valid {
-			return "/books/image/" + book.Image.String
+	helpers["book_cover"] = func(image, google_books_id string) string {
+		if len(image) > 0 {
+			return "/books/image/" + image
 		}
 
-		if book.GoogleBooksID.Valid {
-			googleBookURL := "https://books.google.com/books/content?id=%s&printsec=frontcover&img=1&zoom=1"
-			return fmt.Sprintf(googleBookURL, book.GoogleBooksID.String)
+		if len(google_books_id) > 0 {
+			const googleBookURL = "https://books.google.com/books/content?id=%s&printsec=frontcover&img=1&zoom=1"
+			return fmt.Sprintf(googleBookURL, google_books_id)
 		}
 
 		return "/default_book"

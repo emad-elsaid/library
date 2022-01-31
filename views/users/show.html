@@ -4,26 +4,26 @@
   </div>
 {{ end }}
 
-{{ if .books }}
+{{ if not .unshelved_books }}
   <h1 class="title is-3">Books lying around</h1>
 
   <div class="columns is-mobile is-multiline">
-    {{ range .books }}
+    {{ range .unshelved_books }}
       <div class="column is-2-tablet is-4-mobile">
         {{ partial "books/book" . }}
       </div>
     {{ end }}
   </div>
 
-  {{ partial "common/_separator" . }}
+  {{ partial "common/separator" . }}
 {{ end }}
 
 {{ range .shelves }}
-  <h2 class="title is-3" id="shelf-{{ .id }}">
-    {{ .name }}
+  <h2 class="title is-3" id="shelf-{{ .ID }}">
+    {{ .Name }}
   </h2>
 
-  {{ if .books.exists }}
+  {{ if .books }}
     <div class="columns is-mobile is-multiline">
       {{ range .books }}
         <div class="column is-2-tablet is-4-mobile">

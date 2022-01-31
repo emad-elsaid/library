@@ -18,7 +18,15 @@ VALUES($1,$2,$3,$4)
        DO UPDATE SET name = $1, image = $2
        RETURNING id;
 
--- name: UserBooks :many
-SELECT *
-  FROM books
- WHERE user_id = $1;
+-- name: UserUnshelvedBooks :many
+SELECT books.id id, title, books.image image, google_books_id, slug, isbn
+  FROM books, users
+ WHERE users.id = books.user_id
+   AND user_id = $1
+   AND shelf_id IS NULL;
+
+-- name: Shelves :many
+SELECT id, name
+  FROM shelves
+ WHERE user_id = $1
+ ORDER BY position;

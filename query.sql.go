@@ -8,6 +8,41 @@ import (
 	"database/sql"
 )
 
+const shelves = `-- name: Shelves :many
+SELECT id, name
+  FROM shelves
+ WHERE user_id = $1
+ ORDER BY position
+`
+
+type ShelvesRow struct {
+	ID   int64
+	Name sql.NullString
+}
+
+func (q *Queries) Shelves(ctx context.Context, userID int64) ([]ShelvesRow, error) {
+	rows, err := q.db.QueryContext(ctx, shelves, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ShelvesRow
+	for rows.Next() {
+		var i ShelvesRow
+		if err := rows.Scan(&i.ID, &i.Name); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const signup = `-- name: Signup :one
 INSERT
  INTO public.users(name, image, slug, email)
@@ -67,50 +102,6 @@ func (q *Queries) User(ctx context.Context, id int64) (User, error) {
 	return i, err
 }
 
-const userBooks = `-- name: UserBooks :many
-SELECT id, title, author, image, isbn, created_at, updated_at, shelf_id, user_id, google_books_id, subtitle, description, page_count, publisher
-  FROM books
- WHERE user_id = $1
-`
-
-func (q *Queries) UserBooks(ctx context.Context, userID int32) ([]Book, error) {
-	rows, err := q.db.QueryContext(ctx, userBooks, userID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Book
-	for rows.Next() {
-		var i Book
-		if err := rows.Scan(
-			&i.ID,
-			&i.Title,
-			&i.Author,
-			&i.Image,
-			&i.Isbn,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.ShelfID,
-			&i.UserID,
-			&i.GoogleBooksID,
-			&i.Subtitle,
-			&i.Description,
-			&i.PageCount,
-			&i.Publisher,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const userBySlug = `-- name: UserBySlug :one
 SELECT id, name, email, image, created_at, updated_at, slug, description, facebook, twitter, linkedin, instagram, phone, whatsapp, telegram, amazon_associates_id
   FROM users
@@ -140,4 +131,51 @@ func (q *Queries) UserBySlug(ctx context.Context, slug string) (User, error) {
 		&i.AmazonAssociatesID,
 	)
 	return i, err
+}
+
+const userUnshelvedBooks = `-- name: UserUnshelvedBooks :many
+SELECT books.id id, title, books.image image, google_books_id, slug, isbn
+  FROM books, users
+ WHERE users.id = books.user_id
+   AND user_id = $1
+   AND shelf_id IS NULL
+`
+
+type UserUnshelvedBooksRow struct {
+	ID            int64
+	Title         string
+	Image         sql.NullString
+	GoogleBooksID sql.NullString
+	Slug          string
+	Isbn          string
+}
+
+func (q *Queries) UserUnshelvedBooks(ctx context.Context, userID int64) ([]UserUnshelvedBooksRow, error) {
+	rows, err := q.db.QueryContext(ctx, userUnshelvedBooks, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []UserUnshelvedBooksRow
+	for rows.Next() {
+		var i UserUnshelvedBooksRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Image,
+			&i.GoogleBooksID,
+			&i.Slug,
+			&i.Isbn,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
