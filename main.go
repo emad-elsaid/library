@@ -202,6 +202,7 @@ func main() {
 		errors := params.Validate()
 		if len(errors) != 0 {
 			render(w, "layout", "books/new", map[string]interface{}{
+				"book":         params,
 				"current_user": current_user(r),
 				"user":         user,
 				"errors":       errors,
@@ -212,13 +213,7 @@ func main() {
 
 		book, err := queries.NewBook(DbCtx(), params)
 		if err != nil {
-			render(w, "layout", "books/new", map[string]interface{}{
-				"current_user": current_user(r),
-				"user":         user,
-				"error":        err,
-				"errors":       map[string][]error{},
-				"csrf":         csrf.TemplateField(r),
-			})
+			http.Error(w, "", http.StatusInternalServerError)
 			return
 		}
 

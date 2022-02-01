@@ -4,7 +4,7 @@
   <google-books></google-books>
 </p>
 
-<form action="/users/{{ .user.Slug }}/books{{ if .book.ID }}/{{ .book.Isbn }}{{ end }}" method="POST">
+<form action="/users/{{ .user.Slug }}/books{{ if has_field .book "ID" }}/{{ .book.Isbn }}{{ end }}" method="POST">
   {{ .csrf }}
   <input type="hidden" name="google_books_id" value="{{ .book.GoogleBooksID }}">
 
@@ -15,15 +15,15 @@
           class="input {{ if index .errors "title" }}is-danger{{ end }}"
           type="text"
           name="title"
-          value="{{ .book.title }}"
+          value="{{ .book.Title }}"
           onchange="document.getElementsByTagName('google-books')[0].setAttribute('keyword', this.value)"
           required
           autofocus>
-      {{ template "common/errors" index .errors "title" }}
+      {{ if has_field . "errors" }} {{ template "common/errors" index .errors "title" }} {{ end }}
     </div>
   </div>
 
-  {{ if not .book.ID }}
+  {{ if has_field .book "ID" | not }}
     <div class="field">
       <label class="label">ISBN</label>
       <div class="control">
@@ -31,10 +31,10 @@
             class="input {{ if index .errors "isbn" }}is-danger{{ end }}"
             type="number"
             name="isbn"
-            value="{{ .book.isbn }}"
+            value="{{ .book.Isbn }}"
             onchange="document.getElementsByTagName('google-books')[0].setAttribute('keyword', `isbn:${this.value}`)"
             required>
-        {{ template "common/errors" index .errors "isbn" }}
+        {{ if has_field . "errors" }} {{ template "common/errors" index .errors "isbn" }} {{ end }}
       </div>
     </div>
   {{ end }}
@@ -47,9 +47,9 @@
           type="text"
           name="author"
           onchange="document.getElementsByTagName('google-books')[0].setAttribute('keyword', this.value)"
-          value="{{ .book.author }}"
+          value="{{ .book.Author }}"
           required>
-      {{ template "common/errors" index .errors "author" }}
+      {{ if has_field . "errors" }} {{ template "common/errors" index .errors "author" }} {{ end }}
     </div>
   </div>
 
@@ -63,8 +63,8 @@
             class="input {{ if index .errors "subtitle" }}is-danger{{ end }}"
             type="text"
             name="subtitle"
-            value="{{ .book.subtitle }}">
-        {{ template "common/errors" index .errors "subtitle" }}
+            value="{{ .book.Subtitle }}">
+        {{ if has_field . "errors" }} {{ template "common/errors" index .errors "subtitle" }} {{ end }}
       </div>
     </div>
 
@@ -73,8 +73,8 @@
       <div class="control">
         <textarea
             class="textarea {{ if index .errors "description" }}is-danger{{ end }}"
-            name="description">{{ .book.description }}</textarea>
-        {{ template "common/errors" index .errors "description" }}
+            name="description">{{ .book.Description }}</textarea>
+        {{ if has_field . "errors" }} {{ template "common/errors" index .errors "description" }} {{ end }}
       </div>
     </div>
 
@@ -85,8 +85,8 @@
             class="input {{ if index .errors "publisher" }}is-danger{{ end }}"
             type="text"
             name="publisher"
-            value="{{ .book.publisher }}">
-        {{ template "common/errors" index .errors "publisher" }}
+            value="{{ .book.Publisher }}">
+        {{ if has_field . "errors" }} {{ template "common/errors" index .errors "publisher" }} {{ end }}
       </div>
     </div>
 
@@ -97,8 +97,8 @@
             class="input {{ if index .errors "page_count" }}is-danger{{ end }}"
             type="number"
             name="page_count"
-            value="{{ .book.page_count }}">
-        {{ template "common/errors" index .errors "page_count" }}
+            value="{{ .book.PageCount }}">
+        {{ if has_field . "errors" }} {{ template "common/errors" index .errors "page_count" }} {{ end }}
       </div>
     </div>
 
@@ -111,7 +111,7 @@
   </div>
 </form>
 
-{{ if .book.ID }}
+{{ if has_field .book "ID" }}
   <form action="/users/{{ .user.Slug }}/books/{{ .book.isbn }}" method="POST" class="has-text-right">
     <input type="hidden" name="_method" value="DELETE">
     {{ .csrf }}

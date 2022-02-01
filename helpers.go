@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"reflect"
 	"strings"
 )
 
@@ -72,6 +73,21 @@ func Helpers() {
 
 	helpers["shelf_books"] = func(shelfID int64) ([]ShelfBooksRow, error) {
 		return queries.ShelfBooks(context.Background(), sql.NullInt32{Valid: true, Int32: int32(shelfID)})
+	}
+
+	helpers["has_field"] = func(v interface{}, name string) bool {
+		rv := reflect.ValueOf(v)
+		if rv.Kind() == reflect.Ptr {
+			rv = rv.Elem()
+		}
+		if rv.Kind() == reflect.Struct {
+			return rv.FieldByName(name).IsValid()
+		}
+		if rv.Kind() == reflect.Map {
+			val := rv.MapIndex(reflect.ValueOf(name))
+			return val.IsValid()
+		}
+		return false
 	}
 }
 
