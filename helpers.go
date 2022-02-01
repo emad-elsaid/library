@@ -41,41 +41,7 @@ func Helpers() {
 		return fmt.Sprintf(`<meta name="%s" value="%s"/>`, name, v)
 	}
 
-	helpers["can"] = func(who *User, do string, what interface{}) bool {
-		err := fmt.Sprintf("Verb %s not handled for %#v", do, what)
-
-		switch w := what.(type) {
-		case nil:
-			switch do {
-			case "login":
-				return who == nil
-			case "logout":
-				return who != nil
-			default:
-				log.Fatal(err)
-			}
-
-		case *User:
-			switch do {
-			case "create_book":
-				return who != nil && who.ID == w.ID
-			case "list_shelves":
-				return who != nil && who.ID == w.ID
-			default:
-				log.Fatal(err)
-			}
-
-		case BookByIsbnAndUserRow:
-			switch do {
-			case "edit", "highlight":
-				return who != nil && who.ID == w.UserID
-			}
-
-		default:
-			log.Fatal(err)
-		}
-		return true
-	}
+	helpers["can"] = can
 
 	helpers["include"] = func(list []string, str string) bool {
 		for _, i := range list {
@@ -131,4 +97,50 @@ func current_user(r *http.Request) *User {
 	}
 
 	return &user
+}
+
+func can(who *User, do string, what interface{}) bool {
+	err := fmt.Sprintf("Verb %s not handled for %#v", do, what)
+
+	switch w := what.(type) {
+	case nil:
+		switch do {
+		case "login":
+			return who == nil
+		case "logout":
+			return who != nil
+		default:
+			log.Fatal(err)
+		}
+
+	case User:
+		switch do {
+		case "create_book":
+			return who != nil && who.ID == w.ID
+		case "list_shelves":
+			return who != nil && who.ID == w.ID
+		default:
+			log.Fatal(err)
+		}
+
+	case *User:
+		switch do {
+		case "create_book":
+			return who != nil && who.ID == w.ID
+		case "list_shelves":
+			return who != nil && who.ID == w.ID
+		default:
+			log.Fatal(err)
+		}
+
+	case BookByIsbnAndUserRow:
+		switch do {
+		case "edit", "highlight":
+			return who != nil && who.ID == w.UserID
+		}
+
+	default:
+		log.Fatal(err)
+	}
+	return true
 }

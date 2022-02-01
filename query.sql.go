@@ -11,9 +11,10 @@ import (
 
 const bookByIsbnAndUser = `-- name: BookByIsbnAndUser :one
 SELECT books.id, books.title, books.author, books.image, books.isbn, books.created_at, books.updated_at, books.shelf_id, books.user_id, books.google_books_id, books.subtitle, books.description, books.page_count, books.publisher, slug, shelves.name shelf_name
-  FROM books, users, shelves
+  FROM users, books
+       LEFT JOIN shelves
+           ON shelves.id = books.shelf_id
  WHERE users.id = books.user_id
-   AND shelves.id = books.shelf_id
    AND books.user_id = $1
    AND isbn = $2
  LIMIT 1
@@ -40,7 +41,7 @@ type BookByIsbnAndUserRow struct {
 	PageCount     int32
 	Publisher     string
 	Slug          string
-	ShelfName     string
+	ShelfName     sql.NullString
 }
 
 func (q *Queries) BookByIsbnAndUser(ctx context.Context, arg BookByIsbnAndUserParams) (BookByIsbnAndUserRow, error) {
@@ -102,6 +103,56 @@ func (q *Queries) Highlights(ctx context.Context, bookID int64) ([]Highlight, er
 		return nil, err
 	}
 	return items, nil
+}
+
+const newBook = `-- name: NewBook :one
+INSERT INTO public.books (title, isbn, author, subtitle, description, publisher, page_count, google_books_id, user_id)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       RETURNING id, title, author, image, isbn, created_at, updated_at, shelf_id, user_id, google_books_id, subtitle, description, page_count, publisher
+`
+
+type NewBookParams struct {
+	Title         string
+	Isbn          string
+	Author        string
+	Subtitle      string
+	Description   string
+	Publisher     string
+	PageCount     int32
+	GoogleBooksID sql.NullString
+	UserID        int64
+}
+
+func (q *Queries) NewBook(ctx context.Context, arg NewBookParams) (Book, error) {
+	row := q.db.QueryRowContext(ctx, newBook,
+		arg.Title,
+		arg.Isbn,
+		arg.Author,
+		arg.Subtitle,
+		arg.Description,
+		arg.Publisher,
+		arg.PageCount,
+		arg.GoogleBooksID,
+		arg.UserID,
+	)
+	var i Book
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.Author,
+		&i.Image,
+		&i.Isbn,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.ShelfID,
+		&i.UserID,
+		&i.GoogleBooksID,
+		&i.Subtitle,
+		&i.Description,
+		&i.PageCount,
+		&i.Publisher,
+	)
+	return i, err
 }
 
 const shelfBooks = `-- name: ShelfBooks :many

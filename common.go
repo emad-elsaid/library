@@ -28,6 +28,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -242,4 +243,11 @@ func applyMiddlewares(handler http.HandlerFunc, middlewares ...func(http.Handler
 func DbCtx() context.Context {
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 	return ctx
+}
+
+// HELPERS FUNCTIONS ======================
+
+func atoi32(s string) int32 {
+	i, _ := strconv.ParseInt(s, 10, 32)
+	return int32(i)
 }

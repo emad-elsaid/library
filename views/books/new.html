@@ -4,7 +4,7 @@
   <google-books></google-books>
 </p>
 
-<form action="/users/{{ .user.Slug }}/books/{{ if .book.persisted }}{{ .book.isbn }}{{ end }}" method="POST">
+<form action="/users/{{ .user.Slug }}/books{{ if .book.ID }}/{{ .book.Isbn }}{{ end }}" method="POST">
   {{ .csrf }}
   <input type="hidden" name="google_books_id" value="{{ .book.GoogleBooksID }}">
 
@@ -12,33 +12,29 @@
     <label class="label">Title</label>
     <div class="control">
       <input
-          class="input {{ if include .book.errors "title" }}is-danger{{ end }}"
+          class="input {{ if index .errors "title" }}is-danger{{ end }}"
           type="text"
           name="title"
           value="{{ .book.title }}"
           onchange="document.getElementsByTagName('google-books')[0].setAttribute('keyword', this.value)"
           required
           autofocus>
-      {{ if include .book.errors "title" }}
-        <p class="help is-danger">{{ call .book.errors.full_messages_for "title" }}</p>
-      {{ end }}
+      {{ template "common/errors" index .errors "title" }}
     </div>
   </div>
 
-  {{ if not .book.persisted }}
+  {{ if not .book.ID }}
     <div class="field">
       <label class="label">ISBN</label>
       <div class="control">
         <input
-            class="input {{ if include .book.errors "isbn" }}is-danger{{ end }}"
+            class="input {{ if index .errors "isbn" }}is-danger{{ end }}"
             type="number"
             name="isbn"
             value="{{ .book.isbn }}"
             onchange="document.getElementsByTagName('google-books')[0].setAttribute('keyword', `isbn:${this.value}`)"
             required>
-        {{ if include .book.errors "isbn" }}
-          <p class="help is-danger">{{ call .book.errors.full_messages_for "isbn" }}</p>
-        {{ end }}
+        {{ template "common/errors" index .errors "isbn" }}
       </div>
     </div>
   {{ end }}
@@ -47,15 +43,13 @@
     <label class="label">Author</label>
     <div class="control">
       <input
-          class="input {{ if include .book.errors "author" }}is-danger{{end}}"
+          class="input {{ if index .errors "author" }}is-danger{{end}}"
           type="text"
           name="author"
           onchange="document.getElementsByTagName('google-books')[0].setAttribute('keyword', this.value)"
           value="{{ .book.author }}"
           required>
-      {{ if include .book.errors "author" }}
-        <p class="help is-danger">{{ call .book.errors.full_messages_for "author" }}</p>
-      {{ end }}
+      {{ template "common/errors" index .errors "author" }}
     </div>
   </div>
 
@@ -66,13 +60,11 @@
       <label class="label">Subtitle</label>
       <div class="control">
         <input
-            class="input {{ if include .book.errors "subtitle" }}is-danger{{ end }}"
+            class="input {{ if index .errors "subtitle" }}is-danger{{ end }}"
             type="text"
             name="subtitle"
             value="{{ .book.subtitle }}">
-        {{ if include .book.errors "subtitle" }}
-          <p class="help is-danger">{{ call .book.errors.full_messages_for "subtitle" }}</p>
-        {{ end }}
+        {{ template "common/errors" index .errors "subtitle" }}
       </div>
     </div>
 
@@ -80,11 +72,9 @@
       <label class="label">Description</label>
       <div class="control">
         <textarea
-            class="textarea {{ if include .book.errors "description" }}is-danger{{ end }}"
+            class="textarea {{ if index .errors "description" }}is-danger{{ end }}"
             name="description">{{ .book.description }}</textarea>
-        {{ if include .book.errors "description" }}
-          <p class="help is-danger">{{ call .book.errors.full_messages_for "description" }}</p>
-        {{ end }}
+        {{ template "common/errors" index .errors "description" }}
       </div>
     </div>
 
@@ -92,13 +82,11 @@
       <label class="label">Publisher</label>
       <div class="control">
         <input
-            class="input {{ if include .book.errors "publisher" }}is-danger{{ end }}"
+            class="input {{ if index .errors "publisher" }}is-danger{{ end }}"
             type="text"
             name="publisher"
             value="{{ .book.publisher }}">
-        {{ if include .book.errors "publisher" }}
-          <p class="help is-danger">{{ call .book.errors.full_messages_for "publisher" }}</p>
-        {{ end }}
+        {{ template "common/errors" index .errors "publisher" }}
       </div>
     </div>
 
@@ -106,13 +94,11 @@
       <label class="label">Pages</label>
       <div class="control">
         <input
-            class="input {{ if include .book.errors "page_count" }}is-danger{{ end }}"
+            class="input {{ if index .errors "page_count" }}is-danger{{ end }}"
             type="number"
             name="page_count"
             value="{{ .book.page_count }}">
-        {{ if include .book.errors "page_count" }}
-          <p class="help is-danger">{{ call .book.errors.full_messages_for "page_count" }}</p>
-        {{ end }}
+        {{ template "common/errors" index .errors "page_count" }}
       </div>
     </div>
 
@@ -125,7 +111,7 @@
   </div>
 </form>
 
-{{ if .book.persisted }}
+{{ if .book.ID }}
   <form action="/users/{{ .user.Slug }}/books/{{ .book.isbn }}" method="POST" class="has-text-right">
     <input type="hidden" name="_method" value="DELETE">
     {{ .csrf }}

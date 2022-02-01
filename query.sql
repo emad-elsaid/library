@@ -40,9 +40,10 @@ SELECT books.id id, title, books.image image, google_books_id, slug, isbn
 
 -- name: BookByIsbnAndUser :one
 SELECT books.*, slug, shelves.name shelf_name
-  FROM books, users, shelves
+  FROM users, books
+       LEFT JOIN shelves
+           ON shelves.id = books.shelf_id
  WHERE users.id = books.user_id
-   AND shelves.id = books.shelf_id
    AND books.user_id = $1
    AND isbn = $2
  LIMIT 1;
@@ -51,3 +52,8 @@ SELECT books.*, slug, shelves.name shelf_name
 SELECT *
   FROM highlights
  WHERE book_id = $1;
+
+-- name: NewBook :one
+INSERT INTO public.books (title, isbn, author, subtitle, description, publisher, page_count, google_books_id, user_id)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       RETURNING *;

@@ -162,9 +162,15 @@ func main() {
 			return
 		}
 
+		if !can(current_user(r), "create_book", user) {
+			http.Error(w, "", http.StatusUnauthorized)
+			return
+		}
+
 		render(w, "layout", "books/new", map[string]interface{}{
 			"current_user": current_user(r),
 			"user":         user,
+			"errors":       map[string][]error{},
 			"csrf":         csrf.TemplateField(r),
 		})
 	}, loggedinMiddleware)
@@ -177,7 +183,46 @@ func main() {
 			return
 		}
 
-		http.Redirect(w, r, fmt.Sprintf("/users/%s", user.Slug), http.StatusFound)
+		r.ParseForm()
+		form := r.Form
+		params := NewBookParams{
+			Title:       form.Get("title"),
+			Isbn:        form.Get("isbn"),
+			Author:      form.Get("author"),
+			Subtitle:    form.Get("subtitle"),
+			Description: form.Get("description"),
+			Publisher:   form.Get("publisher"),
+			PageCount:   atoi32(form.Get("page_count")),
+			GoogleBooksID: sql.NullString{
+				String: form.Get("google_books_id"),
+				Valid:  len(form.Get("google_books_id")) > 0,
+			},
+			UserID: user.ID,
+		}
+		errors := params.Validate()
+		if len(errors) != 0 {
+			render(w, "layout", "books/new", map[string]interface{}{
+				"current_user": current_user(r),
+				"user":         user,
+				"errors":       errors,
+				"csrf":         csrf.TemplateField(r),
+			})
+			return
+		}
+
+		book, err := queries.NewBook(DbCtx(), params)
+		if err != nil {
+			render(w, "layout", "books/new", map[string]interface{}{
+				"current_user": current_user(r),
+				"user":         user,
+				"error":        err,
+				"errors":       map[string][]error{},
+				"csrf":         csrf.TemplateField(r),
+			})
+			return
+		}
+
+		http.Redirect(w, r, fmt.Sprintf("/users/%s/books/%s", user.Slug, book.Isbn), http.StatusFound)
 	})
 
 	GET("/users/{user}/books/{isbn}", func(w http.ResponseWriter, r *http.Request) {
@@ -193,7 +238,7 @@ func main() {
 			Isbn:   vars["isbn"],
 		})
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
 

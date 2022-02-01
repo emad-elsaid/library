@@ -1,10 +1,10 @@
-{{ if .user.Description }}
+{{ if .user.Description.String }}
   <div class="notification">
     {{ simple_format .user.Description.String }}
   </div>
 {{ end }}
 
-{{ if not .unshelved_books }}
+{{ if .unshelved_books }}
   <h1 class="title is-3">Books lying around</h1>
 
   <div class="columns is-mobile is-multiline">

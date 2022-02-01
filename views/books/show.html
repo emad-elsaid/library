@@ -50,14 +50,14 @@
     <hr/>
 
     <div class="buttons">
-      <a class="button is-fullwidth" href="https://www.amazon.de/s?k={{ .book.Isbn }}&tag={{ .user.AmazonAssociatesID }}" target="_blank" rel="noopener">On Amazon.de</a>
+      <a class="button is-fullwidth" href="https://www.amazon.de/s?k={{ .book.Isbn }}&tag={{ .user.AmazonAssociatesID.Value }}" target="_blank" rel="noopener">On Amazon.de</a>
       <a class="button is-fullwidth" href="https://www.goodreads.com/search?q={{ .book.Isbn }}" target="_blank" rel="noopener">On Goodreads.com</a>
     </div>
 
   </div>
 
   <div class="column content">
-    {{ if .book.ShelfID }}
+    {{ if .book.ShelfID.Valid }}
       <a class="tag is-info is-light" href="/users/{{ .user.Slug }}#shelf-{{ .book.ShelfID.Int32 }}">{{ .book.ShelfName }}</a>
     {{ end }}
     <h2 class="title">
