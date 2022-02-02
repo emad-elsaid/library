@@ -56,6 +56,41 @@ var (
 	session *sessions.CookieStore
 )
 
+func init() {
+	db, err := connectToDB()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ql := QueryLogger{db, log.Default()}
+	queries = New(ql)
+
+	router = mux.NewRouter()
+	session = sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET")))
+	csrf.TemplateTag = "csrf"
+}
+
+func Start() {
+	compileViews()
+
+	router.PathPrefix("/").Handler(staticWithoutDirectoryListingHandler())
+	csrfMiddleware := csrf.Protect([]byte(os.Getenv("SESSION_SECRET")))
+
+	http.Handle("/", csrfMiddleware(router))
+
+	srv := &http.Server{
+		Handler:      router,
+		Addr:         BIND_ADDRESS,
+		WriteTimeout: 15 * time.Second,
+		ReadTimeout:  15 * time.Second,
+	}
+
+	log.Printf("Starting server: %s", BIND_ADDRESS)
+	log.Fatal(srv.ListenAndServe())
+}
+
+// DATABASE CONNECTION ===================================
+
 type QueryLogger struct {
 	db     *sqlx.DB
 	logger *log.Logger
@@ -97,20 +132,6 @@ func (p QueryLogger) QueryRowContext(ctx context.Context, q string, args ...inte
 	return r
 }
 
-func init() {
-	db, err := connectToDB()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	ql := QueryLogger{db, log.Default()}
-	queries = New(ql)
-
-	router = mux.NewRouter()
-	session = sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET")))
-	csrf.TemplateTag = "csrf"
-}
-
 func connectToDB() (*sqlx.DB, error) {
 	db, err := sqlx.Connect("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
@@ -121,40 +142,6 @@ func connectToDB() (*sqlx.DB, error) {
 	db.SetMaxIdleConns(MAX_DB_IDLE_CONNECTIONS)
 
 	return db, err
-}
-
-func Start() {
-	compileViews()
-
-	router.PathPrefix("/").Handler(staticWithoutDirectoryListingHandler())
-	csrfMiddleware := csrf.Protect([]byte(os.Getenv("SESSION_SECRET")))
-
-	http.Handle("/", csrfMiddleware(router))
-
-	srv := &http.Server{
-		Handler:      router,
-		Addr:         BIND_ADDRESS,
-		WriteTimeout: 15 * time.Second,
-		ReadTimeout:  15 * time.Second,
-	}
-
-	log.Printf("Starting server: %s", BIND_ADDRESS)
-	log.Fatal(srv.ListenAndServe())
-}
-
-func staticWithoutDirectoryListingHandler() http.Handler {
-	dir := http.Dir(STATIC_DIR_PATH)
-	server := http.FileServer(dir)
-	handler := http.StripPrefix("/", server)
-
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.HasSuffix(r.URL.Path, "/") {
-			http.NotFound(w, r)
-			return
-		}
-
-		handler.ServeHTTP(w, r)
-	})
 }
 
 // ROUTES HELPERS ==========================================
@@ -236,6 +223,21 @@ func applyMiddlewares(handler http.HandlerFunc, middlewares ...func(http.Handler
 		handler = h(handler)
 	}
 	return handler
+}
+
+func staticWithoutDirectoryListingHandler() http.Handler {
+	dir := http.Dir(STATIC_DIR_PATH)
+	server := http.FileServer(dir)
+	handler := http.StripPrefix("/", server)
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.URL.Path, "/") {
+			http.NotFound(w, r)
+			return
+		}
+
+		handler.ServeHTTP(w, r)
+	})
 }
 
 // CONTEXTS ================================
