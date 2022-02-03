@@ -145,17 +145,46 @@ func connectToDB() (*sqlx.DB, error) {
 }
 
 // ROUTES HELPERS ==========================================
+type HandlerFunc func(http.ResponseWriter, *http.Request) http.HandlerFunc
 
-func GET(path string, handler http.HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) {
-	router.Methods("GET").Path(path).HandlerFunc(applyMiddlewares(handler, middlewares...))
+func handlerFuncToHttpHandler(handler HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		handler(w, r)(w, r)
+	}
 }
 
-func POST(path string, handler http.HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) {
-	router.Methods("POST").Path(path).HandlerFunc(applyMiddlewares(handler, middlewares...))
+func NotFound(w http.ResponseWriter, r *http.Request) {
+	http.Error(w, "", http.StatusNotFound)
 }
 
-func DELETE(path string, handler http.HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) {
-	router.Methods("DELETE").Path(path).HandlerFunc(applyMiddlewares(handler, middlewares...))
+func BadRequest(w http.ResponseWriter, r *http.Request) {
+	http.Error(w, "", http.StatusBadRequest)
+}
+
+func Unauthorized(w http.ResponseWriter, r *http.Request) {
+	http.Error(w, "", http.StatusBadRequest)
+}
+
+func InternalServerError(w http.ResponseWriter, r *http.Request) {
+	http.Error(w, "", http.StatusBadRequest)
+}
+
+func Redirect(url string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, url, http.StatusFound)
+	}
+}
+
+func GET(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) {
+	router.Methods("GET").Path(path).HandlerFunc(applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...))
+}
+
+func POST(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) {
+	router.Methods("POST").Path(path).HandlerFunc(applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...))
+}
+
+func DELETE(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) {
+	router.Methods("DELETE").Path(path).HandlerFunc(applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...))
 }
 
 // VIEWS ====================
@@ -204,9 +233,11 @@ func partial(path string, data interface{}) string {
 	return w.String()
 }
 
-func render(w http.ResponseWriter, path string, view string, data map[string]interface{}) {
-	data["view"] = view
-	fmt.Fprint(w, partial(path, data))
+func Render(path string, view string, data map[string]interface{}) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		data["view"] = view
+		fmt.Fprint(w, partial(path, data))
+	}
 }
 
 // SESSION =================================

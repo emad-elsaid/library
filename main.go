@@ -24,47 +24,44 @@ func main() {
 		Endpoint:     google.Endpoint,
 	}
 
-	GET("/", func(w http.ResponseWriter, r *http.Request) {
+	GET("/", func(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
 		user := current_user(r)
 		if user != nil {
-			http.Redirect(w, r, fmt.Sprintf("/users/%s", user.Slug), http.StatusFound)
-			return
+			return Redirect(fmt.Sprintf("/users/%s", user.Slug))
 		} else {
-			render(w, "layout", "index", map[string]interface{}{
+			return Render("layout", "index", map[string]interface{}{
 				"meta": map[string]string{},
 			})
 		}
 	})
 
-	GET("/privacy", func(w http.ResponseWriter, r *http.Request) {
-		render(w, "layout", "privacy", map[string]interface{}{
-			"meta": map[string]string{},
+	GET("/privacy", func(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
+		return Render("layout", "privacy", map[string]interface{}{
+			"meta":         map[string]string{},
+			"current_user": current_user(r),
 		})
 	})
 
-	POST("/auth/google", func(w http.ResponseWriter, r *http.Request) {
+	POST("/auth/google", func(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
 		url := google_conf.AuthCodeURL("state")
-		http.Redirect(w, r, url, http.StatusFound)
+		return Redirect(url)
 	})
 
-	GET("/auth/google/callback", func(w http.ResponseWriter, r *http.Request) {
+	GET("/auth/google/callback", func(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
 		tok, err := google_conf.Exchange(oauth2.NoContext, r.URL.Query().Get("code"))
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			return BadRequest
 		}
 
 		client := google_conf.Client(oauth2.NoContext, tok)
 		resp, err := client.Get("https://www.googleapis.com/oauth2/v2/userinfo")
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
-			return
+			return Unauthorized
 		}
 
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			return InternalServerError
 		}
 
 		user := struct {
@@ -74,8 +71,7 @@ func main() {
 		}{}
 		err = json.Unmarshal(body, &user)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			return InternalServerError
 		}
 
 		u, err := queries.Signup(DbCtx(), SignupParams{
@@ -85,33 +81,30 @@ func main() {
 			Email: sql.NullString{String: user.Email, Valid: true},
 		})
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			return InternalServerError
 		}
 
 		s := SESSION(r)
 		s.Values["current_user"] = u
 		if err = s.Save(r, w); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			return InternalServerError
 		}
 
-		http.Redirect(w, r, "/", http.StatusFound)
+		return Redirect("/")
 	})
 
-	GET("/logout", func(w http.ResponseWriter, r *http.Request) {
+	GET("/logout", func(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
 		s := SESSION(r)
 		s.Values = map[interface{}]interface{}{}
 		s.Save(r, w)
-		http.Redirect(w, r, "/", http.StatusFound)
+		return Redirect("/")
 	})
 
-	GET("/users/{user}", func(w http.ResponseWriter, r *http.Request) {
+	GET("/users/{user}", func(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
 		vars := mux.Vars(r)
 		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
-			http.NotFound(w, r)
-			return
+			return NotFound
 		}
 
 		data := map[string]interface{}{
@@ -126,61 +119,56 @@ func main() {
 
 		data["shelves"], err = queries.Shelves(DbCtx(), user.ID)
 
-		render(w, "layout", "users/show", data)
+		return Render("layout", "users/show", data)
 	})
 
-	GET("/users/{user}/edit", func(w http.ResponseWriter, r *http.Request) {
+	GET("/users/{user}/edit", func(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
 		vars := mux.Vars(r)
 		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
-			http.NotFound(w, r)
-			return
+			return NotFound
 		}
 
-		render(w, "layout", "users/edit", map[string]interface{}{
+		return Render("layout", "users/edit", map[string]interface{}{
 			"current_user": current_user(r),
 			"user":         user,
 		})
 	}, loggedinMiddleware)
 
-	POST("/users/{user}", func(w http.ResponseWriter, r *http.Request) {
+	POST("/users/{user}", func(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
 		vars := mux.Vars(r)
 		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
-			http.NotFound(w, r)
-			return
+			return NotFound
 		}
 
-		http.Redirect(w, r, fmt.Sprintf("/users/%s", user.Slug), http.StatusFound)
+		return Redirect(fmt.Sprintf("/users/%s", user.Slug))
 	}, loggedinMiddleware)
 
-	GET("/users/{user}/books/new", func(w http.ResponseWriter, r *http.Request) {
+	GET("/users/{user}/books/new", func(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
 		vars := mux.Vars(r)
 		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
-			http.NotFound(w, r)
-			return
+			return NotFound
 		}
 
 		if !can(current_user(r), "create_book", user) {
-			http.Error(w, "", http.StatusUnauthorized)
-			return
+			return Unauthorized
 		}
 
-		render(w, "layout", "books/new", map[string]interface{}{
+		return Render("layout", "books/new", map[string]interface{}{
 			"current_user": current_user(r),
 			"user":         user,
-			"errors":       map[string][]error{},
+			"errors":       ValidationErrors{},
 			"csrf":         csrf.TemplateField(r),
 		})
 	}, loggedinMiddleware)
 
-	POST("/users/{user}/books", func(w http.ResponseWriter, r *http.Request) {
+	POST("/users/{user}/books", func(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
 		vars := mux.Vars(r)
 		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
-			http.NotFound(w, r)
-			return
+			return NotFound
 		}
 
 		r.ParseForm()
@@ -201,31 +189,28 @@ func main() {
 		}
 		errors := params.Validate()
 		if len(errors) != 0 {
-			render(w, "layout", "books/new", map[string]interface{}{
+			return Render("layout", "books/new", map[string]interface{}{
 				"book":         params,
 				"current_user": current_user(r),
 				"user":         user,
 				"errors":       errors,
 				"csrf":         csrf.TemplateField(r),
 			})
-			return
 		}
 
 		book, err := queries.NewBook(DbCtx(), params)
 		if err != nil {
-			http.Error(w, "", http.StatusInternalServerError)
-			return
+			return InternalServerError
 		}
 
-		http.Redirect(w, r, fmt.Sprintf("/users/%s/books/%s", user.Slug, book.Isbn), http.StatusFound)
+		return Redirect(fmt.Sprintf("/users/%s/books/%s", user.Slug, book.Isbn))
 	})
 
-	GET("/users/{user}/books/{isbn}", func(w http.ResponseWriter, r *http.Request) {
+	GET("/users/{user}/books/{isbn}", func(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
 		vars := mux.Vars(r)
 		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			return InternalServerError
 		}
 
 		book, err := queries.BookByIsbnAndUser(DbCtx(), BookByIsbnAndUserParams{
@@ -233,17 +218,15 @@ func main() {
 			Isbn:   vars["isbn"],
 		})
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusNotFound)
-			return
+			return NotFound
 		}
 
 		highlights, err := queries.Highlights(DbCtx(), book.ID)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			return InternalServerError
 		}
 
-		render(w, "layout", "books/show", map[string]interface{}{
+		return Render("layout", "books/show", map[string]interface{}{
 			"current_user": current_user(r),
 			"user":         user,
 			"book":         book,
@@ -251,263 +234,253 @@ func main() {
 		})
 	})
 
-	POST("/users/{user}/books/{isbn}", func(w http.ResponseWriter, r *http.Request) {
+	GET("/users/{user}/books/{isbn}/edit", func(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
 		vars := mux.Vars(r)
 		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
-			http.NotFound(w, r)
-			return
+			return NotFound
 		}
 
-		http.Redirect(w, r, fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]), http.StatusFound)
+		book, err := queries.BookByIsbnAndUser(DbCtx(), BookByIsbnAndUserParams{
+			UserID: user.ID,
+			Isbn:   vars["isbn"],
+		})
+		if err != nil {
+			return NotFound
+		}
+
+		return Render("layout", "books/new", map[string]interface{}{
+			"current_user": current_user(r),
+			"user":         user,
+			"book":         book,
+			"csrf":         csrf.TemplateField(r),
+			"errors":       ValidationErrors{},
+		})
 	}, loggedinMiddleware)
 
-	GET("/users/{user}/books/{isbn}/edit", func(w http.ResponseWriter, r *http.Request) {
+	POST("/users/{user}/books/{isbn}", func(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
 		vars := mux.Vars(r)
 		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
-			http.NotFound(w, r)
-			return
+			return NotFound
 		}
 
-		render(w, "layout", "books/edit", map[string]interface{}{
+		return Redirect(fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]))
+	}, loggedinMiddleware)
+
+	DELETE("/users/{user}/books/{isbn}", func(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
+		vars := mux.Vars(r)
+		user, err := queries.UserBySlug(DbCtx(), vars["user"])
+		if err != nil {
+			return NotFound
+		}
+
+		return Redirect(fmt.Sprintf("/users/%s", user.Slug))
+	}, loggedinMiddleware)
+
+	POST("/users/{user}/books/{isbn}/shelf", func(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
+		vars := mux.Vars(r)
+		user, err := queries.UserBySlug(DbCtx(), vars["user"])
+		if err != nil {
+			return NotFound
+		}
+
+		return Redirect(fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]))
+	}, loggedinMiddleware)
+
+	GET("/users/{user}/books/{isbn}/image", func(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
+		vars := mux.Vars(r)
+		user, err := queries.UserBySlug(DbCtx(), vars["user"])
+		if err != nil {
+			return NotFound
+		}
+
+		return Render("layout", "books/image", map[string]interface{}{
 			"current_user": current_user(r),
 			"user":         user,
 		})
 	}, loggedinMiddleware)
 
-	DELETE("/users/{user}/books/{isbn}", func(w http.ResponseWriter, r *http.Request) {
+	POST("/users/{user}/books/{isbn}/image", func(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
 		vars := mux.Vars(r)
 		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
-			http.NotFound(w, r)
-			return
+			return NotFound
 		}
 
-		http.Redirect(w, r, fmt.Sprintf("/users/%s", user.Slug), http.StatusFound)
+		return Redirect(fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]))
 	}, loggedinMiddleware)
 
-	POST("/users/{user}/books/{isbn}/shelf", func(w http.ResponseWriter, r *http.Request) {
+	GET("/users/{user}/shelves/new", func(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
 		vars := mux.Vars(r)
 		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
-			http.NotFound(w, r)
-			return
+			return NotFound
 		}
 
-		http.Redirect(w, r, fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]), http.StatusFound)
-	}, loggedinMiddleware)
-
-	GET("/users/{user}/books/{isbn}/image", func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		user, err := queries.UserBySlug(DbCtx(), vars["user"])
-		if err != nil {
-			http.NotFound(w, r)
-			return
-		}
-
-		render(w, "layout", "books/image", map[string]interface{}{
-			"current_user": current_user(r),
-			"user":         user,
-		})
-	}, loggedinMiddleware)
-
-	POST("/users/{user}/books/{isbn}/image", func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		user, err := queries.UserBySlug(DbCtx(), vars["user"])
-		if err != nil {
-			http.NotFound(w, r)
-			return
-		}
-
-		http.Redirect(w, r, fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]), http.StatusFound)
-	}, loggedinMiddleware)
-
-	GET("/users/{user}/shelves/new", func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		user, err := queries.UserBySlug(DbCtx(), vars["user"])
-		if err != nil {
-			http.NotFound(w, r)
-			return
-		}
-
-		render(w, "layout", "shelves/new", map[string]interface{}{
+		return Render("layout", "shelves/new", map[string]interface{}{
 			"current_user": current_user(r),
 			"user":         user,
 			"csrf":         csrf.TemplateField(r),
 		})
 	}, loggedinMiddleware)
 
-	GET("/users/{user}/shelves", func(w http.ResponseWriter, r *http.Request) {
+	GET("/users/{user}/shelves", func(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
 		vars := mux.Vars(r)
 		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
-			http.NotFound(w, r)
-			return
+			return NotFound
 		}
 
-		render(w, "layout", "shelves/index", map[string]interface{}{
+		return Render("layout", "shelves/index", map[string]interface{}{
 			"current_user": current_user(r),
 			"user":         user,
 		})
 	}, loggedinMiddleware)
 
-	POST("/users/{user}/shelves", func(w http.ResponseWriter, r *http.Request) {
+	POST("/users/{user}/shelves", func(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
 		vars := mux.Vars(r)
 		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
-			http.NotFound(w, r)
-			return
+			return NotFound
 		}
 
-		http.Redirect(w, r, fmt.Sprintf("/users/%s/shelves", user.Slug), http.StatusFound)
+		return Redirect(fmt.Sprintf("/users/%s/shelves", user.Slug))
 	}, loggedinMiddleware)
 
-	GET("/users/{user}/shelves/{shelf}/edit", func(w http.ResponseWriter, r *http.Request) {
+	GET("/users/{user}/shelves/{shelf}/edit", func(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
 		vars := mux.Vars(r)
 		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
-			http.NotFound(w, r)
-			return
+			return NotFound
 		}
 
-		render(w, "layout", "shelves/edit", map[string]interface{}{
+		return Render("layout", "shelves/edit", map[string]interface{}{
 			"current_user": current_user(r),
 			"user":         user,
 			"csrf":         csrf.TemplateField(r),
 		})
 	}, loggedinMiddleware)
 
-	POST("/users/{user}/shelves/{shelf}", func(w http.ResponseWriter, r *http.Request) {
+	POST("/users/{user}/shelves/{shelf}", func(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
 		vars := mux.Vars(r)
 		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
-			http.NotFound(w, r)
-			return
+			return NotFound
 		}
 
-		http.Redirect(w, r, fmt.Sprintf("/users/%s/shelves", user.Slug), http.StatusFound)
+		return Redirect(fmt.Sprintf("/users/%s/shelves", user.Slug))
 	}, loggedinMiddleware)
 
-	POST("/users/{user}/shelves/{shelf}/up", func(w http.ResponseWriter, r *http.Request) {
+	POST("/users/{user}/shelves/{shelf}/up", func(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
 		vars := mux.Vars(r)
 		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
-			http.NotFound(w, r)
-			return
+			return NotFound
 		}
 
-		http.Redirect(w, r, fmt.Sprintf("/users/%s/shelves", user.Slug), http.StatusFound)
+		return Redirect(fmt.Sprintf("/users/%s/shelves", user.Slug))
 	}, loggedinMiddleware)
 
-	POST("/users/{user}/shelves/{shelf}/down", func(w http.ResponseWriter, r *http.Request) {
+	POST("/users/{user}/shelves/{shelf}/down", func(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
 		vars := mux.Vars(r)
 		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
-			http.NotFound(w, r)
-			return
+			return NotFound
 		}
 
-		http.Redirect(w, r, fmt.Sprintf("/users/%s/shelves", user.Slug), http.StatusFound)
+		return Redirect(fmt.Sprintf("/users/%s/shelves", user.Slug))
 	}, loggedinMiddleware)
 
-	DELETE("/users/{user}/shelves/{shelf}", func(w http.ResponseWriter, r *http.Request) {
+	DELETE("/users/{user}/shelves/{shelf}", func(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
 		vars := mux.Vars(r)
 		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
-			http.NotFound(w, r)
-			return
+			return NotFound
 		}
 
-		http.Redirect(w, r, fmt.Sprintf("/users/%s/shelves", user.Slug), http.StatusFound)
+		return Redirect(fmt.Sprintf("/users/%s/shelves", user.Slug))
 	}, loggedinMiddleware)
 
-	GET("/users/{user}/books/{isbn}/highlights/new", func(w http.ResponseWriter, r *http.Request) {
+	GET("/users/{user}/books/{isbn}/highlights/new", func(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
 		vars := mux.Vars(r)
 		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
-			http.NotFound(w, r)
-			return
+			return NotFound
 		}
 
-		render(w, "layout", "highlights/new", map[string]interface{}{
+		return Render("layout", "highlights/new", map[string]interface{}{
 			"current_user": current_user(r),
 			"user":         user,
 			"csrf":         csrf.TemplateField(r),
 		})
 	}, loggedinMiddleware)
 
-	POST("/users/{user}/books/{isbn}/highlights", func(w http.ResponseWriter, r *http.Request) {
+	POST("/users/{user}/books/{isbn}/highlights", func(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
 		vars := mux.Vars(r)
 		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
-			http.NotFound(w, r)
-			return
+			return NotFound
 		}
 
-		http.Redirect(w, r, fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]), http.StatusFound)
+		return Redirect(fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]))
 	}, loggedinMiddleware)
 
-	GET("/users/{user}/books/{isbn}/highlights/{id}/edit", func(w http.ResponseWriter, r *http.Request) {
+	GET("/users/{user}/books/{isbn}/highlights/{id}/edit", func(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
 		vars := mux.Vars(r)
 		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
-			http.NotFound(w, r)
-			return
+			return NotFound
 		}
 
-		render(w, "layout", "highlights/edit", map[string]interface{}{
+		return Render("layout", "highlights/edit", map[string]interface{}{
 			"current_user": current_user(r),
 			"user":         user,
 			"csrf":         csrf.TemplateField(r),
 		})
 	}, loggedinMiddleware)
 
-	POST("/users/{user}/books/{isbn}/highlights/{id}", func(w http.ResponseWriter, r *http.Request) {
+	POST("/users/{user}/books/{isbn}/highlights/{id}", func(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
 		vars := mux.Vars(r)
 		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
-			http.NotFound(w, r)
-			return
+			return NotFound
 		}
 
-		http.Redirect(w, r, fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]), http.StatusFound)
+		return Redirect(fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]))
 	}, loggedinMiddleware)
 
-	DELETE("/users/{user}/books/{isbn}/highlights/{id}", func(w http.ResponseWriter, r *http.Request) {
+	DELETE("/users/{user}/books/{isbn}/highlights/{id}", func(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
 		vars := mux.Vars(r)
 		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
-			http.NotFound(w, r)
-			return
+			return NotFound
 		}
 
-		http.Redirect(w, r, fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]), http.StatusFound)
+		return Redirect(fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]))
 	}, loggedinMiddleware)
 
-	GET("/users/{user}/books/{isbn}/highlights/{id}/image", func(w http.ResponseWriter, r *http.Request) {
+	GET("/users/{user}/books/{isbn}/highlights/{id}/image", func(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
 		vars := mux.Vars(r)
 		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
-			http.NotFound(w, r)
-			return
+			return NotFound
 		}
 
-		render(w, "layout", "highlights/image", map[string]interface{}{
+		return Render("layout", "highlights/image", map[string]interface{}{
 			"current_user": current_user(r),
 			"user":         user,
 		})
 	}, loggedinMiddleware)
 
-	POST("/users/{user}/books/{isbn}/highlights/{id}/image", func(w http.ResponseWriter, r *http.Request) {
+	POST("/users/{user}/books/{isbn}/highlights/{id}/image", func(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
 		vars := mux.Vars(r)
 		user, err := queries.UserBySlug(DbCtx(), vars["user"])
 		if err != nil {
-			http.NotFound(w, r)
-			return
+			return NotFound
 		}
 
-		http.Redirect(w, r, fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]), http.StatusFound)
+		return Redirect(fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]))
 	}, loggedinMiddleware)
 
 	Helpers()

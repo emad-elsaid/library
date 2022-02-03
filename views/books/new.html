@@ -19,7 +19,7 @@
           onchange="document.getElementsByTagName('google-books')[0].setAttribute('keyword', this.value)"
           required
           autofocus>
-      {{ if has_field . "errors" }} {{ template "common/errors" index .errors "title" }} {{ end }}
+      {{ template "common/errors" index .errors "title" }}
     </div>
   </div>
 
@@ -34,7 +34,7 @@
             value="{{ .book.Isbn }}"
             onchange="document.getElementsByTagName('google-books')[0].setAttribute('keyword', `isbn:${this.value}`)"
             required>
-        {{ if has_field . "errors" }} {{ template "common/errors" index .errors "isbn" }} {{ end }}
+        {{ template "common/errors" index .errors "isbn" }}
       </div>
     </div>
   {{ end }}
@@ -49,7 +49,7 @@
           onchange="document.getElementsByTagName('google-books')[0].setAttribute('keyword', this.value)"
           value="{{ .book.Author }}"
           required>
-      {{ if has_field . "errors" }} {{ template "common/errors" index .errors "author" }} {{ end }}
+      {{ template "common/errors" index .errors "author" }}
     </div>
   </div>
 
@@ -64,7 +64,7 @@
             type="text"
             name="subtitle"
             value="{{ .book.Subtitle }}">
-        {{ if has_field . "errors" }} {{ template "common/errors" index .errors "subtitle" }} {{ end }}
+        {{ template "common/errors" index .errors "subtitle" }}
       </div>
     </div>
 
@@ -74,7 +74,7 @@
         <textarea
             class="textarea {{ if index .errors "description" }}is-danger{{ end }}"
             name="description">{{ .book.Description }}</textarea>
-        {{ if has_field . "errors" }} {{ template "common/errors" index .errors "description" }} {{ end }}
+        {{ template "common/errors" index .errors "description" }}
       </div>
     </div>
 
@@ -86,7 +86,7 @@
             type="text"
             name="publisher"
             value="{{ .book.Publisher }}">
-        {{ if has_field . "errors" }} {{ template "common/errors" index .errors "publisher" }} {{ end }}
+        {{ template "common/errors" index .errors "publisher" }}
       </div>
     </div>
 
@@ -98,7 +98,7 @@
             type="number"
             name="page_count"
             value="{{ .book.PageCount }}">
-        {{ if has_field . "errors" }} {{ template "common/errors" index .errors "page_count" }} {{ end }}
+        {{ template "common/errors" index .errors "page_count" }}
       </div>
     </div>
 
@@ -112,7 +112,7 @@
 </form>
 
 {{ if has_field .book "ID" }}
-  <form action="/users/{{ .user.Slug }}/books/{{ .book.isbn }}" method="POST" class="has-text-right">
+  <form action="/users/{{ .user.Slug }}/books/{{ .book.Isbn }}" method="POST" class="has-text-right">
     <input type="hidden" name="_method" value="DELETE">
     {{ .csrf }}
     <button class="button is-danger">Delete!</button>
