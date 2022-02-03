@@ -254,9 +254,10 @@ func SESSION(r *http.Request) *sessions.Session {
 
 // MIDDLEWARES =============================
 
+// First middleware gets executed first
 func applyMiddlewares(handler http.HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) http.HandlerFunc {
-	for _, h := range middlewares {
-		handler = h(handler)
+	for i := len(middlewares) - 1; i >= 0; i-- {
+		handler = middlewares[i](handler)
 	}
 	return handler
 }
