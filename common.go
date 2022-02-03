@@ -306,7 +306,7 @@ func ValidateStringPresent(val, key, label string, ve ValidationErrors) {
 func ValidateStringLength(val, key, label string, ve ValidationErrors, min, max int) {
 	l := len(val)
 	if l < min || l > max {
-		ve.Add(key, fmt.Errorf("%s has to be between %d and %d characters", label, min, max))
+		ve.Add(key, fmt.Errorf("%s has to be between %d and %d characters, length is %d", label, min, max, l))
 	}
 }
 

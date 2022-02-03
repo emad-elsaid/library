@@ -14,7 +14,7 @@ func (n NewBookParams) Validate() ValidationErrors {
 	ValidateISBN13(n.Isbn, "isbn", "ISBN", ve)
 
 	ValidateStringLength(n.GoogleBooksID.String, "google_books_id", "Google Books ID", ve, 0, 30)
-	ValidateStringLength(n.Description, "description", "Description", ve, 0, 500)
+	ValidateStringLength(n.Description, "description", "Description", ve, 0, 2000)
 	ValidateStringLength(n.Publisher, "publisher", "Publisher", ve, 0, 50)
 
 	return ve
@@ -30,7 +30,7 @@ func (n UpdateBookParams) Validate() ValidationErrors {
 	ValidateStringPresent(n.Author, "author", "Author", ve)
 	ValidateStringLength(n.Author, "author", "Author", ve, 0, 100)
 
-	ValidateStringLength(n.Description, "description", "Description", ve, 0, 500)
+	ValidateStringLength(n.Description, "description", "Description", ve, 0, 2000)
 	ValidateStringLength(n.Publisher, "publisher", "Publisher", ve, 0, 50)
 	return ve
 }
