@@ -100,6 +100,7 @@ func main() {
 
 	GET("/users/{user}", func(w Response, r Request) Output {
 		vars := mux.Vars(r)
+
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
@@ -121,41 +122,55 @@ func main() {
 	})
 
 	GET("/users/{user}/edit", func(w Response, r Request) Output {
+		actor := current_user(r)
 		vars := mux.Vars(r)
+
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
 		}
 
+		if !can(actor, "edit", user) {
+			return Unauthorized
+		}
+
 		return Render("layout", "users/edit", map[string]interface{}{
-			"current_user": current_user(r),
+			"current_user": actor,
 			"user":         user,
 		})
 	}, loggedinMiddleware)
 
 	POST("/users/{user}", func(w Response, r Request) Output {
+		actor := current_user(r)
 		vars := mux.Vars(r)
+
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
+		}
+
+		if !can(actor, "edit", user) {
+			return Unauthorized
 		}
 
 		return Redirect(fmt.Sprintf("/users/%s", user.Slug))
 	}, loggedinMiddleware)
 
 	GET("/users/{user}/books/new", func(w Response, r Request) Output {
+		actor := current_user(r)
 		vars := mux.Vars(r)
+
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
 		}
 
-		if !can(current_user(r), "create_book", user) {
+		if !can(actor, "create_book", user) {
 			return Unauthorized
 		}
 
 		return Render("layout", "books/new", map[string]interface{}{
-			"current_user": current_user(r),
+			"current_user": actor,
 			"user":         user,
 			"errors":       ValidationErrors{},
 			"csrf":         csrf.TemplateField(r),
@@ -163,7 +178,9 @@ func main() {
 	}, loggedinMiddleware)
 
 	POST("/users/{user}/books", func(w Response, r Request) Output {
+		actor := current_user(r)
 		vars := mux.Vars(r)
+
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
@@ -189,7 +206,7 @@ func main() {
 		if len(errors) != 0 {
 			return Render("layout", "books/new", map[string]interface{}{
 				"book":         params,
-				"current_user": current_user(r),
+				"current_user": actor,
 				"user":         user,
 				"errors":       errors,
 				"csrf":         csrf.TemplateField(r),
@@ -206,6 +223,7 @@ func main() {
 
 	GET("/users/{user}/books/{isbn}", func(w Response, r Request) Output {
 		vars := mux.Vars(r)
+
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return InternalServerError
@@ -233,7 +251,9 @@ func main() {
 	})
 
 	GET("/users/{user}/books/{isbn}/edit", func(w Response, r Request) Output {
+		actor := current_user(r)
 		vars := mux.Vars(r)
+
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
@@ -248,7 +268,7 @@ func main() {
 		}
 
 		return Render("layout", "books/new", map[string]interface{}{
-			"current_user": current_user(r),
+			"current_user": actor,
 			"user":         user,
 			"book":         book,
 			"csrf":         csrf.TemplateField(r),
@@ -257,225 +277,503 @@ func main() {
 	}, loggedinMiddleware)
 
 	POST("/users/{user}/books/{isbn}", func(w Response, r Request) Output {
+		actor := current_user(r)
 		vars := mux.Vars(r)
+
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
+		}
+
+		book, err := queries.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
+			UserID: user.ID,
+			Isbn:   vars["isbn"],
+		})
+		if err != nil {
+			return NotFound
+		}
+
+		if !can(actor, "edit", book) {
+			return Unauthorized
 		}
 
 		return Redirect(fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]))
 	}, loggedinMiddleware)
 
 	DELETE("/users/{user}/books/{isbn}", func(w Response, r Request) Output {
+		actor := current_user(r)
 		vars := mux.Vars(r)
+
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
+		}
+
+		book, err := queries.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
+			UserID: user.ID,
+			Isbn:   vars["isbn"],
+		})
+		if err != nil {
+			return NotFound
+		}
+
+		if !can(actor, "delete", book) {
+			return Unauthorized
 		}
 
 		return Redirect(fmt.Sprintf("/users/%s", user.Slug))
 	}, loggedinMiddleware)
 
 	POST("/users/{user}/books/{isbn}/shelf", func(w Response, r Request) Output {
+		actor := current_user(r)
 		vars := mux.Vars(r)
+
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
+		}
+
+		book, err := queries.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
+			UserID: user.ID,
+			Isbn:   vars["isbn"],
+		})
+		if err != nil {
+			return NotFound
+		}
+
+		if !can(actor, "edit", book) {
+			return Unauthorized
 		}
 
 		return Redirect(fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]))
 	}, loggedinMiddleware)
 
 	GET("/users/{user}/books/{isbn}/image", func(w Response, r Request) Output {
+		actor := current_user(r)
 		vars := mux.Vars(r)
+
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
 		}
 
+		book, err := queries.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
+			UserID: user.ID,
+			Isbn:   vars["isbn"],
+		})
+		if err != nil {
+			return NotFound
+		}
+
+		if !can(actor, "edit", book) {
+			return Unauthorized
+		}
+
 		return Render("layout", "books/image", map[string]interface{}{
-			"current_user": current_user(r),
+			"current_user": actor,
 			"user":         user,
 		})
 	}, loggedinMiddleware)
 
 	POST("/users/{user}/books/{isbn}/image", func(w Response, r Request) Output {
+		actor := current_user(r)
 		vars := mux.Vars(r)
+
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
+		}
+
+		book, err := queries.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
+			UserID: user.ID,
+			Isbn:   vars["isbn"],
+		})
+		if err != nil {
+			return NotFound
+		}
+
+		if !can(actor, "edit", book) {
+			return Unauthorized
 		}
 
 		return Redirect(fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]))
 	}, loggedinMiddleware)
 
 	GET("/users/{user}/shelves/new", func(w Response, r Request) Output {
+		actor := current_user(r)
 		vars := mux.Vars(r)
+
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
 		}
 
 		return Render("layout", "shelves/new", map[string]interface{}{
-			"current_user": current_user(r),
+			"current_user": actor,
 			"user":         user,
 			"csrf":         csrf.TemplateField(r),
 		})
 	}, loggedinMiddleware)
 
 	GET("/users/{user}/shelves", func(w Response, r Request) Output {
+		actor := current_user(r)
 		vars := mux.Vars(r)
+
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
 		}
 
 		return Render("layout", "shelves/index", map[string]interface{}{
-			"current_user": current_user(r),
+			"current_user": actor,
 			"user":         user,
 		})
 	}, loggedinMiddleware)
 
 	POST("/users/{user}/shelves", func(w Response, r Request) Output {
+		actor := current_user(r)
 		vars := mux.Vars(r)
+
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
+		}
+
+		if !can(actor, "create_shelf", user) {
+			return Unauthorized
 		}
 
 		return Redirect(fmt.Sprintf("/users/%s/shelves", user.Slug))
 	}, loggedinMiddleware)
 
 	GET("/users/{user}/shelves/{shelf}/edit", func(w Response, r Request) Output {
+		actor := current_user(r)
 		vars := mux.Vars(r)
+
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
 		}
 
 		return Render("layout", "shelves/edit", map[string]interface{}{
-			"current_user": current_user(r),
+			"current_user": actor,
 			"user":         user,
 			"csrf":         csrf.TemplateField(r),
 		})
 	}, loggedinMiddleware)
 
 	POST("/users/{user}/shelves/{shelf}", func(w Response, r Request) Output {
+		actor := current_user(r)
 		vars := mux.Vars(r)
+
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
+		}
+
+		shelf, err := queries.ShelfByIdAndUser(r.Context(), ShelfByIdAndUserParams{
+			UserID: user.ID,
+			ID:     atoi64(vars["shelf"]),
+		})
+		if err != nil {
+			return NotFound
+		}
+
+		if !can(actor, "edit", shelf) {
+			return Unauthorized
 		}
 
 		return Redirect(fmt.Sprintf("/users/%s/shelves", user.Slug))
 	}, loggedinMiddleware)
 
 	POST("/users/{user}/shelves/{shelf}/up", func(w Response, r Request) Output {
+		actor := current_user(r)
 		vars := mux.Vars(r)
+
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
+		}
+
+		shelf, err := queries.ShelfByIdAndUser(r.Context(), ShelfByIdAndUserParams{
+			UserID: user.ID,
+			ID:     atoi64(vars["shelf"]),
+		})
+		if err != nil {
+			return NotFound
+		}
+
+		if !can(actor, "edit", shelf) {
+			return Unauthorized
 		}
 
 		return Redirect(fmt.Sprintf("/users/%s/shelves", user.Slug))
 	}, loggedinMiddleware)
 
 	POST("/users/{user}/shelves/{shelf}/down", func(w Response, r Request) Output {
+		actor := current_user(r)
 		vars := mux.Vars(r)
+
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
+		}
+
+		shelf, err := queries.ShelfByIdAndUser(r.Context(), ShelfByIdAndUserParams{
+			UserID: user.ID,
+			ID:     atoi64(vars["shelf"]),
+		})
+		if err != nil {
+			return NotFound
+		}
+
+		if !can(actor, "edit", shelf) {
+			return Unauthorized
 		}
 
 		return Redirect(fmt.Sprintf("/users/%s/shelves", user.Slug))
 	}, loggedinMiddleware)
 
 	DELETE("/users/{user}/shelves/{shelf}", func(w Response, r Request) Output {
+		actor := current_user(r)
 		vars := mux.Vars(r)
+
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
+		}
+
+		shelf, err := queries.ShelfByIdAndUser(r.Context(), ShelfByIdAndUserParams{
+			UserID: user.ID,
+			ID:     atoi64(vars["shelf"]),
+		})
+		if err != nil {
+			return NotFound
+		}
+
+		if !can(actor, "delete", shelf) {
+			return Unauthorized
 		}
 
 		return Redirect(fmt.Sprintf("/users/%s/shelves", user.Slug))
 	}, loggedinMiddleware)
 
 	GET("/users/{user}/books/{isbn}/highlights/new", func(w Response, r Request) Output {
+		actor := current_user(r)
 		vars := mux.Vars(r)
+
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
 		}
 
+		book, err := queries.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
+			UserID: user.ID,
+			Isbn:   vars["isbn"],
+		})
+		if err != nil {
+			return NotFound
+		}
+
+		if !can(actor, "create_highlight", book) {
+			return Unauthorized
+		}
+
 		return Render("layout", "highlights/new", map[string]interface{}{
-			"current_user": current_user(r),
+			"current_user": actor,
 			"user":         user,
 			"csrf":         csrf.TemplateField(r),
 		})
 	}, loggedinMiddleware)
 
 	POST("/users/{user}/books/{isbn}/highlights", func(w Response, r Request) Output {
+		actor := current_user(r)
 		vars := mux.Vars(r)
+
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
+		}
+
+		book, err := queries.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
+			UserID: user.ID,
+			Isbn:   vars["isbn"],
+		})
+		if err != nil {
+			return NotFound
+		}
+
+		if !can(actor, "create_highlight", book) {
+			return Unauthorized
 		}
 
 		return Redirect(fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]))
 	}, loggedinMiddleware)
 
 	GET("/users/{user}/books/{isbn}/highlights/{id}/edit", func(w Response, r Request) Output {
+		actor := current_user(r)
 		vars := mux.Vars(r)
+
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
 		}
 
+		book, err := queries.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
+			UserID: user.ID,
+			Isbn:   vars["isbn"],
+		})
+		if err != nil {
+			return NotFound
+		}
+
+		highlight, err := queries.HighlightByIDAndBook(r.Context(), HighlightByIDAndBookParams{
+			ID:     atoi64(vars["id"]),
+			BookID: book.ID,
+		})
+		if err != nil {
+			return NotFound
+		}
+
+		if !can(actor, "edit_highlight", book) {
+			return Unauthorized
+		}
+
 		return Render("layout", "highlights/edit", map[string]interface{}{
-			"current_user": current_user(r),
+			"current_user": actor,
 			"user":         user,
+			"highlight":    highlight,
 			"csrf":         csrf.TemplateField(r),
 		})
 	}, loggedinMiddleware)
 
 	POST("/users/{user}/books/{isbn}/highlights/{id}", func(w Response, r Request) Output {
+		actor := current_user(r)
 		vars := mux.Vars(r)
+
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
+		}
+
+		book, err := queries.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
+			UserID: user.ID,
+			Isbn:   vars["isbn"],
+		})
+		if err != nil {
+			return NotFound
+		}
+
+		_, err = queries.HighlightByIDAndBook(r.Context(), HighlightByIDAndBookParams{
+			ID:     atoi64(vars["id"]),
+			BookID: book.ID,
+		})
+		if err != nil {
+			return NotFound
+		}
+
+		if !can(actor, "edit_highlight", book) {
+			return Unauthorized
 		}
 
 		return Redirect(fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]))
 	}, loggedinMiddleware)
 
 	DELETE("/users/{user}/books/{isbn}/highlights/{id}", func(w Response, r Request) Output {
+		actor := current_user(r)
 		vars := mux.Vars(r)
+
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
+		}
+
+		book, err := queries.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
+			UserID: user.ID,
+			Isbn:   vars["isbn"],
+		})
+		if err != nil {
+			return NotFound
+		}
+
+		_, err = queries.HighlightByIDAndBook(r.Context(), HighlightByIDAndBookParams{
+			ID:     atoi64(vars["id"]),
+			BookID: book.ID,
+		})
+		if err != nil {
+			return NotFound
+		}
+
+		if !can(actor, "delete_highlight", book) {
+			return Unauthorized
 		}
 
 		return Redirect(fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]))
 	}, loggedinMiddleware)
 
 	GET("/users/{user}/books/{isbn}/highlights/{id}/image", func(w Response, r Request) Output {
+		actor := current_user(r)
 		vars := mux.Vars(r)
+
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
 		}
 
+		book, err := queries.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
+			UserID: user.ID,
+			Isbn:   vars["isbn"],
+		})
+		if err != nil {
+			return NotFound
+		}
+
+		highlight, err := queries.HighlightByIDAndBook(r.Context(), HighlightByIDAndBookParams{
+			ID:     atoi64(vars["id"]),
+			BookID: book.ID,
+		})
+		if err != nil {
+			return NotFound
+		}
+
+		if !can(actor, "edit_highlight", book) {
+			return Unauthorized
+		}
+
 		return Render("layout", "highlights/image", map[string]interface{}{
-			"current_user": current_user(r),
+			"current_user": actor,
 			"user":         user,
+			"highlight":    highlight,
 		})
 	}, loggedinMiddleware)
 
 	POST("/users/{user}/books/{isbn}/highlights/{id}/image", func(w Response, r Request) Output {
+		actor := current_user(r)
 		vars := mux.Vars(r)
+
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
+		}
+
+		book, err := queries.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
+			UserID: user.ID,
+			Isbn:   vars["isbn"],
+		})
+		if err != nil {
+			return NotFound
+		}
+
+		_, err = queries.HighlightByIDAndBook(r.Context(), HighlightByIDAndBookParams{
+			ID:     atoi64(vars["id"]),
+			BookID: book.ID,
+		})
+		if err != nil {
+			return NotFound
+		}
+
+		if !can(actor, "edit_highlight", book) {
+			return Unauthorized
 		}
 
 		return Redirect(fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]))

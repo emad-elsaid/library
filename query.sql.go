@@ -68,6 +68,34 @@ func (q *Queries) BookByIsbnAndUser(ctx context.Context, arg BookByIsbnAndUserPa
 	return i, err
 }
 
+const highlightByIDAndBook = `-- name: HighlightByIDAndBook :one
+SELECT id, book_id, page, content, image, created_at, updated_at
+  FROM highlights
+ WHERE id = $1
+   AND book_id = $2
+ LIMIT 1
+`
+
+type HighlightByIDAndBookParams struct {
+	ID     int64
+	BookID int64
+}
+
+func (q *Queries) HighlightByIDAndBook(ctx context.Context, arg HighlightByIDAndBookParams) (Highlight, error) {
+	row := q.db.QueryRowContext(ctx, highlightByIDAndBook, arg.ID, arg.BookID)
+	var i Highlight
+	err := row.Scan(
+		&i.ID,
+		&i.BookID,
+		&i.Page,
+		&i.Content,
+		&i.Image,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const highlights = `-- name: Highlights :many
 SELECT id, book_id, page, content, image, created_at, updated_at
   FROM highlights
@@ -200,6 +228,33 @@ func (q *Queries) ShelfBooks(ctx context.Context, shelfID sql.NullInt32) ([]Shel
 		return nil, err
 	}
 	return items, nil
+}
+
+const shelfByIdAndUser = `-- name: ShelfByIdAndUser :one
+SELECT id, name, created_at, updated_at, user_id, position
+  FROM shelves
+ WHERE shelves.user_id = $1
+   AND shelves.id = $2
+ LIMIT 1
+`
+
+type ShelfByIdAndUserParams struct {
+	UserID int64
+	ID     int64
+}
+
+func (q *Queries) ShelfByIdAndUser(ctx context.Context, arg ShelfByIdAndUserParams) (Shelf, error) {
+	row := q.db.QueryRowContext(ctx, shelfByIdAndUser, arg.UserID, arg.ID)
+	var i Shelf
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.UserID,
+		&i.Position,
+	)
+	return i, err
 }
 
 const shelves = `-- name: Shelves :many

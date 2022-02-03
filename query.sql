@@ -57,3 +57,17 @@ SELECT *
 INSERT INTO public.books (title, isbn, author, subtitle, description, publisher, page_count, google_books_id, user_id)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING *;
+
+-- name: ShelfByIdAndUser :one
+SELECT *
+  FROM shelves
+ WHERE shelves.user_id = $1
+   AND shelves.id = $2
+ LIMIT 1;
+
+-- name: HighlightByIDAndBook :one
+SELECT *
+  FROM highlights
+ WHERE id = $1
+   AND book_id = $2
+ LIMIT 1;

@@ -282,3 +282,8 @@ func atoi32(s string) int32 {
 	i, _ := strconv.ParseInt(s, 10, 32)
 	return int32(i)
 }
+
+func atoi64(s string) int64 {
+	i, _ := strconv.ParseInt(s, 10, 64)
+	return i
+}
