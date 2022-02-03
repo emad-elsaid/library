@@ -43,8 +43,7 @@ func main() {
 	})
 
 	POST("/auth/google", func(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
-		url := google_conf.AuthCodeURL("state")
-		return Redirect(url)
+		return Redirect(google_conf.AuthCodeURL("state"))
 	})
 
 	GET("/auth/google/callback", func(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
