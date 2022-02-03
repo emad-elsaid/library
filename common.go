@@ -276,13 +276,6 @@ func staticWithoutDirectoryListingHandler() http.Handler {
 	})
 }
 
-// CONTEXTS ================================
-
-func DbCtx() context.Context {
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
-	return ctx
-}
-
 // HELPERS FUNCTIONS ======================
 
 func atoi32(s string) int32 {

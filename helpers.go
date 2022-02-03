@@ -107,7 +107,7 @@ func current_user(r *http.Request) *User {
 		return nil
 	}
 
-	user, err := queries.User(context.Background(), user_id)
+	user, err := queries.User(r.Context(), user_id)
 	if err != nil {
 		return nil
 	}
