@@ -39,7 +39,7 @@
   </table>
 {{ end }}
 
-{{ if can "create" .user.shelves.new }}
+{{ if can .current_user "create_shelf" .user }}
   <div class="content">
     <form action="/users/{{ .user.Slug }}/shelves" method="POST">
       {{ .csrf }}

@@ -137,6 +137,8 @@ func can(who *User, do string, what interface{}) bool {
 			return who != nil && who.ID == w.ID
 		case "edit":
 			return who != nil && who.ID == w.ID
+		case "create_shelf":
+			return who != nil && who.ID == w.ID
 		default:
 			log.Fatal(err)
 		}
