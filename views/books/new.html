@@ -4,7 +4,7 @@
   <google-books></google-books>
 </p>
 
-<form action="/users/{{ .user.Slug }}/books{{ if has_field .book "ID" }}/{{ .book.Isbn }}{{ end }}" method="POST">
+<form action="/users/{{ .user.Slug }}/books{{ if has_field .book "ID" }}/{{ .book.Isbn }}{{ end }}" method="POST" enctype="multipart/form-data">
   {{ .csrf }}
   <input type="hidden" name="google_books_id" value="{{ .book.GoogleBooksID }}">
 

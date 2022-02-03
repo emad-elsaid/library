@@ -143,8 +143,6 @@ func main() {
 	POST("/users/{user}", func(w Response, r Request) Output {
 		actor := current_user(r)
 		vars := mux.Vars(r)
-		r.ParseForm()
-		form := r.Form
 
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
@@ -155,16 +153,17 @@ func main() {
 			return Unauthorized
 		}
 
+		// TODO find a way to remove this duplication
 		params := UpdateUserParams{
-			Description:        NullString(form.Get("description")),
-			AmazonAssociatesID: NullString(form.Get("amazon_associates_id")),
-			Facebook:           NullString(form.Get("facebook")),
-			Twitter:            NullString(form.Get("twitter")),
-			Linkedin:           NullString(form.Get("linkedin")),
-			Instagram:          NullString(form.Get("instagram")),
-			Phone:              NullString(form.Get("phone")),
-			Whatsapp:           NullString(form.Get("whatsapp")),
-			Telegram:           NullString(form.Get("telegram")),
+			Description:        NullString(r.FormValue("description")),
+			AmazonAssociatesID: NullString(r.FormValue("amazon_associates_id")),
+			Facebook:           NullString(r.FormValue("facebook")),
+			Twitter:            NullString(r.FormValue("twitter")),
+			Linkedin:           NullString(r.FormValue("linkedin")),
+			Instagram:          NullString(r.FormValue("instagram")),
+			Phone:              NullString(r.FormValue("phone")),
+			Whatsapp:           NullString(r.FormValue("whatsapp")),
+			Telegram:           NullString(r.FormValue("telegram")),
 			ID:                 user.ID,
 		}
 		errors := params.Validate()
@@ -223,17 +222,16 @@ func main() {
 			return NotFound
 		}
 
-		r.ParseForm()
-		form := r.Form
+		r.ParseMultipartForm(1 * 1014 * 1024 * 10)
 		params := NewBookParams{
-			Title:         form.Get("title"),
-			Isbn:          form.Get("isbn"),
-			Author:        form.Get("author"),
-			Subtitle:      form.Get("subtitle"),
-			Description:   form.Get("description"),
-			Publisher:     form.Get("publisher"),
-			PageCount:     atoi32(form.Get("page_count")),
-			GoogleBooksID: NullString(form.Get("google_books_id")),
+			Title:         r.FormValue("title"),
+			Isbn:          r.FormValue("isbn"),
+			Author:        r.FormValue("author"),
+			Subtitle:      r.FormValue("subtitle"),
+			Description:   r.FormValue("description"),
+			Publisher:     r.FormValue("publisher"),
+			PageCount:     atoi32(r.FormValue("page_count")),
+			GoogleBooksID: NullString(r.FormValue("google_books_id")),
 			UserID:        user.ID,
 		}
 		errors := params.Validate()
@@ -319,8 +317,6 @@ func main() {
 	POST("/users/{user}/books/{isbn}", func(w Response, r Request) Output {
 		actor := current_user(r)
 		vars := mux.Vars(r)
-		r.ParseForm()
-		form := r.Form
 
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
@@ -335,13 +331,14 @@ func main() {
 			return NotFound
 		}
 
+		r.ParseMultipartForm(1 * 1014 * 1024 * 10)
 		params := UpdateBookParams{
-			Title:       form.Get("title"),
-			Author:      form.Get("author"),
-			Subtitle:    form.Get("subtitle"),
-			Description: form.Get("description"),
-			Publisher:   form.Get("publisher"),
-			PageCount:   atoi32(form.Get("page_count")),
+			Title:       r.FormValue("title"),
+			Author:      r.FormValue("author"),
+			Subtitle:    r.FormValue("subtitle"),
+			Description: r.FormValue("description"),
+			Publisher:   r.FormValue("publisher"),
+			PageCount:   atoi32(r.FormValue("page_count")),
 			ID:          book.ID,
 		}
 		errors := params.Validate()
