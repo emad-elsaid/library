@@ -276,6 +276,13 @@ CREATE INDEX index_books_on_user_id ON public.books USING btree (user_id);
 
 
 --
+-- Name: index_books_on_user_id_and_isbn; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_books_on_user_id_and_isbn ON public.books USING btree (user_id, isbn);
+
+
+--
 -- Name: index_highlights_on_book_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -308,7 +315,7 @@ CREATE UNIQUE INDEX index_users_on_slug ON public.users USING btree (slug);
 --
 
 ALTER TABLE ONLY public.highlights
-    ADD CONSTRAINT fk_rails_198ee9796d FOREIGN KEY (book_id) REFERENCES public.books(id);
+    ADD CONSTRAINT fk_rails_198ee9796d FOREIGN KEY (book_id) REFERENCES public.books(id) ON DELETE CASCADE;
 
 
 --
@@ -316,7 +323,7 @@ ALTER TABLE ONLY public.highlights
 --
 
 ALTER TABLE ONLY public.books
-    ADD CONSTRAINT fk_rails_5e29c313c6 FOREIGN KEY (shelf_id) REFERENCES public.shelves(id);
+    ADD CONSTRAINT fk_rails_5e29c313c6 FOREIGN KEY (shelf_id) REFERENCES public.shelves(id) ON DELETE CASCADE;
 
 
 --
@@ -324,7 +331,7 @@ ALTER TABLE ONLY public.books
 --
 
 ALTER TABLE ONLY public.shelves
-    ADD CONSTRAINT fk_rails_6b65d5b892 FOREIGN KEY (user_id) REFERENCES public.users(id);
+    ADD CONSTRAINT fk_rails_6b65d5b892 FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
 
 
 --
@@ -332,7 +339,7 @@ ALTER TABLE ONLY public.shelves
 --
 
 ALTER TABLE ONLY public.books
-    ADD CONSTRAINT fk_rails_bc582ddd02 FOREIGN KEY (user_id) REFERENCES public.users(id);
+    ADD CONSTRAINT fk_rails_bc582ddd02 FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
 
 
 --
@@ -359,6 +366,8 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20220130212907'),
 ('20220131112523'),
 ('20220131115959'),
-('20220131124929');
+('20220131124929'),
+('20220201201413'),
+('20220203060659');
 
 
