@@ -5,12 +5,10 @@
     <label class="label">Library description</label>
     <div class="control">
       <textarea
-          class="textarea {{ if include .user.errors "description" }}is-danger{{ end }}"
-          name="description">{{ .user.description }}</textarea>
+          class="textarea {{ if index .errors "description" }}is-danger{{ end }}"
+          name="description">{{ .user.Description.String }}</textarea>
       <p class="help">Maximum 500 character.</p>
-      {{ if include .user.errors "description" }}
-      <p class="help is-danger">{{ call .user.errors.full_messages_for "description" }}</p>
-      {{ end }}
+      {{ template "common/errors" index .errors "description" }}
     </div>
   </div>
 
@@ -18,30 +16,71 @@
     <label class="label">Amazon Associates ID</label>
     <div class="control">
       <input
-          class="input {{ if include .user.errors "amazon_associates_id" }}is-danger{{ end }}"
-          name="amazon_associates_id" value="{{ .user.amazon_associates_id }}"/>
-        {{ if include .user.errors "amazon_associates_id" }}
-        <p class="help is-danger">{{ call .user.errors.full_messages_for "amazon_associates_id" }}</p>
-        {{ end }}
+          class="input {{ if index .errors "amazon_associates_id" }}is-danger{{ end }}"
+          name="amazon_associates_id" value="{{ .user.AmazonAssociatesID.String }}"/>
+      {{ template "common/errors" index .errors "amazon_associates_id" }}
     </div>
   </div>
 
   <div class="title">
     Social Profiles
   </div>
-  {{ range .PROFILES }}
-    <div class="field">
-      <label class="label is-capitalized">{{ . }}</label>
-      <div class="control">
-        <input
-            class="input {{ if include .user.errors . }}is-danger{{ end }}"
-            name="{{ . }}" value="{{ index .user . }}"/>
-        {{ if include .user.errors . }}
-        <p class="help is-danger">{{ call .user.errors.full_messages_for . }}</p>
-        {{ end }}
-      </div>
+
+  <div class="field">
+    <label class="label">Facebook</label>
+    <div class="control">
+      <input class="input {{ if index .errors "facebook" }}is-danger{{ end }}" name="facebook" value="{{ .user.Facebook.String }}"/>
+      {{ template "common/errors" index .errors "facebook" }}
     </div>
-  {{ end }}
+  </div>
+
+  <div class="field">
+    <label class="label">Twitter</label>
+    <div class="control">
+      <input class="input {{ if index .errors "twitter" }}is-danger{{ end }}" name="twitter" value="{{ .user.Twitter.String }}"/>
+      {{ template "common/errors" index .errors "twitter" }}
+    </div>
+  </div>
+
+  <div class="field">
+    <label class="label">Linkedin</label>
+    <div class="control">
+      <input class="input {{ if index .errors "linkedin" }}is-danger{{ end }}" name="linkedin" value="{{ .user.Linkedin.String }}"/>
+      {{ template "common/errors" index .errors "linkedin" }}
+    </div>
+  </div>
+
+  <div class="field">
+    <label class="label">Instagram</label>
+    <div class="control">
+      <input class="input {{ if index .errors "instagram" }}is-danger{{ end }}" name="instagram" value="{{ .user.Instagram.String }}"/>
+      {{ template "common/errors" index .errors "instagram" }}
+    </div>
+  </div>
+
+  <div class="field">
+    <label class="label">Phone</label>
+    <div class="control">
+      <input class="input {{ if index .errors "phone" }}is-danger{{ end }}" name="phone" value="{{ .user.Phone.String }}"/>
+      {{ template "common/errors" index .errors "phone" }}
+    </div>
+  </div>
+
+  <div class="field">
+    <label class="label">Whatsapp</label>
+    <div class="control">
+      <input class="input {{ if index .errors "whatsapp" }}is-danger{{ end }}" name="whatsapp" value="{{ .user.Whatsapp.String }}"/>
+      {{ template "common/errors" index .errors "whatsapp" }}
+    </div>
+  </div>
+
+  <div class="field">
+    <label class="label">Telegram</label>
+    <div class="control">
+      <input class="input {{ if index .errors "telegram" }}is-danger{{ end }}" name="telegram" value="{{ .user.Telegram.String }}"/>
+      {{ template "common/errors" index .errors "telegram" }}
+    </div>
+  </div>
 
   <div class="field is-grouped">
     <div class="control">

@@ -71,3 +71,16 @@ SELECT *
  WHERE id = $1
    AND book_id = $2
  LIMIT 1;
+
+-- name: UpdateUser :exec
+UPDATE users
+   SET description = $1,
+       amazon_associates_id = $2,
+       facebook = $3,
+       twitter = $4,
+       linkedin = $5,
+       instagram = $6,
+       phone = $7,
+       whatsapp = $8,
+       telegram = $9
+ WHERE id = $10;

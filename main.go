@@ -137,12 +137,15 @@ func main() {
 		return Render("layout", "users/edit", map[string]interface{}{
 			"current_user": actor,
 			"user":         user,
+			"errors":       ValidationErrors{},
 		})
 	}, loggedinMiddleware)
 
 	POST("/users/{user}", func(w Response, r Request) Output {
 		actor := current_user(r)
 		vars := mux.Vars(r)
+		r.ParseForm()
+		form := r.Form
 
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
@@ -151,6 +154,41 @@ func main() {
 
 		if !can(actor, "edit", user) {
 			return Unauthorized
+		}
+
+		params := UpdateUserParams{
+			Description:        sql.NullString{String: form.Get("description"), Valid: true},
+			AmazonAssociatesID: sql.NullString{String: form.Get("amazon_associates_id"), Valid: true},
+			Facebook:           sql.NullString{String: form.Get("facebook"), Valid: true},
+			Twitter:            sql.NullString{String: form.Get("twitter"), Valid: true},
+			Linkedin:           sql.NullString{String: form.Get("linkedin"), Valid: true},
+			Instagram:          sql.NullString{String: form.Get("instagram"), Valid: true},
+			Phone:              sql.NullString{String: form.Get("phone"), Valid: true},
+			Whatsapp:           sql.NullString{String: form.Get("whatsapp"), Valid: true},
+			Telegram:           sql.NullString{String: form.Get("telegram"), Valid: true},
+			ID:                 user.ID,
+		}
+		errors := params.Validate()
+		if len(errors) != 0 {
+			user.Description = params.Description
+			user.AmazonAssociatesID = params.AmazonAssociatesID
+			user.Facebook = params.Facebook
+			user.Twitter = params.Twitter
+			user.Linkedin = params.Linkedin
+			user.Instagram = params.Instagram
+			user.Phone = params.Phone
+			user.Whatsapp = params.Whatsapp
+			user.Telegram = params.Telegram
+			return Render("layout", "users/edit", map[string]interface{}{
+				"current_user": actor,
+				"user":         user,
+				"errors":       errors,
+			})
+		}
+
+		err = queries.UpdateUser(r.Context(), params)
+		if err != nil {
+			return InternalServerError
 		}
 
 		return Redirect(fmt.Sprintf("/users/%s", user.Slug))

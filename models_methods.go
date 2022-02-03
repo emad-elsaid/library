@@ -32,7 +32,7 @@ func (n NewBookParams) Validate() (res ValidationErrors) {
 	}
 
 	if !StringLength(n.GoogleBooksID.String, 0, 30) {
-		res.Add("google_books_id", errors.New("Google Books ID has to be betwee 0 and 30"))
+		res.Add("google_books_id", errors.New("Google Books ID has to be between 0 and 30 characters"))
 	}
 
 	if !ISBN13(n.Isbn) {
@@ -41,6 +41,48 @@ func (n NewBookParams) Validate() (res ValidationErrors) {
 
 	if n.UserID == 0 {
 		res.Add("user", errors.New("User has to be set for book"))
+	}
+
+	return
+}
+
+func (u UpdateUserParams) Validate() (res ValidationErrors) {
+	res = ValidationErrors{}
+
+	if !StringLength(u.Description.String, 0, 500) {
+		res.Add("description", errors.New("Description has to be between 0 and 500 characters"))
+	}
+
+	if !StringLength(u.AmazonAssociatesID.String, 0, 50) {
+		res.Add("amazon_associates_id", errors.New("Amazon Associates ID has to be between 0 and 50 characters"))
+	}
+
+	if !StringLength(u.Facebook.String, 0, 50) {
+		res.Add("facebook", errors.New("Facebook has to be between 0 and 50 characters"))
+	}
+
+	if !StringLength(u.Twitter.String, 0, 50) {
+		res.Add("twitter", errors.New("Twitter has to be between 0 and 50 characters"))
+	}
+
+	if !StringLength(u.Linkedin.String, 0, 50) {
+		res.Add("linkedin", errors.New("Linkedin has to be between 0 and 50 characters"))
+	}
+
+	if !StringLength(u.Instagram.String, 0, 50) {
+		res.Add("instagram", errors.New("Instagram has to be between 0 and 50 characters"))
+	}
+
+	if !StringLength(u.Phone.String, 0, 50) {
+		res.Add("phone", errors.New("Phone has to be between 0 and 50 characters"))
+	}
+
+	if !StringLength(u.Whatsapp.String, 0, 50) {
+		res.Add("whatsapp", errors.New("Whatsapp has to be between 0 and 50 characters"))
+	}
+
+	if !StringLength(u.Telegram.String, 0, 50) {
+		res.Add("telegram", errors.New("Telegram has to be between 0 and 50 characters"))
 	}
 
 	return

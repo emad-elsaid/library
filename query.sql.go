@@ -320,6 +320,49 @@ func (q *Queries) Signup(ctx context.Context, arg SignupParams) (int64, error) {
 	return id, err
 }
 
+const updateUser = `-- name: UpdateUser :exec
+UPDATE users
+   SET description = $1,
+       amazon_associates_id = $2,
+       facebook = $3,
+       twitter = $4,
+       linkedin = $5,
+       instagram = $6,
+       phone = $7,
+       whatsapp = $8,
+       telegram = $9
+ WHERE id = $10
+`
+
+type UpdateUserParams struct {
+	Description        sql.NullString
+	AmazonAssociatesID sql.NullString
+	Facebook           sql.NullString
+	Twitter            sql.NullString
+	Linkedin           sql.NullString
+	Instagram          sql.NullString
+	Phone              sql.NullString
+	Whatsapp           sql.NullString
+	Telegram           sql.NullString
+	ID                 int64
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
+	_, err := q.db.ExecContext(ctx, updateUser,
+		arg.Description,
+		arg.AmazonAssociatesID,
+		arg.Facebook,
+		arg.Twitter,
+		arg.Linkedin,
+		arg.Instagram,
+		arg.Phone,
+		arg.Whatsapp,
+		arg.Telegram,
+		arg.ID,
+	)
+	return err
+}
+
 const user = `-- name: User :one
 SELECT id, name, email, image, created_at, updated_at, slug, description, facebook, twitter, linkedin, instagram, phone, whatsapp, telegram, amazon_associates_id
   FROM users
