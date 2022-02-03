@@ -38,12 +38,12 @@
     <section class="hero">
       <div class="hero-head">
         {{ if .current_user }}
-          {{ partial "partials/user_nav" . }}
+          {{ template "partials/user_nav" . }}
         {{ end }}
       </div>
 
       <div class="hero-body has-text-centered">
-        {{ partial "partials/header" . }}
+        {{ template "partials/header" . }}
       </div>
     </section>
 

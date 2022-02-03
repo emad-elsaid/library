@@ -10,7 +10,7 @@
   <div class="columns is-mobile is-multiline">
     {{ range .unshelved_books }}
       <div class="column is-2-tablet is-4-mobile">
-        {{ partial "books/book" . }}
+        {{ template "books/book" . }}
       </div>
     {{ end }}
   </div>
@@ -27,7 +27,7 @@
     <div class="columns is-mobile is-multiline">
       {{ range $b }}
         <div class="column is-2-tablet is-4-mobile">
-          {{ partial "books/book" . }}
+          {{ template "books/book" . }}
         </div>
       {{ end }}
     </div>
