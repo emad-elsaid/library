@@ -56,6 +56,11 @@ var (
 	session *sessions.CookieStore
 )
 
+// Some aliases to make it easier
+type Response = http.ResponseWriter
+type Request = *http.Request
+type Output = http.HandlerFunc
+
 func init() {
 	db, err := connectToDB()
 	if err != nil {
