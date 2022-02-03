@@ -16,7 +16,9 @@
           type="text"
           name="title"
           value="{{ .book.Title }}"
+          {{ if has_field .book "ID" }}{{ else }}
           onchange="document.getElementsByTagName('google-books')[0].setAttribute('keyword', this.value)"
+          {{ end }}
           required
           autofocus>
       {{ template "common/errors" index .errors "title" }}
@@ -32,7 +34,9 @@
             type="number"
             name="isbn"
             value="{{ .book.Isbn }}"
+            {{ if has_field .book "ID" }}{{ else }}
             onchange="document.getElementsByTagName('google-books')[0].setAttribute('keyword', `isbn:${this.value}`)"
+            {{ end }}
             required>
         {{ template "common/errors" index .errors "isbn" }}
       </div>
@@ -46,10 +50,25 @@
           class="input {{ if index .errors "author" }}is-danger{{end}}"
           type="text"
           name="author"
+          {{ if has_field .book "ID" }}{{ else }}
           onchange="document.getElementsByTagName('google-books')[0].setAttribute('keyword', this.value)"
+          {{ end }}
           value="{{ .book.Author }}"
           required>
       {{ template "common/errors" index .errors "author" }}
+    </div>
+  </div>
+
+  <div class="notification is-info is-light">
+    When accessing this page from your phone it'll prompt you to capture a photo using your phone camera. <br/>
+    Use <strong>3:4 aspect ratio</strong> when taking your picture for best result.
+  </div>
+
+  <div class="field">
+    <label class="label">Cover Image</label>
+    <div class="control">
+      <input class="input {{ if index .errors "image"  }}is-danger{{ end }}" type="file" name="image"  accept="image/*;capture=camera">
+      {{ template "common/errors" index .errors "image" }}
     </div>
   </div>
 

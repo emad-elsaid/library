@@ -58,6 +58,16 @@ INSERT INTO public.books (title, isbn, author, subtitle, description, publisher,
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING *;
 
+-- name: UpdateBook :exec
+UPDATE public.books
+   SET title = $1,
+       author = $2,
+       subtitle = $3,
+       description = $4,
+       publisher = $5,
+       page_count = $6
+ WHERE id = $7;
+
 -- name: ShelfByIdAndUser :one
 SELECT *
   FROM shelves

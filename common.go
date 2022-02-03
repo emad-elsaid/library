@@ -209,7 +209,7 @@ func compileViews() {
 		if strings.HasSuffix(path, VIEWS_EXTENSION) && d.Type().IsRegular() {
 			name := strings.TrimPrefix(path, "views/")
 			name = strings.TrimSuffix(name, VIEWS_EXTENSION)
-			log.Printf("Parsing view: %s -> %s", path, name)
+			log.Printf("Parsing view: %s", name)
 
 			c, err := fs.ReadFile(views, path)
 			if err != nil {
@@ -287,4 +287,55 @@ func atoi32(s string) int32 {
 func atoi64(s string) int64 {
 	i, _ := strconv.ParseInt(s, 10, 64)
 	return i
+}
+
+// VALIDATION ============================
+
+type ValidationErrors map[string][]error
+
+func (v ValidationErrors) Add(field string, err error) {
+	v[field] = append(v[field], err)
+}
+
+func ValidateStringPresent(val, key, label string, ve ValidationErrors) {
+	if len(strings.TrimSpace(val)) == 0 {
+		ve.Add(key, fmt.Errorf("%s can't be empty", label))
+	}
+}
+
+func ValidateStringLength(val, key, label string, ve ValidationErrors, min, max int) {
+	l := len(val)
+	if l < min || l > max {
+		ve.Add(key, fmt.Errorf("%s has to be between %d and %d characters", label, min, max))
+	}
+}
+
+func ValidateStringNumeric(val, key, label string, ve ValidationErrors) {
+	for _, c := range val {
+		if !strings.ContainsRune("0123456789", c) {
+			ve.Add(key, fmt.Errorf("%s has to consist of numbers", label))
+			return
+		}
+	}
+}
+
+func ValidateISBN13(val, key, label string, ve ValidationErrors) {
+	if len(val) != 13 {
+		ve.Add(key, fmt.Errorf("%s has to be 13 digits", label))
+		return
+	}
+
+	sum := 0
+	for i, s := range val {
+		digit, _ := strconv.Atoi(string(s))
+		if i%2 == 0 {
+			sum += digit
+		} else {
+			sum += digit * 3
+		}
+	}
+
+	if sum%10 != 0 {
+		ve.Add(key, fmt.Errorf("%s is not a valid ISBN13 number", label))
+	}
 }

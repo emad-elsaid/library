@@ -9,11 +9,6 @@
         {{ .csrf }}
         <div class="field">
           <div class="control">
-            <a class="button is-fullwidth" href="/users/{{ .user.Slug }}/books/{{ .book.Isbn }}/image">Change Cover</a>
-          </div>
-        </div>
-        <div class="field">
-          <div class="control">
             <a class="button is-fullwidth" href="/users/{{ .user.Slug }}/books/{{ .book.Isbn }}/edit">Edit</a>
           </div>
         </div>
@@ -22,7 +17,7 @@
             <span class="select is-fullwidth">
               <select name="shelf_id">
                 <option value="" {{ if not .book.ShelfID }}selected{{ end }}>No Shelf</option>
-                {{ range .current_user.Shelves }}
+                {{ range .shelves }}
                 <option value="{{ .ID }}" {{ if eq . $.book.ShelfID }}selected{{ end }}>{{ .Name }}</option>
                 {{ end }}
               </select>

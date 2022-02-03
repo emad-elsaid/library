@@ -320,6 +320,40 @@ func (q *Queries) Signup(ctx context.Context, arg SignupParams) (int64, error) {
 	return id, err
 }
 
+const updateBook = `-- name: UpdateBook :exec
+UPDATE public.books
+   SET title = $1,
+       author = $2,
+       subtitle = $3,
+       description = $4,
+       publisher = $5,
+       page_count = $6
+ WHERE id = $7
+`
+
+type UpdateBookParams struct {
+	Title       string
+	Author      string
+	Subtitle    string
+	Description string
+	Publisher   string
+	PageCount   int32
+	ID          int64
+}
+
+func (q *Queries) UpdateBook(ctx context.Context, arg UpdateBookParams) error {
+	_, err := q.db.ExecContext(ctx, updateBook,
+		arg.Title,
+		arg.Author,
+		arg.Subtitle,
+		arg.Description,
+		arg.Publisher,
+		arg.PageCount,
+		arg.ID,
+	)
+	return err
+}
+
 const updateUser = `-- name: UpdateUser :exec
 UPDATE users
    SET description = $1,
