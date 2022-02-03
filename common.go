@@ -289,6 +289,13 @@ func atoi64(s string) int64 {
 	return i
 }
 
+func NullString(s string) sql.NullString {
+	return sql.NullString{
+		String: s,
+		Valid:  len(s) > 0,
+	}
+}
+
 // VALIDATION ============================
 
 type ValidationErrors map[string][]error

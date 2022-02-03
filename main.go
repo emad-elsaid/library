@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -73,10 +72,10 @@ func main() {
 		}
 
 		u, err := queries.Signup(r.Context(), SignupParams{
-			Name:  sql.NullString{String: user.Name, Valid: true},
-			Image: sql.NullString{String: user.Picture, Valid: true},
+			Name:  NullString(user.Name),
+			Image: NullString(user.Picture),
 			Slug:  uuid.New().String(),
-			Email: sql.NullString{String: user.Email, Valid: true},
+			Email: NullString(user.Email),
 		})
 		if err != nil {
 			return InternalServerError
@@ -157,15 +156,15 @@ func main() {
 		}
 
 		params := UpdateUserParams{
-			Description:        sql.NullString{String: form.Get("description"), Valid: true},
-			AmazonAssociatesID: sql.NullString{String: form.Get("amazon_associates_id"), Valid: true},
-			Facebook:           sql.NullString{String: form.Get("facebook"), Valid: true},
-			Twitter:            sql.NullString{String: form.Get("twitter"), Valid: true},
-			Linkedin:           sql.NullString{String: form.Get("linkedin"), Valid: true},
-			Instagram:          sql.NullString{String: form.Get("instagram"), Valid: true},
-			Phone:              sql.NullString{String: form.Get("phone"), Valid: true},
-			Whatsapp:           sql.NullString{String: form.Get("whatsapp"), Valid: true},
-			Telegram:           sql.NullString{String: form.Get("telegram"), Valid: true},
+			Description:        NullString(form.Get("description")),
+			AmazonAssociatesID: NullString(form.Get("amazon_associates_id")),
+			Facebook:           NullString(form.Get("facebook")),
+			Twitter:            NullString(form.Get("twitter")),
+			Linkedin:           NullString(form.Get("linkedin")),
+			Instagram:          NullString(form.Get("instagram")),
+			Phone:              NullString(form.Get("phone")),
+			Whatsapp:           NullString(form.Get("whatsapp")),
+			Telegram:           NullString(form.Get("telegram")),
 			ID:                 user.ID,
 		}
 		errors := params.Validate()
@@ -227,18 +226,15 @@ func main() {
 		r.ParseForm()
 		form := r.Form
 		params := NewBookParams{
-			Title:       form.Get("title"),
-			Isbn:        form.Get("isbn"),
-			Author:      form.Get("author"),
-			Subtitle:    form.Get("subtitle"),
-			Description: form.Get("description"),
-			Publisher:   form.Get("publisher"),
-			PageCount:   atoi32(form.Get("page_count")),
-			GoogleBooksID: sql.NullString{
-				String: form.Get("google_books_id"),
-				Valid:  len(form.Get("google_books_id")) > 0,
-			},
-			UserID: user.ID,
+			Title:         form.Get("title"),
+			Isbn:          form.Get("isbn"),
+			Author:        form.Get("author"),
+			Subtitle:      form.Get("subtitle"),
+			Description:   form.Get("description"),
+			Publisher:     form.Get("publisher"),
+			PageCount:     atoi32(form.Get("page_count")),
+			GoogleBooksID: NullString(form.Get("google_books_id")),
+			UserID:        user.ID,
 		}
 		errors := params.Validate()
 		if len(errors) != 0 {
