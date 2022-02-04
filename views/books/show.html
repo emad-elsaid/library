@@ -85,7 +85,6 @@
       <p>
         {{ if can $.current_user "highlight" $.book }}
           <a href="/users/{{ $.user.Slug }}/books/{{ $.book.Isbn }}/highlights/{{ .ID }}/edit" class="icon is-medium">✏️</a>
-          <a href="/users/{{ $.user.Slug }}/books/{{ $.book.Isbn }}/highlights/{{ .ID }}/image" class="icon is-medium">📸</a>
         {{ end }}
         {{ simple_format .Content }}
       </p>

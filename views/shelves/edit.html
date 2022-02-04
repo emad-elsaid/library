@@ -1,4 +1,4 @@
-<form action="/users/{{ .user.Slug }}/shelves/{{ .shelf.id }}" method="POST">
+<form action="/users/{{ .user.Slug }}/shelves/{{ .shelf.ID }}" method="POST">
   {{ .csrf }}
 
   <div class="field">
@@ -9,7 +9,7 @@
           type="text"
           name="name"
           placeholder="Shelf name..."
-          value="{{ .shelf.name }}"
+          value="{{ .shelf.Name }}"
           required
           autofocus>
     </div>
@@ -22,7 +22,7 @@
   </div>
 </form>
 
-<form action="/users/{{ .user.Slug }}/shelves/{{ .shelf.id }}" method="POST" class="has-text-right">
+<form action="/users/{{ .user.Slug }}/shelves/{{ .shelf.ID }}" method="POST" class="has-text-right">
   <input type="hidden" name="_method" value="DELETE">
   {{ .csrf }}
   <button class="button is-danger">Delete!</button>

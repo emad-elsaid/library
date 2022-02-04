@@ -14,24 +14,18 @@
       {{ range .shelves }}
         <tr>
           <td>
-            {{ .name }}
+            {{ .Name }}
           </td>
           <td>
-            {{ if can "edit" . }}
-              <a class="button is-small is-pulled-right" href="/users/{{ .user.Slug }}/shelves/{{ .shelf.id }}/edit">Edit</a>
-            {{ end }}
-            {{ if or not .first not can "edit" . }}
-              <form action="/users/{{ .user.Slug }}/shelves/{{.id }}/up" class="is-pulled-right" method="POST">
-                {{ .csrf }}
+              <a class="button is-small is-pulled-right" href="/users/{{ $.user.Slug }}/shelves/{{ .ID }}/edit">Edit</a>
+              <form action="/users/{{ $.user.Slug }}/shelves/{{ .ID }}/up" class="is-pulled-right" method="POST">
+                {{ $.csrf }}
                 <button class="button is-small">↑</button>
               </form>
-            {{ end }}
-            {{ if or not .last not can "edit" . }}
-              <form action="/users/{{ .user.Slug }}/shelves/{{.id }}/down" class="is-pulled-right" method="POST">
-                {{ .csrf }}
+              <form action="/users/{{ $.user.Slug }}/shelves/{{.ID }}/down" class="is-pulled-right" method="POST">
+                {{ $.csrf }}
                 <button class="button is-small">↓</button>
               </form>
-            {{ end }}
           </td>
         </tr>
       {{ end }}

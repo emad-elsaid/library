@@ -1,24 +1,18 @@
 <h2 class="title">
-  <a href="/users/{{ .user.Slug }}/books/{{ .book.isbn }}">
-    {{ .book.title }}
+  <a href="/users/{{ .user.Slug }}/books/{{ .book.Isbn }}">
+    {{ .book.Title }}
   </a>
 </h2>
 
 
-<form action="/users/{{ .user.Slug }}/books/{{ .book.isbn }}/highlights/{{ if .highlight.persisted }}{{ .highlight.id }}{{ end }}" method="POST" enctype="multipart/form-data">
+<form action="/users/{{ .user.Slug }}/books/{{ .book.Isbn }}/highlights{{ if has_field .highlight "ID" }}/{{ .highlight.ID }}{{ end }}" method="POST" enctype="multipart/form-data">
   {{ .csrf }}
 
   <div class="field">
     <label class="label">Page</label>
     <div class="control">
-      <input
-          class="input {{ if include .highlight.errors "page" }}is-danger{{ end }}"
-          type="number"
-          name="page"
-          value="{{ .highlight.page }}">
-      {{ if include .highlight.errors "page" }}
-        <p class="help is-danger">{{ call .highlight.errors.full_messages_for "page" }}</p>
-      {{ end }}
+      <input class="input {{ if index .errors "page" }}is-danger{{ end }}" type="number" name="page" value="{{ .highlight.Page }}">
+      {{ template "common/errors" index .errors "page" }}
     </div>
   </div>
 
@@ -26,11 +20,22 @@
     <label class="label">Content</label>
     <div class="control">
       <textarea
-          class="textarea {{ if include .highlight.errors "content" }}is-danger{{ end }}"
-          name="content">{{ .highlight.content }}</textarea>
-      {{ if include .highlight.errors "content" }}
-      <p class="help is-danger">{{ call .highlight.errors.full_messages_for "content" }}</p>
-      {{ end }}
+          class="textarea {{ if index .errors "content" }}is-danger{{ end }}"
+          name="content">{{ .highlight.Content }}</textarea>
+      {{ template "common/errors" index .errors "content" }}
+    </div>
+  </div>
+
+  <div class="notification is-info is-light">
+    When accessing this page from your phone it'll prompt you to capture a photo using your phone camera. <br/>
+    Use <strong>square images</strong> when taking your picture for best result.
+  </div>
+
+  <div class="field">
+    <label class="label">Image</label>
+    <div class="control">
+      <input class="input {{ if index .errors "image"  }}is-danger{{ end }}" type="file" name="image"  accept="image/*;capture=camera">
+      {{ template "common/errors" index .errors "image" }}
     </div>
   </div>
 
@@ -41,10 +46,10 @@
   </div>
 </form>
 
-{{ if .highlight.persisted }}
-  <form action="/users/{{ .user.Slug }}/books/{{ .book.isbn }}/highlights/{{ .highlight.id }}" method="POST" class="has-text-right">
+{{ if has_field .highlight "ID" }}
+  <form action="/users/{{ .user.Slug }}/books/{{ .book.Isbn }}/highlights/{{ .highlight.ID }}" method="POST" class="has-text-right">
     <input type="hidden" name="_method" value="DELETE">
-   {{ .csrf }}
+    {{ .csrf }}
     <button class="button is-danger">Delete!</button>
   </form>
 {{ end }}

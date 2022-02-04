@@ -51,7 +51,8 @@ SELECT books.*, slug, shelves.name shelf_name
 -- name: Highlights :many
 SELECT *
   FROM highlights
- WHERE book_id = $1;
+ WHERE book_id = $1
+ ORDER BY page;
 
 -- name: NewBook :one
 INSERT INTO public.books (title, isbn, author, subtitle, description, publisher, page_count, google_books_id, user_id)
@@ -67,6 +68,11 @@ UPDATE public.books
        publisher = $5,
        page_count = $6
  WHERE id = $7;
+
+-- name: UpdateBookImage :exec
+UPDATE public.books
+   SET image = $1
+ WHERE id = $2;
 
 -- name: ShelfByIdAndUser :one
 SELECT *
@@ -94,3 +100,32 @@ UPDATE users
        whatsapp = $8,
        telegram = $9
  WHERE id = $10;
+
+-- name: NewHighlight :one
+INSERT INTO highlights (book_id, page, content)
+VALUES ($1, $2, $3)
+       RETURNING *;
+
+-- name: UpdateHighlightImage :exec
+UPDATE public.highlights
+   SET image = $1
+ WHERE id = $2;
+
+-- name: UpdateHighlight :exec
+UPDATE public.highlights
+   SET page = $1,
+       content = $2
+ WHERE id = $3;
+
+-- name: NewShelf :exec
+INSERT INTO public.shelves (name, user_id, position)
+VALUES ($1, $2, (
+  SELECT coalesce(MAX(position), 0) + 1
+    FROM public.shelves
+   WHERE user_id = $2)
+);
+
+-- name: UpdateShelf :exec
+UPDATE public.shelves
+   SET name = $1
+ WHERE id = $2;

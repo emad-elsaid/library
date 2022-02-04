@@ -24,6 +24,11 @@ import (
 	"embed"
 	"fmt"
 	"html/template"
+	"image"
+	_ "image/gif"
+	_ "image/jpeg"
+	_ "image/png"
+	"io"
 	"io/fs"
 	"log"
 	"net/http"
@@ -60,6 +65,15 @@ var (
 type Response = http.ResponseWriter
 type Request = *http.Request
 type Output = http.HandlerFunc
+
+const (
+	_        = iota
+	KB int64 = 1 << (10 * iota)
+	MB
+	GB
+	TB
+	PB
+)
 
 func init() {
 	db, err := connectToDB()
@@ -167,11 +181,13 @@ func BadRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func Unauthorized(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "", http.StatusBadRequest)
+	http.Error(w, "", http.StatusUnauthorized)
 }
 
-func InternalServerError(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "", http.StatusBadRequest)
+func InternalServerError(err error) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 func Redirect(url string) http.HandlerFunc {
@@ -344,5 +360,31 @@ func ValidateISBN13(val, key, label string, ve ValidationErrors) {
 
 	if sum%10 != 0 {
 		ve.Add(key, fmt.Errorf("%s is not a valid ISBN13 number", label))
+	}
+}
+
+func ValidateImage(val io.Reader, key, label string, ve ValidationErrors, maxw, maxh int) {
+	if val == nil {
+		return
+	}
+
+	image, _, err := image.Decode(val)
+	if err != nil {
+		ve.Add(key, fmt.Errorf("%s has an unsupported format supported formats are JPG, GIF, PNG", label))
+		return
+	}
+
+	sz := image.Bounds().Size()
+	if sz.X > maxw {
+		ve.Add(key, fmt.Errorf("%s width should be less than %d px", label, maxw))
+	}
+	if sz.Y > maxh {
+		ve.Add(key, fmt.Errorf("%s height should be less than %d px", label, maxh))
+	}
+}
+
+func ValidateInt32Min(val int32, key, label string, ve ValidationErrors, min int32) {
+	if val < min {
+		ve.Add(key, fmt.Errorf("%s shouldn't be less than %d", label, min))
 	}
 }

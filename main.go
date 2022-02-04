@@ -5,12 +5,18 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
+)
+
+const (
+	BOOK_COVER_PATH      = "public/books/image"
+	HIGHLIGHT_IMAGE_PATH = "public/highlights/image"
 )
 
 func main() {
@@ -58,7 +64,7 @@ func main() {
 
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
-			return InternalServerError
+			return InternalServerError(err)
 		}
 
 		user := struct {
@@ -68,7 +74,7 @@ func main() {
 		}{}
 		err = json.Unmarshal(body, &user)
 		if err != nil {
-			return InternalServerError
+			return InternalServerError(err)
 		}
 
 		u, err := queries.Signup(r.Context(), SignupParams{
@@ -78,13 +84,13 @@ func main() {
 			Email: NullString(user.Email),
 		})
 		if err != nil {
-			return InternalServerError
+			return InternalServerError(err)
 		}
 
 		s := SESSION(r)
 		s.Values["current_user"] = u
 		if err = s.Save(r, w); err != nil {
-			return InternalServerError
+			return InternalServerError(err)
 		}
 
 		return Redirect("/")
@@ -186,7 +192,7 @@ func main() {
 
 		err = queries.UpdateUser(r.Context(), params)
 		if err != nil {
-			return InternalServerError
+			return InternalServerError(err)
 		}
 
 		return Redirect(fmt.Sprintf("/users/%s", user.Slug))
@@ -222,7 +228,11 @@ func main() {
 			return NotFound
 		}
 
-		r.ParseMultipartForm(1 * 1014 * 1024 * 10)
+		if !can(actor, "create_book", user) {
+			return Unauthorized
+		}
+
+		r.ParseMultipartForm(MB * 10)
 		params := NewBookParams{
 			Title:         r.FormValue("title"),
 			Isbn:          r.FormValue("isbn"),
@@ -235,6 +245,13 @@ func main() {
 			UserID:        user.ID,
 		}
 		errors := params.Validate()
+
+		file, _, _ := r.FormFile("image")
+		if file != nil {
+			ValidateImage(file, "image", "Image", errors, 600, 600)
+			file.Seek(0, os.SEEK_SET)
+		}
+
 		if len(errors) != 0 {
 			return Render("layout", "books/new", map[string]interface{}{
 				"book":         params,
@@ -247,7 +264,22 @@ func main() {
 
 		book, err := queries.NewBook(r.Context(), params)
 		if err != nil {
-			return InternalServerError
+			return InternalServerError(err)
+		}
+
+		if file != nil {
+			name, err := UploadImage(file, BOOK_COVER_PATH, 432, 576)
+			if err != nil {
+				return InternalServerError(err)
+			}
+
+			err = queries.UpdateBookImage(r.Context(), UpdateBookImageParams{
+				Image: NullString(name),
+				ID:    book.ID,
+			})
+			if err != nil {
+				return InternalServerError(err)
+			}
 		}
 
 		return Redirect(fmt.Sprintf("/users/%s/books/%s", user.Slug, book.Isbn))
@@ -258,7 +290,7 @@ func main() {
 
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
-			return InternalServerError
+			return InternalServerError(err)
 		}
 
 		book, err := queries.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
@@ -271,12 +303,12 @@ func main() {
 
 		highlights, err := queries.Highlights(r.Context(), book.ID)
 		if err != nil {
-			return InternalServerError
+			return InternalServerError(err)
 		}
 
 		shelves, err := queries.Shelves(r.Context(), user.ID)
 		if err != nil {
-			return InternalServerError
+			return InternalServerError(err)
 		}
 
 		return Render("layout", "books/show", map[string]interface{}{
@@ -305,6 +337,10 @@ func main() {
 			return NotFound
 		}
 
+		if !can(actor, "edit", book) {
+			return Unauthorized
+		}
+
 		return Render("layout", "books/new", map[string]interface{}{
 			"current_user": actor,
 			"user":         user,
@@ -331,7 +367,12 @@ func main() {
 			return NotFound
 		}
 
-		r.ParseMultipartForm(1 * 1014 * 1024 * 10)
+		if !can(actor, "edit", book) {
+			return Unauthorized
+		}
+
+		r.ParseMultipartForm(MB * 10)
+
 		params := UpdateBookParams{
 			Title:       r.FormValue("title"),
 			Author:      r.FormValue("author"),
@@ -341,7 +382,14 @@ func main() {
 			PageCount:   atoi32(r.FormValue("page_count")),
 			ID:          book.ID,
 		}
+
 		errors := params.Validate()
+		file, _, _ := r.FormFile("image")
+		if file != nil {
+			ValidateImage(file, "image", "Image", errors, 600, 600)
+			file.Seek(0, os.SEEK_SET)
+		}
+
 		if len(errors) > 0 {
 			book.Title = params.Title
 			book.Author = params.Author
@@ -360,11 +408,32 @@ func main() {
 
 		err = queries.UpdateBook(r.Context(), params)
 		if err != nil {
-			return InternalServerError
+			return InternalServerError(err)
 		}
 
-		if !can(actor, "edit", book) {
-			return Unauthorized
+		if file != nil {
+			name, err := UploadImage(file, BOOK_COVER_PATH, 432, 576)
+			if err != nil {
+				return InternalServerError(err)
+			}
+
+			oldname := path.Join(BOOK_COVER_PATH, book.Image.String)
+			if book.Image.Valid && len(book.Image.String) > 0 { // if image is set
+				if _, err = os.Stat(oldname); err == nil { // and it exists
+					err := os.Remove(oldname) // delete it
+					if err != nil {           // and check if it's really deleted
+						return InternalServerError(err)
+					}
+				}
+			}
+
+			err = queries.UpdateBookImage(r.Context(), UpdateBookImageParams{
+				Image: NullString(name),
+				ID:    book.ID,
+			})
+			if err != nil {
+				return InternalServerError(err)
+			}
 		}
 
 		return Redirect(fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]))
@@ -418,22 +487,6 @@ func main() {
 		return Redirect(fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]))
 	}, loggedinMiddleware)
 
-	GET("/users/{user}/shelves/new", func(w Response, r Request) Output {
-		actor := current_user(r)
-		vars := mux.Vars(r)
-
-		user, err := queries.UserBySlug(r.Context(), vars["user"])
-		if err != nil {
-			return NotFound
-		}
-
-		return Render("layout", "shelves/new", map[string]interface{}{
-			"current_user": actor,
-			"user":         user,
-			"csrf":         csrf.TemplateField(r),
-		})
-	}, loggedinMiddleware)
-
 	GET("/users/{user}/shelves", func(w Response, r Request) Output {
 		actor := current_user(r)
 		vars := mux.Vars(r)
@@ -443,9 +496,20 @@ func main() {
 			return NotFound
 		}
 
+		if !can(actor, "show_shelves", user) {
+			return Unauthorized
+		}
+
+		shelves, err := queries.Shelves(r.Context(), user.ID)
+		if err != nil {
+			return InternalServerError(err)
+		}
+
 		return Render("layout", "shelves/index", map[string]interface{}{
 			"current_user": actor,
 			"user":         user,
+			"shelves":      shelves,
+			"csrf":         csrf.TemplateField(r),
 		})
 	}, loggedinMiddleware)
 
@@ -462,6 +526,14 @@ func main() {
 			return Unauthorized
 		}
 
+		err = queries.NewShelf(r.Context(), NewShelfParams{
+			Name:   r.FormValue("name"),
+			UserID: user.ID,
+		})
+		if err != nil {
+			return InternalServerError(err)
+		}
+
 		return Redirect(fmt.Sprintf("/users/%s/shelves", user.Slug))
 	}, loggedinMiddleware)
 
@@ -474,9 +546,19 @@ func main() {
 			return NotFound
 		}
 
+		shelf, err := queries.ShelfByIdAndUser(r.Context(), ShelfByIdAndUserParams{
+			UserID: user.ID,
+			ID:     atoi64(vars["shelf"]),
+		})
+
+		if !can(actor, "edit", shelf) {
+			return Unauthorized
+		}
+
 		return Render("layout", "shelves/edit", map[string]interface{}{
 			"current_user": actor,
 			"user":         user,
+			"shelf":        shelf,
 			"csrf":         csrf.TemplateField(r),
 		})
 	}, loggedinMiddleware)
@@ -500,6 +582,14 @@ func main() {
 
 		if !can(actor, "edit", shelf) {
 			return Unauthorized
+		}
+
+		err = queries.UpdateShelf(r.Context(), UpdateShelfParams{
+			Name: r.FormValue("name"),
+			ID:   shelf.ID,
+		})
+		if err != nil {
+			return InternalServerError(err)
 		}
 
 		return Redirect(fmt.Sprintf("/users/%s/shelves", user.Slug))
@@ -600,7 +690,9 @@ func main() {
 
 		return Render("layout", "highlights/new", map[string]interface{}{
 			"current_user": actor,
+			"book":         book,
 			"user":         user,
+			"errors":       ValidationErrors{},
 			"csrf":         csrf.TemplateField(r),
 		})
 	}, loggedinMiddleware)
@@ -626,7 +718,53 @@ func main() {
 			return Unauthorized
 		}
 
-		return Redirect(fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]))
+		r.ParseMultipartForm(MB * 10)
+
+		params := NewHighlightParams{
+			BookID:  book.ID,
+			Page:    atoi32(r.FormValue("page")),
+			Content: r.FormValue("content"),
+		}
+		errors := params.Validate()
+
+		file, _, _ := r.FormFile("image")
+		if file != nil {
+			ValidateImage(file, "image", "Image", errors, 1000, 1000)
+			file.Seek(0, os.SEEK_SET)
+		}
+
+		if len(errors) > 0 {
+			return Render("layout", "highlights/new", map[string]interface{}{
+				"current_user": actor,
+				"book":         book,
+				"user":         user,
+				"highlight":    params,
+				"errors":       errors,
+				"csrf":         csrf.TemplateField(r),
+			})
+		}
+
+		highlight, err := queries.NewHighlight(r.Context(), params)
+		if err != nil {
+			return InternalServerError(err)
+		}
+
+		if file != nil {
+			name, err := UploadImage(file, HIGHLIGHT_IMAGE_PATH, 600, 600)
+			if err != nil {
+				return InternalServerError(err)
+			}
+
+			err = queries.UpdateHighlightImage(r.Context(), UpdateHighlightImageParams{
+				Image: NullString(name),
+				ID:    highlight.ID,
+			})
+			if err != nil {
+				return InternalServerError(err)
+			}
+		}
+
+		return Redirect(fmt.Sprintf("/users/%s/books/%s", user.Slug, book.Isbn))
 	}, loggedinMiddleware)
 
 	GET("/users/{user}/books/{isbn}/highlights/{id}/edit", func(w Response, r Request) Output {
@@ -658,79 +796,17 @@ func main() {
 			return Unauthorized
 		}
 
-		return Render("layout", "highlights/edit", map[string]interface{}{
+		return Render("layout", "highlights/new", map[string]interface{}{
 			"current_user": actor,
+			"book":         book,
 			"user":         user,
 			"highlight":    highlight,
+			"errors":       ValidationErrors{},
 			"csrf":         csrf.TemplateField(r),
 		})
 	}, loggedinMiddleware)
 
 	POST("/users/{user}/books/{isbn}/highlights/{id}", func(w Response, r Request) Output {
-		actor := current_user(r)
-		vars := mux.Vars(r)
-
-		user, err := queries.UserBySlug(r.Context(), vars["user"])
-		if err != nil {
-			return NotFound
-		}
-
-		book, err := queries.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
-			UserID: user.ID,
-			Isbn:   vars["isbn"],
-		})
-		if err != nil {
-			return NotFound
-		}
-
-		_, err = queries.HighlightByIDAndBook(r.Context(), HighlightByIDAndBookParams{
-			ID:     atoi64(vars["id"]),
-			BookID: book.ID,
-		})
-		if err != nil {
-			return NotFound
-		}
-
-		if !can(actor, "edit_highlight", book) {
-			return Unauthorized
-		}
-
-		return Redirect(fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]))
-	}, loggedinMiddleware)
-
-	DELETE("/users/{user}/books/{isbn}/highlights/{id}", func(w Response, r Request) Output {
-		actor := current_user(r)
-		vars := mux.Vars(r)
-
-		user, err := queries.UserBySlug(r.Context(), vars["user"])
-		if err != nil {
-			return NotFound
-		}
-
-		book, err := queries.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
-			UserID: user.ID,
-			Isbn:   vars["isbn"],
-		})
-		if err != nil {
-			return NotFound
-		}
-
-		_, err = queries.HighlightByIDAndBook(r.Context(), HighlightByIDAndBookParams{
-			ID:     atoi64(vars["id"]),
-			BookID: book.ID,
-		})
-		if err != nil {
-			return NotFound
-		}
-
-		if !can(actor, "delete_highlight", book) {
-			return Unauthorized
-		}
-
-		return Redirect(fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]))
-	}, loggedinMiddleware)
-
-	GET("/users/{user}/books/{isbn}/highlights/{id}/image", func(w Response, r Request) Output {
 		actor := current_user(r)
 		vars := mux.Vars(r)
 
@@ -759,14 +835,56 @@ func main() {
 			return Unauthorized
 		}
 
-		return Render("layout", "highlights/image", map[string]interface{}{
-			"current_user": actor,
-			"user":         user,
-			"highlight":    highlight,
-		})
+		params := UpdateHighlightParams{
+			Page:    atoi32(r.FormValue("page")),
+			Content: r.FormValue("content"),
+			ID:      highlight.ID,
+		}
+		errors := params.Validate()
+
+		file, _, _ := r.FormFile("image")
+		if file != nil {
+			ValidateImage(file, "image", "Image", errors, 1000, 1000)
+			file.Seek(0, os.SEEK_SET)
+		}
+
+		if len(errors) > 0 {
+			highlight.Content = params.Content
+			highlight.Page = params.Page
+			return Render("layout", "highlights/new", map[string]interface{}{
+				"current_user": actor,
+				"user":         user,
+				"book":         book,
+				"highlight":    highlight,
+				"errors":       errors,
+				"csrf":         csrf.TemplateField(r),
+			})
+		}
+
+		err = queries.UpdateHighlight(r.Context(), params)
+		if err != nil {
+			return InternalServerError(err)
+		}
+
+		if file != nil {
+			name, err := UploadImage(file, HIGHLIGHT_IMAGE_PATH, 1000, 1000)
+			if err != nil {
+				return InternalServerError(err)
+			}
+
+			err = queries.UpdateHighlightImage(r.Context(), UpdateHighlightImageParams{
+				Image: NullString(name),
+				ID:    highlight.ID,
+			})
+			if err != nil {
+				return InternalServerError(err)
+			}
+		}
+
+		return Redirect(fmt.Sprintf("/users/%s/books/%s", user.Slug, book.Isbn))
 	}, loggedinMiddleware)
 
-	POST("/users/{user}/books/{isbn}/highlights/{id}/image", func(w Response, r Request) Output {
+	DELETE("/users/{user}/books/{isbn}/highlights/{id}", func(w Response, r Request) Output {
 		actor := current_user(r)
 		vars := mux.Vars(r)
 
@@ -791,7 +909,7 @@ func main() {
 			return NotFound
 		}
 
-		if !can(actor, "edit_highlight", book) {
+		if !can(actor, "delete_highlight", book) {
 			return Unauthorized
 		}
 

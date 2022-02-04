@@ -100,6 +100,7 @@ const highlights = `-- name: Highlights :many
 SELECT id, book_id, page, content, image, created_at, updated_at
   FROM highlights
  WHERE book_id = $1
+ ORDER BY page
 `
 
 func (q *Queries) Highlights(ctx context.Context, bookID int64) ([]Highlight, error) {
@@ -181,6 +182,52 @@ func (q *Queries) NewBook(ctx context.Context, arg NewBookParams) (Book, error) 
 		&i.Publisher,
 	)
 	return i, err
+}
+
+const newHighlight = `-- name: NewHighlight :one
+INSERT INTO highlights (book_id, page, content)
+VALUES ($1, $2, $3)
+       RETURNING id, book_id, page, content, image, created_at, updated_at
+`
+
+type NewHighlightParams struct {
+	BookID  int64
+	Page    int32
+	Content string
+}
+
+func (q *Queries) NewHighlight(ctx context.Context, arg NewHighlightParams) (Highlight, error) {
+	row := q.db.QueryRowContext(ctx, newHighlight, arg.BookID, arg.Page, arg.Content)
+	var i Highlight
+	err := row.Scan(
+		&i.ID,
+		&i.BookID,
+		&i.Page,
+		&i.Content,
+		&i.Image,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const newShelf = `-- name: NewShelf :exec
+INSERT INTO public.shelves (name, user_id, position)
+VALUES ($1, $2, (
+  SELECT coalesce(MAX(position), 0) + 1
+    FROM public.shelves
+   WHERE user_id = $2)
+)
+`
+
+type NewShelfParams struct {
+	Name   string
+	UserID int64
+}
+
+func (q *Queries) NewShelf(ctx context.Context, arg NewShelfParams) error {
+	_, err := q.db.ExecContext(ctx, newShelf, arg.Name, arg.UserID)
+	return err
 }
 
 const shelfBooks = `-- name: ShelfBooks :many
@@ -351,6 +398,72 @@ func (q *Queries) UpdateBook(ctx context.Context, arg UpdateBookParams) error {
 		arg.PageCount,
 		arg.ID,
 	)
+	return err
+}
+
+const updateBookImage = `-- name: UpdateBookImage :exec
+UPDATE public.books
+   SET image = $1
+ WHERE id = $2
+`
+
+type UpdateBookImageParams struct {
+	Image sql.NullString
+	ID    int64
+}
+
+func (q *Queries) UpdateBookImage(ctx context.Context, arg UpdateBookImageParams) error {
+	_, err := q.db.ExecContext(ctx, updateBookImage, arg.Image, arg.ID)
+	return err
+}
+
+const updateHighlight = `-- name: UpdateHighlight :exec
+UPDATE public.highlights
+   SET page = $1,
+       content = $2
+ WHERE id = $3
+`
+
+type UpdateHighlightParams struct {
+	Page    int32
+	Content string
+	ID      int64
+}
+
+func (q *Queries) UpdateHighlight(ctx context.Context, arg UpdateHighlightParams) error {
+	_, err := q.db.ExecContext(ctx, updateHighlight, arg.Page, arg.Content, arg.ID)
+	return err
+}
+
+const updateHighlightImage = `-- name: UpdateHighlightImage :exec
+UPDATE public.highlights
+   SET image = $1
+ WHERE id = $2
+`
+
+type UpdateHighlightImageParams struct {
+	Image sql.NullString
+	ID    int64
+}
+
+func (q *Queries) UpdateHighlightImage(ctx context.Context, arg UpdateHighlightImageParams) error {
+	_, err := q.db.ExecContext(ctx, updateHighlightImage, arg.Image, arg.ID)
+	return err
+}
+
+const updateShelf = `-- name: UpdateShelf :exec
+UPDATE public.shelves
+   SET name = $1
+ WHERE id = $2
+`
+
+type UpdateShelfParams struct {
+	Name string
+	ID   int64
+}
+
+func (q *Queries) UpdateShelf(ctx context.Context, arg UpdateShelfParams) error {
+	_, err := q.db.ExecContext(ctx, updateShelf, arg.Name, arg.ID)
 	return err
 }
 

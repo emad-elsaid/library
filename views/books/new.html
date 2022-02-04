@@ -6,7 +6,7 @@
 
 <form action="/users/{{ .user.Slug }}/books{{ if has_field .book "ID" }}/{{ .book.Isbn }}{{ end }}" method="POST" enctype="multipart/form-data">
   {{ .csrf }}
-  <input type="hidden" name="google_books_id" value="{{ .book.GoogleBooksID }}">
+  <input type="hidden" name="google_books_id" value="{{ .book.GoogleBooksID.String }}">
 
   <div class="field">
     <label class="label">Title</label>

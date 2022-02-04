@@ -48,3 +48,17 @@ func (u UpdateUserParams) Validate() ValidationErrors {
 	ValidateStringLength(u.Telegram.String, "telegram", "Telegram", ve, 0, 50)
 	return ve
 }
+
+func (n NewHighlightParams) Validate() ValidationErrors {
+	ve := ValidationErrors{}
+	ValidateStringLength(n.Content, "content", "Content", ve, 10, 500)
+	ValidateInt32Min(n.Page, "page", "Page", ve, 0)
+	return ve
+}
+
+func (n UpdateHighlightParams) Validate() ValidationErrors {
+	ve := ValidationErrors{}
+	ValidateStringLength(n.Content, "content", "Content", ve, 10, 500)
+	ValidateInt32Min(n.Page, "page", "Page", ve, 0)
+	return ve
+}
