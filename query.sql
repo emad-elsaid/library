@@ -129,3 +129,27 @@ VALUES ($1, $2, (
 UPDATE public.shelves
    SET name = $1
  WHERE id = $2;
+
+-- name: DeleteBook :exec
+DELETE FROM public.books
+ WHERE id = $1;
+
+-- name: DeleteHighlight :exec
+DELETE FROM public.highlights
+ WHERE id = $1;
+
+-- name: HighlightsWithImages :many
+SELECT image
+  FROM highlights
+ WHERE image IS NOT NULL
+   AND length(image) > 0
+   AND book_id = $1;
+
+-- name: RemoveShelf :exec
+UPDATE shelves SET position = position - 1
+ WHERE user_id = (SELECT user_id FROM shelves WHERE shelves.id = $1)
+   AND position > (SELECT position FROM shelves WHERE shelves.id = $1);
+
+-- name: DeleteShelf :exec
+DELETE FROM shelves
+ WHERE id = $1;

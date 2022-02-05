@@ -131,15 +131,7 @@ func can(who *User, do string, what interface{}) bool {
 
 	case User:
 		switch do {
-		case "create_book":
-			return who != nil && who.ID == w.ID
-		case "list_shelves":
-			return who != nil && who.ID == w.ID
-		case "edit":
-			return who != nil && who.ID == w.ID
-		case "create_shelf":
-			return who != nil && who.ID == w.ID
-		case "show_shelves":
+		case "create_book", "list_shelves", "edit", "create_shelf", "show_shelves":
 			return who != nil && who.ID == w.ID
 		default:
 			log.Fatal(err)
@@ -147,9 +139,7 @@ func can(who *User, do string, what interface{}) bool {
 
 	case *User:
 		switch do {
-		case "create_book":
-			return who != nil && who.ID == w.ID
-		case "list_shelves":
+		case "create_book", "list_shelves":
 			return who != nil && who.ID == w.ID
 		default:
 			log.Fatal(err)
@@ -157,7 +147,7 @@ func can(who *User, do string, what interface{}) bool {
 
 	case BookByIsbnAndUserRow:
 		switch do {
-		case "edit", "highlight", "create_highlight", "edit_highlight":
+		case "edit", "highlight", "create_highlight", "edit_highlight", "delete", "delete_highlight":
 			return who != nil && who.ID == w.UserID
 		default:
 			log.Fatal(err)
@@ -165,7 +155,7 @@ func can(who *User, do string, what interface{}) bool {
 
 	case Shelf:
 		switch do {
-		case "edit":
+		case "edit", "delete":
 			return who != nil && who.ID == w.UserID
 		default:
 			log.Fatal(err)

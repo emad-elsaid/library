@@ -420,10 +420,7 @@ func main() {
 			oldname := path.Join(BOOK_COVER_PATH, book.Image.String)
 			if book.Image.Valid && len(book.Image.String) > 0 { // if image is set
 				if _, err = os.Stat(oldname); err == nil { // and it exists
-					err := os.Remove(oldname) // delete it
-					if err != nil {           // and check if it's really deleted
-						return InternalServerError(err)
-					}
+					os.Remove(oldname) // delete it
 				}
 			}
 
@@ -458,6 +455,23 @@ func main() {
 
 		if !can(actor, "delete", book) {
 			return Unauthorized
+		}
+
+		images, err := queries.HighlightsWithImages(r.Context(), book.ID)
+		if err != nil {
+			return InternalServerError(err)
+		}
+		for _, v := range images {
+			os.Remove(path.Join(HIGHLIGHT_IMAGE_PATH, v.String))
+		}
+
+		if book.Image.Valid && len(book.Image.String) > 0 {
+			os.Remove(path.Join(BOOK_COVER_PATH, book.Image.String))
+		}
+
+		err = queries.DeleteBook(r.Context(), book.ID)
+		if err != nil {
+			return InternalServerError(err)
 		}
 
 		return Redirect(fmt.Sprintf("/users/%s", user.Slug))
@@ -662,6 +676,16 @@ func main() {
 
 		if !can(actor, "delete", shelf) {
 			return Unauthorized
+		}
+
+		err = queries.RemoveShelf(r.Context(), shelf.ID)
+		if err != nil {
+			return InternalServerError(err)
+		}
+
+		err = queries.DeleteShelf(r.Context(), shelf.ID)
+		if err != nil {
+			return InternalServerError(err)
 		}
 
 		return Redirect(fmt.Sprintf("/users/%s/shelves", user.Slug))
@@ -901,7 +925,7 @@ func main() {
 			return NotFound
 		}
 
-		_, err = queries.HighlightByIDAndBook(r.Context(), HighlightByIDAndBookParams{
+		highlight, err := queries.HighlightByIDAndBook(r.Context(), HighlightByIDAndBookParams{
 			ID:     atoi64(vars["id"]),
 			BookID: book.ID,
 		})
@@ -911,6 +935,15 @@ func main() {
 
 		if !can(actor, "delete_highlight", book) {
 			return Unauthorized
+		}
+
+		if highlight.Image.Valid && len(highlight.Image.String) > 0 {
+			os.Remove(path.Join(HIGHLIGHT_IMAGE_PATH, highlight.Image.String))
+		}
+
+		err = queries.DeleteHighlight(r.Context(), highlight.ID)
+		if err != nil {
+			return InternalServerError(err)
 		}
 
 		return Redirect(fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]))

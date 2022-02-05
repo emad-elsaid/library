@@ -94,8 +94,10 @@ func Start() {
 
 	router.PathPrefix("/").Handler(staticWithoutDirectoryListingHandler())
 	csrfMiddleware := csrf.Protect([]byte(os.Getenv("SESSION_SECRET")))
-
-	http.Handle("/", csrfMiddleware(router))
+	router := HTTPMethodOverrideHandler(
+		csrfMiddleware(router),
+	)
+	http.Handle("/", router)
 
 	srv := &http.Server{
 		Handler:      router,
@@ -290,6 +292,19 @@ func staticWithoutDirectoryListingHandler() http.Handler {
 		}
 
 		handler.ServeHTTP(w, r)
+	})
+}
+
+// Derived from Gorilla middleware https://github.com/gorilla/handlers/blob/v1.5.1/handlers.go#L134
+func HTTPMethodOverrideHandler(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "POST" {
+			om := r.FormValue("_method")
+			if om == "PUT" || om == "PATCH" || om == "DELETE" {
+				r.Method = om
+			}
+		}
+		h.ServeHTTP(w, r)
 	})
 }
 

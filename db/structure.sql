@@ -323,7 +323,7 @@ ALTER TABLE ONLY public.highlights
 --
 
 ALTER TABLE ONLY public.books
-    ADD CONSTRAINT fk_rails_5e29c313c6 FOREIGN KEY (shelf_id) REFERENCES public.shelves(id) ON DELETE CASCADE;
+    ADD CONSTRAINT fk_rails_5e29c313c6 FOREIGN KEY (shelf_id) REFERENCES public.shelves(id) ON DELETE SET NULL;
 
 
 --
@@ -368,6 +368,7 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20220131115959'),
 ('20220131124929'),
 ('20220201201413'),
-('20220203060659');
+('20220203060659'),
+('20220205001018');
 
 

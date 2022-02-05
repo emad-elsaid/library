@@ -68,6 +68,36 @@ func (q *Queries) BookByIsbnAndUser(ctx context.Context, arg BookByIsbnAndUserPa
 	return i, err
 }
 
+const deleteBook = `-- name: DeleteBook :exec
+DELETE FROM public.books
+ WHERE id = $1
+`
+
+func (q *Queries) DeleteBook(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, deleteBook, id)
+	return err
+}
+
+const deleteHighlight = `-- name: DeleteHighlight :exec
+DELETE FROM public.highlights
+ WHERE id = $1
+`
+
+func (q *Queries) DeleteHighlight(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, deleteHighlight, id)
+	return err
+}
+
+const deleteShelf = `-- name: DeleteShelf :exec
+DELETE FROM shelves
+ WHERE id = $1
+`
+
+func (q *Queries) DeleteShelf(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, deleteShelf, id)
+	return err
+}
+
 const highlightByIDAndBook = `-- name: HighlightByIDAndBook :one
 SELECT id, book_id, page, content, image, created_at, updated_at
   FROM highlights
@@ -124,6 +154,37 @@ func (q *Queries) Highlights(ctx context.Context, bookID int64) ([]Highlight, er
 			return nil, err
 		}
 		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const highlightsWithImages = `-- name: HighlightsWithImages :many
+SELECT image
+  FROM highlights
+ WHERE image IS NOT NULL
+   AND length(image) > 0
+   AND book_id = $1
+`
+
+func (q *Queries) HighlightsWithImages(ctx context.Context, bookID int64) ([]sql.NullString, error) {
+	rows, err := q.db.QueryContext(ctx, highlightsWithImages, bookID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []sql.NullString
+	for rows.Next() {
+		var image sql.NullString
+		if err := rows.Scan(&image); err != nil {
+			return nil, err
+		}
+		items = append(items, image)
 	}
 	if err := rows.Close(); err != nil {
 		return nil, err
@@ -227,6 +288,17 @@ type NewShelfParams struct {
 
 func (q *Queries) NewShelf(ctx context.Context, arg NewShelfParams) error {
 	_, err := q.db.ExecContext(ctx, newShelf, arg.Name, arg.UserID)
+	return err
+}
+
+const removeShelf = `-- name: RemoveShelf :exec
+UPDATE shelves SET position = position - 1
+ WHERE user_id = (SELECT user_id FROM shelves WHERE shelves.id = $1)
+   AND position > (SELECT position FROM shelves WHERE shelves.id = $1)
+`
+
+func (q *Queries) RemoveShelf(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, removeShelf, id)
 	return err
 }
 
