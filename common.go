@@ -76,12 +76,15 @@ const (
 )
 
 func init() {
+	logger := log.Default()
+	logger.SetFlags(log.Ldate)
+
 	db, err := connectToDB()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ql := QueryLogger{db, log.Default()}
+	ql := QueryLogger{db, logger}
 	queries = New(ql)
 
 	router = mux.NewRouter()
@@ -91,16 +94,22 @@ func init() {
 
 func Start() {
 	compileViews()
+	middlewares := []func(http.Handler) http.Handler{
+		HTTPMethodOverrideHandler,
+		csrf.Protect([]byte(os.Getenv("SESSION_SECRET"))),
+		RequestLoggerHandler,
+	}
 
 	router.PathPrefix("/").Handler(staticWithoutDirectoryListingHandler())
-	csrfMiddleware := csrf.Protect([]byte(os.Getenv("SESSION_SECRET")))
-	router := HTTPMethodOverrideHandler(
-		csrfMiddleware(router),
-	)
-	http.Handle("/", router)
+	var handler http.Handler = router
+	for _, v := range middlewares {
+		handler = v(handler)
+	}
+
+	http.Handle("/", handler)
 
 	srv := &http.Server{
-		Handler:      router,
+		Handler:      handler,
 		Addr:         BIND_ADDRESS,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
@@ -117,13 +126,15 @@ type QueryLogger struct {
 	logger *log.Logger
 }
 
+func (p QueryLogger) label(s string) string {
+	return "\033[97;42m" + s + "\033[0m"
+}
+
 func (p QueryLogger) ExecContext(ctx context.Context, q string, args ...interface{}) (sql.Result, error) {
 	r, err := p.db.ExecContext(ctx, q, args...)
 	a, _ := r.RowsAffected()
 
-	p.logger.Print("DB Exec:", strings.ReplaceAll(q, "\n", " "))
-	p.logger.Print(args...)
-	p.logger.Printf("RowsAffected: %d", a)
+	p.logger.Print(p.label("DB Exec:"), strings.ReplaceAll(q, "\n", " "), args, "RowsAffected", a)
 	return r, err
 }
 func (p QueryLogger) PrepareContext(ctx context.Context, q string) (*sql.Stmt, error) {
@@ -132,8 +143,7 @@ func (p QueryLogger) PrepareContext(ctx context.Context, q string) (*sql.Stmt, e
 func (p QueryLogger) QueryContext(ctx context.Context, q string, args ...interface{}) (*sql.Rows, error) {
 	r, err := p.db.QueryContext(ctx, q, args...)
 
-	p.logger.Print("DB Query: ", strings.ReplaceAll(q, "\n", " "))
-	p.logger.Print(args...)
+	p.logger.Print(p.label("DB Query:"), q, args)
 	if err != nil {
 		p.logger.Printf("Error: %s", err.Error())
 	}
@@ -143,8 +153,7 @@ func (p QueryLogger) QueryContext(ctx context.Context, q string, args ...interfa
 func (p QueryLogger) QueryRowContext(ctx context.Context, q string, args ...interface{}) *sql.Row {
 	r := p.db.QueryRowContext(ctx, q, args...)
 
-	p.logger.Print("Query Row:", strings.ReplaceAll(q, "\n", " "))
-	p.logger.Print(args...)
+	p.logger.Print(p.label("DB Row:"), q, args)
 	err := r.Err()
 	if err != nil {
 		p.logger.Printf("Error: %s", err.Error())
@@ -270,7 +279,7 @@ func SESSION(r *http.Request) *sessions.Session {
 	return s
 }
 
-// MIDDLEWARES =============================
+// HANDLERS MIDDLEWARES =============================
 
 // First middleware gets executed first
 func applyMiddlewares(handler http.HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) http.HandlerFunc {
@@ -280,6 +289,7 @@ func applyMiddlewares(handler http.HandlerFunc, middlewares ...func(http.Handler
 	return handler
 }
 
+// SERVER MIDDLEWARES ==============================
 func staticWithoutDirectoryListingHandler() http.Handler {
 	dir := http.Dir(STATIC_DIR_PATH)
 	server := http.FileServer(dir)
@@ -305,6 +315,14 @@ func HTTPMethodOverrideHandler(h http.Handler) http.Handler {
 			}
 		}
 		h.ServeHTTP(w, r)
+	})
+}
+
+func RequestLoggerHandler(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		h.ServeHTTP(w, r)
+		log.Printf("\033[97;43m%s\033[0m %s -- %s", r.Method, r.URL.Path, time.Now().Sub(start))
 	})
 }
 
