@@ -195,6 +195,59 @@ func (q *Queries) HighlightsWithImages(ctx context.Context, bookID int64) ([]sql
 	return items, nil
 }
 
+const lastShelf = `-- name: LastShelf :one
+SELECT max(position)
+  FROM shelves
+ WHERE user_id = $1
+`
+
+func (q *Queries) LastShelf(ctx context.Context, userID int64) (interface{}, error) {
+	row := q.db.QueryRowContext(ctx, lastShelf, userID)
+	var max interface{}
+	err := row.Scan(&max)
+	return max, err
+}
+
+const moveShelfDown = `-- name: MoveShelfDown :exec
+UPDATE shelves
+   SET position = (
+     CASE
+     WHEN position = (SELECT position FROM shelves WHERE shelves.id = $1) THEN position + 1
+     WHEN position = (SELECT position + 1 FROM shelves WHERE shelves.id = $1) THEN position - 1
+     END
+   )
+ WHERE user_id = (SELECT user_id FROM shelves WHERE shelves.id = $1)
+   AND position IN (
+     (SELECT position FROM shelves WHERE shelves.id = $1),
+     (SELECT position + 1 FROM shelves WHERE shelves.id = $1)
+   )
+`
+
+func (q *Queries) MoveShelfDown(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, moveShelfDown, id)
+	return err
+}
+
+const moveShelfUp = `-- name: MoveShelfUp :exec
+UPDATE shelves
+   SET position = (
+     CASE
+     WHEN position = (SELECT position -1 FROM shelves WHERE shelves.id = $1) THEN position + 1
+     WHEN position = (SELECT position FROM shelves WHERE shelves.id = $1) THEN position - 1
+     END
+   )
+ WHERE user_id = (SELECT user_id FROM shelves WHERE shelves.id = $1)
+   AND position IN (
+     (SELECT position -1 FROM shelves WHERE shelves.id = $1),
+     (SELECT position FROM shelves WHERE shelves.id = $1)
+   )
+`
+
+func (q *Queries) MoveShelfUp(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, moveShelfUp, id)
+	return err
+}
+
 const newBook = `-- name: NewBook :one
 INSERT INTO public.books (title, isbn, author, subtitle, description, publisher, page_count, google_books_id, user_id)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
@@ -377,27 +430,29 @@ func (q *Queries) ShelfByIdAndUser(ctx context.Context, arg ShelfByIdAndUserPara
 }
 
 const shelves = `-- name: Shelves :many
-SELECT id, name
+SELECT id, name, created_at, updated_at, user_id, position
   FROM shelves
  WHERE user_id = $1
  ORDER BY position
 `
 
-type ShelvesRow struct {
-	ID   int64
-	Name string
-}
-
-func (q *Queries) Shelves(ctx context.Context, userID int64) ([]ShelvesRow, error) {
+func (q *Queries) Shelves(ctx context.Context, userID int64) ([]Shelf, error) {
 	rows, err := q.db.QueryContext(ctx, shelves, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ShelvesRow
+	var items []Shelf
 	for rows.Next() {
-		var i ShelvesRow
-		if err := rows.Scan(&i.ID, &i.Name); err != nil {
+		var i Shelf
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.UserID,
+			&i.Position,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

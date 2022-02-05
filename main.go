@@ -626,8 +626,13 @@ func main() {
 			return NotFound
 		}
 
-		if !can(actor, "edit", shelf) {
+		if !can(actor, "up", shelf) {
 			return Unauthorized
+		}
+
+		err = queries.MoveShelfUp(r.Context(), shelf.ID)
+		if err != nil {
+			return InternalServerError(err)
 		}
 
 		return Redirect(fmt.Sprintf("/users/%s/shelves", user.Slug))
@@ -650,8 +655,13 @@ func main() {
 			return NotFound
 		}
 
-		if !can(actor, "edit", shelf) {
+		if !can(actor, "down", shelf) {
 			return Unauthorized
+		}
+
+		err = queries.MoveShelfDown(r.Context(), shelf.ID)
+		if err != nil {
+			return InternalServerError(err)
 		}
 
 		return Redirect(fmt.Sprintf("/users/%s/shelves", user.Slug))

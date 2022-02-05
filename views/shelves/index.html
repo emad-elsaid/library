@@ -11,21 +11,28 @@
       </tr>
     </thead>
     <tbody>
+      {{ $lastitem := last .shelves }}
       {{ range .shelves }}
         <tr>
           <td>
-            {{ .Name }}
+            {{ .Name }} ({{ .Position.Int32 }})
           </td>
           <td>
               <a class="button is-small is-pulled-right" href="/users/{{ $.user.Slug }}/shelves/{{ .ID }}/edit">Edit</a>
+              {{ if can $.current_user "up" . }}
               <form action="/users/{{ $.user.Slug }}/shelves/{{ .ID }}/up" class="is-pulled-right" method="POST">
                 {{ $.csrf }}
                 <button class="button is-small">↑</button>
               </form>
+              {{ end }}
+              {{ if can $.current_user "down" . }}
+              {{ if ne $lastitem . }}
               <form action="/users/{{ $.user.Slug }}/shelves/{{.ID }}/down" class="is-pulled-right" method="POST">
                 {{ $.csrf }}
                 <button class="button is-small">↓</button>
               </form>
+              {{ end }}
+              {{ end }}
           </td>
         </tr>
       {{ end }}

@@ -26,7 +26,7 @@ SELECT books.id id, title, books.image image, google_books_id, slug, isbn
    AND shelf_id IS NULL;
 
 -- name: Shelves :many
-SELECT id, name
+SELECT *
   FROM shelves
  WHERE user_id = $1
  ORDER BY position;
@@ -153,3 +153,31 @@ UPDATE shelves SET position = position - 1
 -- name: DeleteShelf :exec
 DELETE FROM shelves
  WHERE id = $1;
+
+-- name: MoveShelfUp :exec
+UPDATE shelves
+   SET position = (
+     CASE
+     WHEN position = (SELECT position -1 FROM shelves WHERE shelves.id = $1) THEN position + 1
+     WHEN position = (SELECT position FROM shelves WHERE shelves.id = $1) THEN position - 1
+     END
+   )
+ WHERE user_id = (SELECT user_id FROM shelves WHERE shelves.id = $1)
+   AND position IN (
+     (SELECT position -1 FROM shelves WHERE shelves.id = $1),
+     (SELECT position FROM shelves WHERE shelves.id = $1)
+   );
+
+-- name: MoveShelfDown :exec
+UPDATE shelves
+   SET position = (
+     CASE
+     WHEN position = (SELECT position FROM shelves WHERE shelves.id = $1) THEN position + 1
+     WHEN position = (SELECT position + 1 FROM shelves WHERE shelves.id = $1) THEN position - 1
+     END
+   )
+ WHERE user_id = (SELECT user_id FROM shelves WHERE shelves.id = $1)
+   AND position IN (
+     (SELECT position FROM shelves WHERE shelves.id = $1),
+     (SELECT position + 1 FROM shelves WHERE shelves.id = $1)
+   );

@@ -89,6 +89,23 @@ func Helpers() {
 		}
 		return false
 	}
+
+	helpers["last"] = func(v interface{}) interface{} {
+		rv := reflect.ValueOf(v)
+		if rv.Kind() == reflect.Ptr {
+			rv = rv.Elem()
+		}
+
+		if rv.Kind() != reflect.Slice {
+			return false
+		}
+
+		if rv.Len() == 0 {
+			return false
+		}
+
+		return rv.Index(rv.Len() - 1)
+	}
 }
 
 func loggedin(r *http.Request) bool {
@@ -156,6 +173,10 @@ func can(who *User, do string, what interface{}) bool {
 	case Shelf:
 		switch do {
 		case "edit", "delete":
+			return who != nil && who.ID == w.UserID
+		case "up":
+			return who != nil && who.ID == w.UserID && w.Position.Int32 > 1
+		case "down":
 			return who != nil && who.ID == w.UserID
 		default:
 			log.Fatal(err)
