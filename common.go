@@ -127,7 +127,7 @@ type QueryLogger struct {
 }
 
 func (p QueryLogger) label(s string) string {
-	return "\033[97;42m" + s + "\033[0m"
+	return "\033[97;42m " + s + " \033[0m"
 }
 
 func (p QueryLogger) ExecContext(ctx context.Context, q string, args ...interface{}) (sql.Result, error) {
@@ -322,7 +322,7 @@ func RequestLoggerHandler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		h.ServeHTTP(w, r)
-		log.Printf("\033[97;43m%s\033[0m %s -- %s", r.Method, r.URL.Path, time.Now().Sub(start))
+		log.Printf("\033[97;43m %s \033[0m %s -- %s", r.Method, r.URL.Path, time.Now().Sub(start))
 	})
 }
 
