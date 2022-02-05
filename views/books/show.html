@@ -18,7 +18,7 @@
               <select name="shelf_id">
                 <option value="" {{ if not .book.ShelfID }}selected{{ end }}>No Shelf</option>
                 {{ range .shelves }}
-                <option value="{{ .ID }}" {{ if eq .ID $.book.ShelfID.Int32 }}selected{{ end }}>{{ .Name }}</option>
+                <option value="{{ .ID }}" {{ if eq .ID $.book.ShelfID.Int64 }}selected{{ end }}>{{ .Name }}</option>
                 {{ end }}
               </select>
             </span>
@@ -53,7 +53,7 @@
 
   <div class="column content">
     {{ if .book.ShelfID.Valid }}
-      <a class="tag is-info is-light" href="/users/{{ .user.Slug }}#shelf-{{ .book.ShelfID.Int32 }}">{{ .book.ShelfName.String }}</a>
+      <a class="tag is-info is-light" href="/users/{{ .user.Slug }}#shelf-{{ .book.ShelfID.Int64 }}">{{ .book.ShelfName.String }}</a>
     {{ end }}
     <h2 class="title">
       {{ .book.Title }}
