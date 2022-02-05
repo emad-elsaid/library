@@ -181,3 +181,8 @@ UPDATE shelves
      (SELECT position FROM shelves WHERE shelves.id = $1),
      (SELECT position + 1 FROM shelves WHERE shelves.id = $1)
    );
+
+-- name: MoveBookToShelf :exec
+UPDATE books
+   SET shelf_id = $1
+ WHERE id = $2;

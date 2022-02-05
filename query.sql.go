@@ -195,17 +195,20 @@ func (q *Queries) HighlightsWithImages(ctx context.Context, bookID int64) ([]sql
 	return items, nil
 }
 
-const lastShelf = `-- name: LastShelf :one
-SELECT max(position)
-  FROM shelves
- WHERE user_id = $1
+const moveBookToShelf = `-- name: MoveBookToShelf :exec
+UPDATE books
+   SET shelf_id = $1
+ WHERE id = $2
 `
 
-func (q *Queries) LastShelf(ctx context.Context, userID int64) (interface{}, error) {
-	row := q.db.QueryRowContext(ctx, lastShelf, userID)
-	var max interface{}
-	err := row.Scan(&max)
-	return max, err
+type MoveBookToShelfParams struct {
+	ShelfID sql.NullInt32
+	ID      int64
+}
+
+func (q *Queries) MoveBookToShelf(ctx context.Context, arg MoveBookToShelfParams) error {
+	_, err := q.db.ExecContext(ctx, moveBookToShelf, arg.ShelfID, arg.ID)
+	return err
 }
 
 const moveShelfDown = `-- name: MoveShelfDown :exec

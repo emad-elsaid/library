@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -317,6 +318,7 @@ func main() {
 			"book":         book,
 			"shelves":      shelves,
 			"highlights":   highlights,
+			"csrf":         csrf.TemplateField(r),
 		})
 	})
 
@@ -496,6 +498,22 @@ func main() {
 
 		if !can(actor, "edit", book) {
 			return Unauthorized
+		}
+
+		shelf, err := queries.ShelfByIdAndUser(r.Context(), ShelfByIdAndUserParams{
+			UserID: user.ID,
+			ID:     atoi64(r.FormValue("shelf_id")),
+		})
+		if err == nil && !can(actor, "edit", shelf) {
+			return Unauthorized
+		}
+
+		err = queries.MoveBookToShelf(r.Context(), MoveBookToShelfParams{
+			ShelfID: sql.NullInt32{Int32: int32(shelf.ID), Valid: err == nil},
+			ID:      book.ID,
+		})
+		if err != nil {
+			return InternalServerError(err)
 		}
 
 		return Redirect(fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]))
