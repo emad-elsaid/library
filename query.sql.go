@@ -69,8 +69,7 @@ func (q *Queries) BookByIsbnAndUser(ctx context.Context, arg BookByIsbnAndUserPa
 }
 
 const deleteBook = `-- name: DeleteBook :exec
-DELETE FROM public.books
- WHERE id = $1
+DELETE FROM books WHERE id = $1
 `
 
 func (q *Queries) DeleteBook(ctx context.Context, id int64) error {
@@ -79,8 +78,7 @@ func (q *Queries) DeleteBook(ctx context.Context, id int64) error {
 }
 
 const deleteHighlight = `-- name: DeleteHighlight :exec
-DELETE FROM public.highlights
- WHERE id = $1
+DELETE FROM highlights WHERE id = $1
 `
 
 func (q *Queries) DeleteHighlight(ctx context.Context, id int64) error {
@@ -89,8 +87,7 @@ func (q *Queries) DeleteHighlight(ctx context.Context, id int64) error {
 }
 
 const deleteShelf = `-- name: DeleteShelf :exec
-DELETE FROM shelves
- WHERE id = $1
+DELETE FROM shelves WHERE id = $1
 `
 
 func (q *Queries) DeleteShelf(ctx context.Context, id int64) error {
@@ -99,11 +96,7 @@ func (q *Queries) DeleteShelf(ctx context.Context, id int64) error {
 }
 
 const highlightByIDAndBook = `-- name: HighlightByIDAndBook :one
-SELECT id, book_id, page, content, image, created_at, updated_at
-  FROM highlights
- WHERE id = $1
-   AND book_id = $2
- LIMIT 1
+SELECT id, book_id, page, content, image, created_at, updated_at FROM highlights WHERE id = $1 AND book_id = $2 LIMIT 1
 `
 
 type HighlightByIDAndBookParams struct {
@@ -127,10 +120,7 @@ func (q *Queries) HighlightByIDAndBook(ctx context.Context, arg HighlightByIDAnd
 }
 
 const highlights = `-- name: Highlights :many
-SELECT id, book_id, page, content, image, created_at, updated_at
-  FROM highlights
- WHERE book_id = $1
- ORDER BY page
+SELECT id, book_id, page, content, image, created_at, updated_at FROM highlights WHERE book_id = $1 ORDER BY page
 `
 
 func (q *Queries) Highlights(ctx context.Context, bookID int64) ([]Highlight, error) {
@@ -165,11 +155,7 @@ func (q *Queries) Highlights(ctx context.Context, bookID int64) ([]Highlight, er
 }
 
 const highlightsWithImages = `-- name: HighlightsWithImages :many
-SELECT image
-  FROM highlights
- WHERE image IS NOT NULL
-   AND length(image) > 0
-   AND book_id = $1
+SELECT image FROM highlights WHERE image IS NOT NULL AND length(image) > 0 AND book_id = $1
 `
 
 func (q *Queries) HighlightsWithImages(ctx context.Context, bookID int64) ([]sql.NullString, error) {
@@ -196,9 +182,7 @@ func (q *Queries) HighlightsWithImages(ctx context.Context, bookID int64) ([]sql
 }
 
 const moveBookToShelf = `-- name: MoveBookToShelf :exec
-UPDATE books
-   SET shelf_id = $1
- WHERE id = $2
+UPDATE books SET shelf_id = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2
 `
 
 type MoveBookToShelfParams struct {
@@ -252,7 +236,7 @@ func (q *Queries) MoveShelfUp(ctx context.Context, id int64) error {
 }
 
 const newBook = `-- name: NewBook :one
-INSERT INTO public.books (title, isbn, author, subtitle, description, publisher, page_count, google_books_id, user_id)
+INSERT INTO books (title, isbn, author, subtitle, description, publisher, page_count, google_books_id, user_id)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING id, title, author, image, isbn, created_at, updated_at, shelf_id, user_id, google_books_id, subtitle, description, page_count, publisher
 `
@@ -302,9 +286,7 @@ func (q *Queries) NewBook(ctx context.Context, arg NewBookParams) (Book, error) 
 }
 
 const newHighlight = `-- name: NewHighlight :one
-INSERT INTO highlights (book_id, page, content)
-VALUES ($1, $2, $3)
-       RETURNING id, book_id, page, content, image, created_at, updated_at
+INSERT INTO highlights (book_id, page, content) VALUES ($1, $2, $3) RETURNING id, book_id, page, content, image, created_at, updated_at
 `
 
 type NewHighlightParams struct {
@@ -329,10 +311,10 @@ func (q *Queries) NewHighlight(ctx context.Context, arg NewHighlightParams) (Hig
 }
 
 const newShelf = `-- name: NewShelf :exec
-INSERT INTO public.shelves (name, user_id, position)
+INSERT INTO shelves (name, user_id, position)
 VALUES ($1, $2, (
   SELECT coalesce(MAX(position), 0) + 1
-    FROM public.shelves
+    FROM shelves
    WHERE user_id = $2)
 )
 `
@@ -406,11 +388,7 @@ func (q *Queries) ShelfBooks(ctx context.Context, shelfID sql.NullInt64) ([]Shel
 }
 
 const shelfByIdAndUser = `-- name: ShelfByIdAndUser :one
-SELECT id, name, created_at, updated_at, user_id, position
-  FROM shelves
- WHERE shelves.user_id = $1
-   AND shelves.id = $2
- LIMIT 1
+SELECT id, name, created_at, updated_at, user_id, position FROM shelves WHERE user_id = $1 AND id = $2 LIMIT 1
 `
 
 type ShelfByIdAndUserParams struct {
@@ -433,10 +411,7 @@ func (q *Queries) ShelfByIdAndUser(ctx context.Context, arg ShelfByIdAndUserPara
 }
 
 const shelves = `-- name: Shelves :many
-SELECT id, name, created_at, updated_at, user_id, position
-  FROM shelves
- WHERE user_id = $1
- ORDER BY position
+SELECT id, name, created_at, updated_at, user_id, position FROM shelves WHERE user_id = $1 ORDER BY position
 `
 
 func (q *Queries) Shelves(ctx context.Context, userID int64) ([]Shelf, error) {
@@ -471,10 +446,10 @@ func (q *Queries) Shelves(ctx context.Context, userID int64) ([]Shelf, error) {
 
 const signup = `-- name: Signup :one
 INSERT
- INTO public.users(name, image, slug, email)
+ INTO users(name, image, slug, email)
 VALUES($1,$2,$3,$4)
        ON CONFLICT (email)
-       DO UPDATE SET name = $1, image = $2
+       DO UPDATE SET name = $1, image = $2, updated_at = CURRENT_TIMESTAMP
        RETURNING id
 `
 
@@ -498,13 +473,14 @@ func (q *Queries) Signup(ctx context.Context, arg SignupParams) (int64, error) {
 }
 
 const updateBook = `-- name: UpdateBook :exec
-UPDATE public.books
+UPDATE books
    SET title = $1,
        author = $2,
        subtitle = $3,
        description = $4,
        publisher = $5,
-       page_count = $6
+       page_count = $6,
+       updated_at = CURRENT_TIMESTAMP
  WHERE id = $7
 `
 
@@ -532,9 +508,7 @@ func (q *Queries) UpdateBook(ctx context.Context, arg UpdateBookParams) error {
 }
 
 const updateBookImage = `-- name: UpdateBookImage :exec
-UPDATE public.books
-   SET image = $1
- WHERE id = $2
+UPDATE books SET image = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2
 `
 
 type UpdateBookImageParams struct {
@@ -548,10 +522,7 @@ func (q *Queries) UpdateBookImage(ctx context.Context, arg UpdateBookImageParams
 }
 
 const updateHighlight = `-- name: UpdateHighlight :exec
-UPDATE public.highlights
-   SET page = $1,
-       content = $2
- WHERE id = $3
+UPDATE highlights SET page = $1, content = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3
 `
 
 type UpdateHighlightParams struct {
@@ -566,9 +537,7 @@ func (q *Queries) UpdateHighlight(ctx context.Context, arg UpdateHighlightParams
 }
 
 const updateHighlightImage = `-- name: UpdateHighlightImage :exec
-UPDATE public.highlights
-   SET image = $1
- WHERE id = $2
+UPDATE highlights SET image = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2
 `
 
 type UpdateHighlightImageParams struct {
@@ -582,9 +551,7 @@ func (q *Queries) UpdateHighlightImage(ctx context.Context, arg UpdateHighlightI
 }
 
 const updateShelf = `-- name: UpdateShelf :exec
-UPDATE public.shelves
-   SET name = $1
- WHERE id = $2
+UPDATE shelves SET name = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2
 `
 
 type UpdateShelfParams struct {
@@ -607,7 +574,8 @@ UPDATE users
        instagram = $6,
        phone = $7,
        whatsapp = $8,
-       telegram = $9
+       telegram = $9,
+       updated_at = CURRENT_TIMESTAMP
  WHERE id = $10
 `
 
@@ -641,10 +609,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
 }
 
 const user = `-- name: User :one
-SELECT id, name, email, image, created_at, updated_at, slug, description, facebook, twitter, linkedin, instagram, phone, whatsapp, telegram, amazon_associates_id
-  FROM users
- WHERE id = $1
- LIMIT 1
+SELECT id, name, email, image, created_at, updated_at, slug, description, facebook, twitter, linkedin, instagram, phone, whatsapp, telegram, amazon_associates_id FROM users WHERE id = $1 LIMIT 1
 `
 
 func (q *Queries) User(ctx context.Context, id int64) (User, error) {
@@ -672,10 +637,7 @@ func (q *Queries) User(ctx context.Context, id int64) (User, error) {
 }
 
 const userBySlug = `-- name: UserBySlug :one
-SELECT id, name, email, image, created_at, updated_at, slug, description, facebook, twitter, linkedin, instagram, phone, whatsapp, telegram, amazon_associates_id
-  FROM users
- WHERE slug = $1
- LIMIT 1
+SELECT id, name, email, image, created_at, updated_at, slug, description, facebook, twitter, linkedin, instagram, phone, whatsapp, telegram, amazon_associates_id FROM users WHERE slug = $1 LIMIT 1
 `
 
 func (q *Queries) UserBySlug(ctx context.Context, slug string) (User, error) {
