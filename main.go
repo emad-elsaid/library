@@ -509,7 +509,7 @@ func main() {
 		}
 
 		err = queries.MoveBookToShelf(r.Context(), MoveBookToShelfParams{
-			ShelfID: sql.NullInt32{Int32: int32(shelf.ID), Valid: err == nil},
+			ShelfID: sql.NullInt64{Int64: shelf.ID, Valid: err == nil},
 			ID:      book.ID,
 		})
 		if err != nil {
@@ -541,6 +541,7 @@ func main() {
 			"current_user": actor,
 			"user":         user,
 			"shelves":      shelves,
+			"errors":       ValidationErrors{},
 			"csrf":         csrf.TemplateField(r),
 		})
 	}, loggedinMiddleware)
@@ -558,10 +559,29 @@ func main() {
 			return Unauthorized
 		}
 
-		err = queries.NewShelf(r.Context(), NewShelfParams{
+		params := NewShelfParams{
 			Name:   r.FormValue("name"),
 			UserID: user.ID,
-		})
+		}
+
+		errors := params.Validate()
+		if len(errors) > 0 {
+			shelves, err := queries.Shelves(r.Context(), user.ID)
+			if err != nil {
+				return InternalServerError(err)
+			}
+
+			return Render("layout", "shelves/index", map[string]interface{}{
+				"current_user": actor,
+				"user":         user,
+				"shelves":      shelves,
+				"shelf":        params,
+				"csrf":         csrf.TemplateField(r),
+				"errors":       errors,
+			})
+		}
+
+		err = queries.NewShelf(r.Context(), params)
 		if err != nil {
 			return InternalServerError(err)
 		}
@@ -616,10 +636,23 @@ func main() {
 			return Unauthorized
 		}
 
-		err = queries.UpdateShelf(r.Context(), UpdateShelfParams{
+		params := UpdateShelfParams{
 			Name: r.FormValue("name"),
 			ID:   shelf.ID,
-		})
+		}
+
+		errors := params.Validate()
+		if len(errors) > 0 {
+			return Render("layout", "shelves/edit", map[string]interface{}{
+				"current_user": actor,
+				"user":         user,
+				"shelf":        params,
+				"csrf":         csrf.TemplateField(r),
+				"errors":       errors,
+			})
+		}
+
+		err = queries.UpdateShelf(r.Context(), params)
 		if err != nil {
 			return InternalServerError(err)
 		}

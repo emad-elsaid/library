@@ -15,7 +15,7 @@
       {{ range .shelves }}
         <tr>
           <td>
-            {{ .Name }} ({{ .Position.Int32 }})
+            {{ .Name }}
           </td>
           <td>
               <a class="button is-small is-pulled-right" href="/users/{{ $.user.Slug }}/shelves/{{ .ID }}/edit">Edit</a>
@@ -47,7 +47,8 @@
 
       <div class="field has-addons">
         <div class="control is-expanded">
-          <input class="input" type="text" name="name" placeholder="Shelf name..." required>
+          <input class="input {{ if index .errors "name" }}is-danger{{ end }}" type="text" name="name" placeholder="Shelf name..." value="{{ .shelf.Name }}" required>
+          {{ template "common/errors" index .errors "name" }}
         </div>
         <div class="control">
           <button class="button">New Shelf 📚</button>

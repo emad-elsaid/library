@@ -72,7 +72,7 @@ func Helpers() {
 	}
 
 	helpers["shelf_books"] = func(shelfID int64) ([]ShelfBooksRow, error) {
-		return queries.ShelfBooks(context.Background(), sql.NullInt32{Valid: true, Int32: int32(shelfID)})
+		return queries.ShelfBooks(context.Background(), sql.NullInt64{Valid: true, Int64: shelfID})
 	}
 
 	helpers["has_field"] = func(v interface{}, name string) bool {
@@ -175,7 +175,7 @@ func can(who *User, do string, what interface{}) bool {
 		case "edit", "delete":
 			return who != nil && who.ID == w.UserID
 		case "up":
-			return who != nil && who.ID == w.UserID && w.Position.Int32 > 1
+			return who != nil && who.ID == w.UserID && w.Position > 1
 		case "down":
 			return who != nil && who.ID == w.UserID
 		default:

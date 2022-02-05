@@ -62,3 +62,17 @@ func (n UpdateHighlightParams) Validate() ValidationErrors {
 	ValidateInt32Min(n.Page, "page", "Page", ve, 0)
 	return ve
 }
+
+func (n NewShelfParams) Validate() ValidationErrors {
+	ve := ValidationErrors{}
+	ValidateStringPresent(n.Name, "name", "Name", ve)
+	ValidateStringLength(n.Name, "name", "Name", ve, 3, 100)
+	return ve
+}
+
+func (n UpdateShelfParams) Validate() ValidationErrors {
+	ve := ValidationErrors{}
+	ValidateStringPresent(n.Name, "name", "Name", ve)
+	ValidateStringLength(n.Name, "name", "Name", ve, 3, 100)
+	return ve
+}

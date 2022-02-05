@@ -33,7 +33,7 @@ type BookByIsbnAndUserRow struct {
 	Isbn          string
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
-	ShelfID       sql.NullInt32
+	ShelfID       sql.NullInt64
 	UserID        int64
 	GoogleBooksID sql.NullString
 	Subtitle      string
@@ -202,7 +202,7 @@ UPDATE books
 `
 
 type MoveBookToShelfParams struct {
-	ShelfID sql.NullInt32
+	ShelfID sql.NullInt64
 	ID      int64
 }
 
@@ -375,7 +375,7 @@ type ShelfBooksRow struct {
 	Isbn          string
 }
 
-func (q *Queries) ShelfBooks(ctx context.Context, shelfID sql.NullInt32) ([]ShelfBooksRow, error) {
+func (q *Queries) ShelfBooks(ctx context.Context, shelfID sql.NullInt64) ([]ShelfBooksRow, error) {
 	rows, err := q.db.QueryContext(ctx, shelfBooks, shelfID)
 	if err != nil {
 		return nil, err

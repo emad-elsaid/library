@@ -22,7 +22,7 @@ type Book struct {
 	Isbn          string
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
-	ShelfID       sql.NullInt32
+	ShelfID       sql.NullInt64
 	UserID        int64
 	GoogleBooksID sql.NullString
 	Subtitle      string
@@ -51,7 +51,7 @@ type Shelf struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	UserID    int64
-	Position  sql.NullInt32
+	Position  int32
 }
 
 type User struct {

@@ -5,13 +5,14 @@
     <label class="label">Shelf name</label>
     <div class="control">
       <input
-          class="input"
+          class="input {{ if index .errors "name" }}is-danger{{ end }}"
           type="text"
           name="name"
           placeholder="Shelf name..."
           value="{{ .shelf.Name }}"
           required
           autofocus>
+      {{ template "common/errors" index .errors "name" }}
     </div>
   </div>
 
