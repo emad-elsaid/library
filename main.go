@@ -111,6 +111,7 @@ func main() {
 		}
 
 		data := Locals{
+			"title":        user.Name.String,
 			"csrf":         csrf.TemplateField(r),
 			"current_user": current_user(r),
 			"user":         user,
@@ -315,6 +316,7 @@ func main() {
 		return Render("layout", "books/show", Locals{
 			"current_user": current_user(r),
 			"user":         user,
+			"title":        book.Title,
 			"book":         book,
 			"shelves":      shelves,
 			"highlights":   highlights,
