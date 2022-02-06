@@ -50,7 +50,7 @@ const (
 	MAX_DB_OPEN_CONNECTIONS = 5
 	MAX_DB_IDLE_CONNECTIONS = 5
 	STATIC_DIR_PATH         = "public"
-	BIND_ADDRESS            = "127.0.0.1:3000"
+	BIND_ADDRESS            = "0.0.0.0:3000"
 	VIEWS_EXTENSION         = ".html"
 	SESSION_COOKIE_NAME     = "library"
 )
