@@ -16,7 +16,7 @@ func Helpers() {
 		return template.HTML(partial(path, data)), nil
 	}
 
-	helpers["meta_property"] = func(meta map[string]string, name string) string {
+	helpers["meta_property"] = func(meta map[string]string, name string) template.HTML {
 		if meta == nil {
 			return ""
 		}
@@ -26,10 +26,11 @@ func Helpers() {
 			return ""
 		}
 
-		return fmt.Sprintf(`<meta property="%s" value="%s"/>`, template.HTMLEscapeString(name), template.HTMLEscapeString(v))
+		tag := fmt.Sprintf(`<meta property="%s" value="%s"/>`, template.HTMLEscapeString(name), template.HTMLEscapeString(v))
+		return template.HTML(tag)
 	}
 
-	helpers["meta_name"] = func(meta map[string]string, name string) string {
+	helpers["meta_name"] = func(meta map[string]string, name string) template.HTML {
 		if meta == nil {
 			return ""
 		}
@@ -39,7 +40,8 @@ func Helpers() {
 			return ""
 		}
 
-		return fmt.Sprintf(`<meta name="%s" value="%s"/>`, name, v)
+		tag := fmt.Sprintf(`<meta name="%s" value="%s"/>`, template.HTMLEscapeString(name), template.HTMLEscapeString(v))
+		return template.HTML(tag)
 	}
 
 	helpers["can"] = can
@@ -54,18 +56,7 @@ func Helpers() {
 		return false
 	}
 
-	helpers["book_cover"] = func(image, google_books_id string) string {
-		if len(image) > 0 {
-			return "/books/image/" + image
-		}
-
-		if len(google_books_id) > 0 {
-			const googleBookURL = "https://books.google.com/books/content?id=%s&printsec=frontcover&img=1&zoom=1"
-			return fmt.Sprintf(googleBookURL, google_books_id)
-		}
-
-		return "/default_book"
-	}
+	helpers["book_cover"] = book_cover
 
 	helpers["simple_format"] = func(str string) (template.HTML, error) {
 		return template.HTML(strings.ReplaceAll(template.HTMLEscapeString(str), "\n", "<br/>")), nil
@@ -130,6 +121,19 @@ func current_user(r *http.Request) *User {
 	}
 
 	return &user
+}
+
+func book_cover(image, google_books_id string) string {
+	if len(image) > 0 {
+		return "/books/image/" + image
+	}
+
+	if len(google_books_id) > 0 {
+		const googleBookURL = "https://books.google.com/books/content?id=%s&printsec=frontcover&img=1&zoom=1"
+		return fmt.Sprintf(googleBookURL, google_books_id)
+	}
+
+	return "/default_book"
 }
 
 func can(who *User, do string, what interface{}) bool {

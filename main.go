@@ -33,16 +33,13 @@ func main() {
 		user := current_user(r)
 		if user != nil {
 			return Redirect(fmt.Sprintf("/users/%s", user.Slug))
-		} else {
-			return Render("layout", "index", map[string]interface{}{
-				"meta": map[string]string{},
-			})
 		}
+
+		return Render("layout", "index", Locals{"csrf": csrf.TemplateField(r)})
 	})
 
 	GET("/privacy", func(w Response, r Request) Output {
-		return Render("layout", "privacy", map[string]interface{}{
-			"meta":         map[string]string{},
+		return Render("layout", "privacy", Locals{
 			"current_user": current_user(r),
 		})
 	})
@@ -112,7 +109,7 @@ func main() {
 			return NotFound
 		}
 
-		data := map[string]interface{}{
+		data := Locals{
 			"current_user": current_user(r),
 			"user":         user,
 		}
@@ -140,7 +137,7 @@ func main() {
 			return Unauthorized
 		}
 
-		return Render("layout", "users/edit", map[string]interface{}{
+		return Render("layout", "users/edit", Locals{
 			"current_user": actor,
 			"user":         user,
 			"errors":       ValidationErrors{},
@@ -184,7 +181,7 @@ func main() {
 			user.Phone = params.Phone
 			user.Whatsapp = params.Whatsapp
 			user.Telegram = params.Telegram
-			return Render("layout", "users/edit", map[string]interface{}{
+			return Render("layout", "users/edit", Locals{
 				"current_user": actor,
 				"user":         user,
 				"errors":       errors,
@@ -212,7 +209,7 @@ func main() {
 			return Unauthorized
 		}
 
-		return Render("layout", "books/new", map[string]interface{}{
+		return Render("layout", "books/new", Locals{
 			"current_user": actor,
 			"user":         user,
 			"errors":       ValidationErrors{},
@@ -254,7 +251,7 @@ func main() {
 		}
 
 		if len(errors) != 0 {
-			return Render("layout", "books/new", map[string]interface{}{
+			return Render("layout", "books/new", Locals{
 				"book":         params,
 				"current_user": actor,
 				"user":         user,
@@ -312,13 +309,24 @@ func main() {
 			return InternalServerError(err)
 		}
 
-		return Render("layout", "books/show", map[string]interface{}{
+		return Render("layout", "books/show", Locals{
 			"current_user": current_user(r),
 			"user":         user,
 			"book":         book,
 			"shelves":      shelves,
 			"highlights":   highlights,
 			"csrf":         csrf.TemplateField(r),
+			"meta": map[string]string{
+				"og:title":       book.Title,
+				"author":         book.Author,
+				"description":    book.Description,
+				"og:description": book.Description,
+				"og:type":        "article",
+				"og:image":       book_cover(book.Image.String, book.GoogleBooksID.String),
+				"twitter:image":  book_cover(book.Image.String, book.GoogleBooksID.String),
+				"twitter:card":   "summary",
+				"twitter:title":  book.Title,
+			},
 		})
 	})
 
@@ -343,7 +351,7 @@ func main() {
 			return Unauthorized
 		}
 
-		return Render("layout", "books/new", map[string]interface{}{
+		return Render("layout", "books/new", Locals{
 			"current_user": actor,
 			"user":         user,
 			"book":         book,
@@ -399,7 +407,7 @@ func main() {
 			book.Description = params.Description
 			book.Publisher = params.Publisher
 			book.PageCount = params.PageCount
-			return Render("layout", "books/new", map[string]interface{}{
+			return Render("layout", "books/new", Locals{
 				"current_user": actor,
 				"user":         user,
 				"book":         book,
@@ -537,7 +545,7 @@ func main() {
 			return InternalServerError(err)
 		}
 
-		return Render("layout", "shelves/index", map[string]interface{}{
+		return Render("layout", "shelves/index", Locals{
 			"current_user": actor,
 			"user":         user,
 			"shelves":      shelves,
@@ -571,7 +579,7 @@ func main() {
 				return InternalServerError(err)
 			}
 
-			return Render("layout", "shelves/index", map[string]interface{}{
+			return Render("layout", "shelves/index", Locals{
 				"current_user": actor,
 				"user":         user,
 				"shelves":      shelves,
@@ -607,7 +615,7 @@ func main() {
 			return Unauthorized
 		}
 
-		return Render("layout", "shelves/edit", map[string]interface{}{
+		return Render("layout", "shelves/edit", Locals{
 			"current_user": actor,
 			"user":         user,
 			"shelf":        shelf,
@@ -643,7 +651,7 @@ func main() {
 
 		errors := params.Validate()
 		if len(errors) > 0 {
-			return Render("layout", "shelves/edit", map[string]interface{}{
+			return Render("layout", "shelves/edit", Locals{
 				"current_user": actor,
 				"user":         user,
 				"shelf":        params,
@@ -773,7 +781,7 @@ func main() {
 			return Unauthorized
 		}
 
-		return Render("layout", "highlights/new", map[string]interface{}{
+		return Render("layout", "highlights/new", Locals{
 			"current_user": actor,
 			"book":         book,
 			"user":         user,
@@ -819,7 +827,7 @@ func main() {
 		}
 
 		if len(errors) > 0 {
-			return Render("layout", "highlights/new", map[string]interface{}{
+			return Render("layout", "highlights/new", Locals{
 				"current_user": actor,
 				"book":         book,
 				"user":         user,
@@ -881,7 +889,7 @@ func main() {
 			return Unauthorized
 		}
 
-		return Render("layout", "highlights/new", map[string]interface{}{
+		return Render("layout", "highlights/new", Locals{
 			"current_user": actor,
 			"book":         book,
 			"user":         user,
@@ -936,7 +944,7 @@ func main() {
 		if len(errors) > 0 {
 			highlight.Content = params.Content
 			highlight.Page = params.Page
-			return Render("layout", "highlights/new", map[string]interface{}{
+			return Render("layout", "highlights/new", Locals{
 				"current_user": actor,
 				"user":         user,
 				"book":         book,

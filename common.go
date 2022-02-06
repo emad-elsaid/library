@@ -65,6 +65,7 @@ var (
 type Response = http.ResponseWriter
 type Request = *http.Request
 type Output = http.HandlerFunc
+type Locals = map[string]interface{} // passed to views/templates
 
 const (
 	_        = iota
@@ -265,7 +266,7 @@ func partial(path string, data interface{}) string {
 	return w.String()
 }
 
-func Render(path string, view string, data map[string]interface{}) http.HandlerFunc {
+func Render(path string, view string, data Locals) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		data["view"] = view
 		fmt.Fprint(w, partial(path, data))
