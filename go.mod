@@ -17,7 +17,7 @@ require github.com/pkg/errors v0.9.1 // indirect
 require (
 	cloud.google.com/go v0.65.0 // indirect
 	github.com/golang/protobuf v1.4.2 // indirect
-	github.com/gorilla/securecookie v1.1.1
+	github.com/gorilla/securecookie v1.1.1 // indirect
 	github.com/gorilla/sessions v1.2.1
 	golang.org/x/net v0.0.0-20200822124328-c89045814202 // indirect
 	google.golang.org/appengine v1.6.6 // indirect

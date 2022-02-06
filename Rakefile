@@ -7,6 +7,6 @@ ActiveRecord::Base.schema_format = :sql
 
 namespace :db do
   task :load_config do
-    load './main'
+    set :database, { adapter: 'postgresql', encoding: 'unicode', pool: 5, url: ENV['DATABASE_URL'] }
   end
 end

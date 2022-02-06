@@ -37,9 +37,10 @@ So I sat down and wrote my own simple library program.
 # Start the server
 
 - Clone it
-- Install dependencies `bundle install`
+- You need ruby and go languages tools
+- Install dependencies `bundle install` `go get .`
 - Setup the database `rake db:setup`
-- Run the server `bundle exec ./main`
+- Run the server `go run *.go`
 
 # Deployment
 
