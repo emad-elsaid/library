@@ -41,6 +41,7 @@ func main() {
 	GET("/privacy", func(w Response, r Request) Output {
 		return Render("layout", "privacy", Locals{
 			"current_user": current_user(r),
+			"csrf":         csrf.TemplateField(r),
 		})
 	})
 
@@ -110,6 +111,7 @@ func main() {
 		}
 
 		data := Locals{
+			"csrf":         csrf.TemplateField(r),
 			"current_user": current_user(r),
 			"user":         user,
 		}
@@ -141,6 +143,7 @@ func main() {
 			"current_user": actor,
 			"user":         user,
 			"errors":       ValidationErrors{},
+			"csrf":         csrf.TemplateField(r),
 		})
 	}, loggedinMiddleware)
 
@@ -185,6 +188,7 @@ func main() {
 				"current_user": actor,
 				"user":         user,
 				"errors":       errors,
+				"csrf":         csrf.TemplateField(r),
 			})
 		}
 
