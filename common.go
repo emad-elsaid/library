@@ -97,7 +97,9 @@ func Start() {
 	compileViews()
 	middlewares := []func(http.Handler) http.Handler{
 		HTTPMethodOverrideHandler,
-		csrf.Protect([]byte(os.Getenv("SESSION_SECRET"))),
+		csrf.Protect(
+			[]byte(os.Getenv("SESSION_SECRET")),
+			csrf.Path("/")),
 		RequestLoggerHandler,
 	}
 
