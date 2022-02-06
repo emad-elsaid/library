@@ -65,7 +65,7 @@ var (
 type Response = http.ResponseWriter
 type Request = *http.Request
 type Output = http.HandlerFunc
-type Locals = map[string]interface{} // passed to views/templates
+type Locals map[string]interface{} // passed to views/templates
 
 const (
 	_        = iota
