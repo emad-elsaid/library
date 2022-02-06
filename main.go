@@ -70,8 +70,8 @@ func main() {
 			Email   string `json:"email"`
 			Picture string `json:"picture"`
 		}{}
-		err = json.Unmarshal(body, &user)
-		if err != nil {
+
+		if err = json.Unmarshal(body, &user); err != nil {
 			return InternalServerError(err)
 		}
 
@@ -188,8 +188,7 @@ func main() {
 			})
 		}
 
-		err = queries.UpdateUser(r.Context(), params)
-		if err != nil {
+		if err = queries.UpdateUser(r.Context(), params); err != nil {
 			return InternalServerError(err)
 		}
 
@@ -416,8 +415,7 @@ func main() {
 			})
 		}
 
-		err = queries.UpdateBook(r.Context(), params)
-		if err != nil {
+		if err = queries.UpdateBook(r.Context(), params); err != nil {
 			return InternalServerError(err)
 		}
 
@@ -479,8 +477,7 @@ func main() {
 			os.Remove(path.Join(BOOK_COVER_PATH, book.Image.String))
 		}
 
-		err = queries.DeleteBook(r.Context(), book.ID)
-		if err != nil {
+		if err = queries.DeleteBook(r.Context(), book.ID); err != nil {
 			return InternalServerError(err)
 		}
 
@@ -589,8 +586,7 @@ func main() {
 			})
 		}
 
-		err = queries.NewShelf(r.Context(), params)
-		if err != nil {
+		if err = queries.NewShelf(r.Context(), params); err != nil {
 			return InternalServerError(err)
 		}
 
@@ -660,8 +656,7 @@ func main() {
 			})
 		}
 
-		err = queries.UpdateShelf(r.Context(), params)
-		if err != nil {
+		if err = queries.UpdateShelf(r.Context(), params); err != nil {
 			return InternalServerError(err)
 		}
 
@@ -689,8 +684,7 @@ func main() {
 			return Unauthorized
 		}
 
-		err = queries.MoveShelfUp(r.Context(), shelf.ID)
-		if err != nil {
+		if err = queries.MoveShelfUp(r.Context(), shelf.ID); err != nil {
 			return InternalServerError(err)
 		}
 
@@ -718,8 +712,7 @@ func main() {
 			return Unauthorized
 		}
 
-		err = queries.MoveShelfDown(r.Context(), shelf.ID)
-		if err != nil {
+		if err = queries.MoveShelfDown(r.Context(), shelf.ID); err != nil {
 			return InternalServerError(err)
 		}
 
@@ -747,13 +740,11 @@ func main() {
 			return Unauthorized
 		}
 
-		err = queries.RemoveShelf(r.Context(), shelf.ID)
-		if err != nil {
+		if err = queries.RemoveShelf(r.Context(), shelf.ID); err != nil {
 			return InternalServerError(err)
 		}
 
-		err = queries.DeleteShelf(r.Context(), shelf.ID)
-		if err != nil {
+		if err = queries.DeleteShelf(r.Context(), shelf.ID); err != nil {
 			return InternalServerError(err)
 		}
 
@@ -954,8 +945,7 @@ func main() {
 			})
 		}
 
-		err = queries.UpdateHighlight(r.Context(), params)
-		if err != nil {
+		if err = queries.UpdateHighlight(r.Context(), params); err != nil {
 			return InternalServerError(err)
 		}
 
@@ -1010,8 +1000,7 @@ func main() {
 			os.Remove(path.Join(HIGHLIGHT_IMAGE_PATH, highlight.Image.String))
 		}
 
-		err = queries.DeleteHighlight(r.Context(), highlight.ID)
-		if err != nil {
+		if err = queries.DeleteHighlight(r.Context(), highlight.ID); err != nil {
 			return InternalServerError(err)
 		}
 
