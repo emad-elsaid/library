@@ -1,31 +1,31 @@
-    {{ if .user }}
-      <a href="/users/{{ .user.Slug }}">
-        <figure class="image is-64x64 container">
-          <img class="is-rounded" src="{{ or .user.Image.String "/default_user" }}"/>
-        </figure>
-      </a>
-    {{ end }}
+{{ if .user }}
+<a href="/users/{{ .user.Slug }}">
+  <figure class="image is-64x64 container">
+    <img class="is-rounded" src="{{ or .user.Image.String "/default_user" }}"/>
+  </figure>
+</a>
+{{ end }}
 
-    <h1 class="title is-uppercase has-text-weight-bold mt-4">
-      {{ if .user }}
-        <a href="/users/{{ .user.Slug }}">
-          {{ if eq .current_user .user }}
-            Your Library
-          {{ else }}
-            {{ .user.Name.String }}'s Library
-          {{ end }}
-        </a>
-      {{ else }}
-        Library
-      {{ end }}
-    </h1>
-
-    {{ if can .current_user "login" nil }}
-      <form action="/auth/google" method="POST">
-        {{ .csrf }}
-        <input name="origin" type="hidden" value="{{ .path_info }}"/>
-        <button class="button">
-          Login with Google
-        </button>
-      </form>
+<h1 class="title is-uppercase has-text-weight-bold mt-4">
+  {{ if .user }}
+  <a href="/users/{{ .user.Slug }}">
+    {{ if eq .current_user .user }}
+    Your Library
+    {{ else }}
+    {{ .user.Name.String }}'s Library
     {{ end }}
+  </a>
+  {{ else }}
+  Library
+  {{ end }}
+</h1>
+
+{{ if can .current_user "login" nil }}
+<form action="/auth/google" method="POST">
+  {{ .csrf }}
+  <input name="origin" type="hidden" value="{{ .path_info }}"/>
+  <button class="button">
+    Login with Google
+  </button>
+</form>
+{{ end }}
