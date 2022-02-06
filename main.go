@@ -24,7 +24,7 @@ func main() {
 	google_conf := &oauth2.Config{
 		ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
 		ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
-		RedirectURL:  "http://localhost:3000/auth/google/callback",
+		RedirectURL:  os.Getenv("DOMAIN") + "/auth/google/callback",
 		Scopes:       []string{"email", "profile"},
 		Endpoint:     google.Endpoint,
 	}
