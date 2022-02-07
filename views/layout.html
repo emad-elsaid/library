@@ -20,13 +20,9 @@
     <link rel="stylesheet" href="/style.css?v=2">
   </head>
   <body>
-    <section class="hero">
-      <div class="hero-head">
-        {{ if .current_user }}
-          {{ template "partials/user_nav" . }}
-        {{ end }}
-      </div>
+    {{ if .current_user }} {{ template "partials/user_nav" . }} {{ end }}
 
+    <section class="hero">
       <div class="hero-body has-text-centered">
         {{ template "partials/header" . }}
       </div>
