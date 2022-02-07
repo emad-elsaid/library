@@ -82,14 +82,13 @@ const (
 )
 
 func init() {
-	logger := log.Default()
-	logger.SetFlags(log.Ldate)
-
 	db, err := connectToDB()
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	logger := log.Default()
+	logger.SetFlags(log.Ldate)
 	ql := QueryLogger{db, logger}
 	queries = New(ql)
 
