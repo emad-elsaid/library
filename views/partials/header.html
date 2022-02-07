@@ -23,9 +23,6 @@
 {{ if can .current_user "login" nil }}
 <form action="/auth/google" method="POST">
   {{ .csrf }}
-  <input name="origin" type="hidden" value="{{ .path_info }}"/>
-  <button class="button">
-    Login with Google
-  </button>
+  <button class="button"> Login with Google </button>
 </form>
 {{ end }}
