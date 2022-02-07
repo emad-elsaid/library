@@ -9,8 +9,6 @@ import (
 	"path"
 
 	"github.com/google/uuid"
-	"github.com/gorilla/csrf"
-	"github.com/gorilla/mux"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 )
@@ -35,13 +33,13 @@ func main() {
 			return Redirect(fmt.Sprintf("/users/%s", user.Slug))
 		}
 
-		return Render("layout", "index", Locals{"csrf": csrf.TemplateField(r)})
+		return Render("layout", "index", Locals{"csrf": CSRF(r)})
 	})
 
 	GET("/privacy", func(w Response, r Request) Output {
 		return Render("layout", "privacy", Locals{
 			"current_user": current_user(r),
-			"csrf":         csrf.TemplateField(r),
+			"csrf":         CSRF(r),
 		})
 	})
 
@@ -103,7 +101,7 @@ func main() {
 	})
 
 	GET("/users/{user}", func(w Response, r Request) Output {
-		vars := mux.Vars(r)
+		vars := VARS(r)
 
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
@@ -112,7 +110,7 @@ func main() {
 
 		data := Locals{
 			"title":        user.Name.String,
-			"csrf":         csrf.TemplateField(r),
+			"csrf":         CSRF(r),
 			"current_user": current_user(r),
 			"user":         user,
 		}
@@ -129,7 +127,7 @@ func main() {
 
 	GET("/users/{user}/edit", func(w Response, r Request) Output {
 		actor := current_user(r)
-		vars := mux.Vars(r)
+		vars := VARS(r)
 
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
@@ -144,13 +142,13 @@ func main() {
 			"current_user": actor,
 			"user":         user,
 			"errors":       ValidationErrors{},
-			"csrf":         csrf.TemplateField(r),
+			"csrf":         CSRF(r),
 		})
 	}, loggedinMiddleware)
 
 	POST("/users/{user}", func(w Response, r Request) Output {
 		actor := current_user(r)
-		vars := mux.Vars(r)
+		vars := VARS(r)
 
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
@@ -189,7 +187,7 @@ func main() {
 				"current_user": actor,
 				"user":         user,
 				"errors":       errors,
-				"csrf":         csrf.TemplateField(r),
+				"csrf":         CSRF(r),
 			})
 		}
 
@@ -202,7 +200,7 @@ func main() {
 
 	GET("/users/{user}/books/new", func(w Response, r Request) Output {
 		actor := current_user(r)
-		vars := mux.Vars(r)
+		vars := VARS(r)
 
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
@@ -217,13 +215,13 @@ func main() {
 			"current_user": actor,
 			"user":         user,
 			"errors":       ValidationErrors{},
-			"csrf":         csrf.TemplateField(r),
+			"csrf":         CSRF(r),
 		})
 	}, loggedinMiddleware)
 
 	POST("/users/{user}/books", func(w Response, r Request) Output {
 		actor := current_user(r)
-		vars := mux.Vars(r)
+		vars := VARS(r)
 
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
@@ -260,7 +258,7 @@ func main() {
 				"current_user": actor,
 				"user":         user,
 				"errors":       errors,
-				"csrf":         csrf.TemplateField(r),
+				"csrf":         CSRF(r),
 			})
 		}
 
@@ -288,7 +286,7 @@ func main() {
 	})
 
 	GET("/users/{user}/books/{isbn}", func(w Response, r Request) Output {
-		vars := mux.Vars(r)
+		vars := VARS(r)
 
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
@@ -320,7 +318,7 @@ func main() {
 			"book":         book,
 			"shelves":      shelves,
 			"highlights":   highlights,
-			"csrf":         csrf.TemplateField(r),
+			"csrf":         CSRF(r),
 			"meta": map[string]string{
 				"og:title":       book.Title,
 				"author":         book.Author,
@@ -337,7 +335,7 @@ func main() {
 
 	GET("/users/{user}/books/{isbn}/edit", func(w Response, r Request) Output {
 		actor := current_user(r)
-		vars := mux.Vars(r)
+		vars := VARS(r)
 
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
@@ -360,14 +358,14 @@ func main() {
 			"current_user": actor,
 			"user":         user,
 			"book":         book,
-			"csrf":         csrf.TemplateField(r),
+			"csrf":         CSRF(r),
 			"errors":       ValidationErrors{},
 		})
 	}, loggedinMiddleware)
 
 	POST("/users/{user}/books/{isbn}", func(w Response, r Request) Output {
 		actor := current_user(r)
-		vars := mux.Vars(r)
+		vars := VARS(r)
 
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
@@ -416,7 +414,7 @@ func main() {
 				"current_user": actor,
 				"user":         user,
 				"book":         book,
-				"csrf":         csrf.TemplateField(r),
+				"csrf":         CSRF(r),
 				"errors":       errors,
 			})
 		}
@@ -452,7 +450,7 @@ func main() {
 
 	DELETE("/users/{user}/books/{isbn}", func(w Response, r Request) Output {
 		actor := current_user(r)
-		vars := mux.Vars(r)
+		vars := VARS(r)
 
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
@@ -492,7 +490,7 @@ func main() {
 
 	POST("/users/{user}/books/{isbn}/shelf", func(w Response, r Request) Output {
 		actor := current_user(r)
-		vars := mux.Vars(r)
+		vars := VARS(r)
 
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
@@ -532,7 +530,7 @@ func main() {
 
 	GET("/users/{user}/shelves", func(w Response, r Request) Output {
 		actor := current_user(r)
-		vars := mux.Vars(r)
+		vars := VARS(r)
 
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
@@ -553,13 +551,13 @@ func main() {
 			"user":         user,
 			"shelves":      shelves,
 			"errors":       ValidationErrors{},
-			"csrf":         csrf.TemplateField(r),
+			"csrf":         CSRF(r),
 		})
 	}, loggedinMiddleware)
 
 	POST("/users/{user}/shelves", func(w Response, r Request) Output {
 		actor := current_user(r)
-		vars := mux.Vars(r)
+		vars := VARS(r)
 
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
@@ -587,7 +585,7 @@ func main() {
 				"user":         user,
 				"shelves":      shelves,
 				"shelf":        params,
-				"csrf":         csrf.TemplateField(r),
+				"csrf":         CSRF(r),
 				"errors":       errors,
 			})
 		}
@@ -601,7 +599,7 @@ func main() {
 
 	GET("/users/{user}/shelves/{shelf}/edit", func(w Response, r Request) Output {
 		actor := current_user(r)
-		vars := mux.Vars(r)
+		vars := VARS(r)
 
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
@@ -621,13 +619,13 @@ func main() {
 			"current_user": actor,
 			"user":         user,
 			"shelf":        shelf,
-			"csrf":         csrf.TemplateField(r),
+			"csrf":         CSRF(r),
 		})
 	}, loggedinMiddleware)
 
 	POST("/users/{user}/shelves/{shelf}", func(w Response, r Request) Output {
 		actor := current_user(r)
-		vars := mux.Vars(r)
+		vars := VARS(r)
 
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
@@ -657,7 +655,7 @@ func main() {
 				"current_user": actor,
 				"user":         user,
 				"shelf":        params,
-				"csrf":         csrf.TemplateField(r),
+				"csrf":         CSRF(r),
 				"errors":       errors,
 			})
 		}
@@ -671,7 +669,7 @@ func main() {
 
 	POST("/users/{user}/shelves/{shelf}/up", func(w Response, r Request) Output {
 		actor := current_user(r)
-		vars := mux.Vars(r)
+		vars := VARS(r)
 
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
@@ -699,7 +697,7 @@ func main() {
 
 	POST("/users/{user}/shelves/{shelf}/down", func(w Response, r Request) Output {
 		actor := current_user(r)
-		vars := mux.Vars(r)
+		vars := VARS(r)
 
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
@@ -727,7 +725,7 @@ func main() {
 
 	DELETE("/users/{user}/shelves/{shelf}", func(w Response, r Request) Output {
 		actor := current_user(r)
-		vars := mux.Vars(r)
+		vars := VARS(r)
 
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
@@ -759,7 +757,7 @@ func main() {
 
 	GET("/users/{user}/books/{isbn}/highlights/new", func(w Response, r Request) Output {
 		actor := current_user(r)
-		vars := mux.Vars(r)
+		vars := VARS(r)
 
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
@@ -783,13 +781,13 @@ func main() {
 			"book":         book,
 			"user":         user,
 			"errors":       ValidationErrors{},
-			"csrf":         csrf.TemplateField(r),
+			"csrf":         CSRF(r),
 		})
 	}, loggedinMiddleware)
 
 	POST("/users/{user}/books/{isbn}/highlights", func(w Response, r Request) Output {
 		actor := current_user(r)
-		vars := mux.Vars(r)
+		vars := VARS(r)
 
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
@@ -830,7 +828,7 @@ func main() {
 				"user":         user,
 				"highlight":    params,
 				"errors":       errors,
-				"csrf":         csrf.TemplateField(r),
+				"csrf":         CSRF(r),
 			})
 		}
 
@@ -859,7 +857,7 @@ func main() {
 
 	GET("/users/{user}/books/{isbn}/highlights/{id}/edit", func(w Response, r Request) Output {
 		actor := current_user(r)
-		vars := mux.Vars(r)
+		vars := VARS(r)
 
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
@@ -892,13 +890,13 @@ func main() {
 			"user":         user,
 			"highlight":    highlight,
 			"errors":       ValidationErrors{},
-			"csrf":         csrf.TemplateField(r),
+			"csrf":         CSRF(r),
 		})
 	}, loggedinMiddleware)
 
 	POST("/users/{user}/books/{isbn}/highlights/{id}", func(w Response, r Request) Output {
 		actor := current_user(r)
-		vars := mux.Vars(r)
+		vars := VARS(r)
 
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
@@ -947,7 +945,7 @@ func main() {
 				"book":         book,
 				"highlight":    highlight,
 				"errors":       errors,
-				"csrf":         csrf.TemplateField(r),
+				"csrf":         CSRF(r),
 			})
 		}
 
@@ -975,7 +973,7 @@ func main() {
 
 	DELETE("/users/{user}/books/{isbn}/highlights/{id}", func(w Response, r Request) Output {
 		actor := current_user(r)
-		vars := mux.Vars(r)
+		vars := VARS(r)
 
 		user, err := queries.UserBySlug(r.Context(), vars["user"])
 		if err != nil {

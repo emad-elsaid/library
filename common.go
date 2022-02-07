@@ -47,18 +47,23 @@ import (
 )
 
 const (
+	APP_NAME                = "library"
 	MAX_DB_OPEN_CONNECTIONS = 5
 	MAX_DB_IDLE_CONNECTIONS = 5
 	STATIC_DIR_PATH         = "public"
 	BIND_ADDRESS            = "0.0.0.0:3000"
 	VIEWS_EXTENSION         = ".html"
-	SESSION_COOKIE_NAME     = "library"
+	SESSION_COOKIE_NAME     = APP_NAME + "_session"
+	CSRF_COOKIE_NAME        = APP_NAME + "_csrf"
 )
 
 var (
 	queries *Queries
 	router  *mux.Router
 	session *sessions.CookieStore
+
+	VARS = mux.Vars
+	CSRF = csrf.TemplateField
 )
 
 // Some aliases to make it easier
@@ -90,7 +95,7 @@ func init() {
 
 	router = mux.NewRouter()
 	session = sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET")))
-	csrf.TemplateTag = "csrf"
+	session.Options.HttpOnly = true
 }
 
 func Start() {
@@ -99,7 +104,10 @@ func Start() {
 		HTTPMethodOverrideHandler,
 		csrf.Protect(
 			[]byte(os.Getenv("SESSION_SECRET")),
-			csrf.Path("/")),
+			csrf.Path("/"),
+			csrf.FieldName("csrf"),
+			csrf.CookieName(CSRF_COOKIE_NAME),
+		),
 		RequestLoggerHandler,
 	}
 
@@ -132,7 +140,6 @@ type QueryLogger struct {
 func (p QueryLogger) label(s string) string {
 	return "\033[97;42m " + s + " \033[0m"
 }
-
 func (p QueryLogger) ExecContext(ctx context.Context, q string, args ...interface{}) (sql.Result, error) {
 	r, err := p.db.ExecContext(ctx, q, args...)
 	a, _ := r.RowsAffected()
@@ -256,7 +263,7 @@ func compileViews() {
 func partial(path string, data interface{}) string {
 	v := templates.Lookup(path)
 	if v == nil {
-		return "view %s not found"
+		return fmt.Sprintf("view %s not found", path)
 	}
 
 	w := bytes.NewBufferString("")
