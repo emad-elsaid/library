@@ -87,11 +87,8 @@ func init() {
 		log.Fatal(err)
 	}
 
-	logger := log.Default()
-	logger.SetFlags(log.Ldate)
-	ql := QueryLogger{db, logger}
-	queries = New(ql)
-
+	log.SetFlags(log.Ldate)
+	queries = New(QueryLogger{db})
 	router = mux.NewRouter()
 	session = sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET")))
 	session.Options.HttpOnly = true
@@ -129,46 +126,59 @@ func Start() {
 	log.Fatal(srv.ListenAndServe())
 }
 
+// LOGGING ===============================================
+
+type logMark struct {
+	label string
+	log   string
+	args  []interface{}
+	start time.Time
+}
+
+func NewLogMark(label string, log string, args ...interface{}) logMark {
+	return logMark{
+		label: label,
+		log:   log,
+		args:  args,
+		start: time.Now(),
+	}
+}
+
+func (o logMark) Debug() {
+	if len(o.args) > 0 {
+		log.Printf("\033[97;42m %s \033[0m (%s) %s %v", o.label, time.Now().Sub(o.start), o.log, o.args)
+	} else {
+		log.Printf("\033[97;42m %s \033[0m (%s) %s", o.label, time.Now().Sub(o.start), o.log)
+	}
+}
+func (o logMark) Info() {
+	if len(o.args) > 0 {
+		log.Printf("\033[97;43m %s \033[0m (%s) %s %v", o.label, time.Now().Sub(o.start), o.log, o.args)
+	} else {
+		log.Printf("\033[97;43m %s \033[0m (%s) %s", o.label, time.Now().Sub(o.start), o.log)
+	}
+}
+
 // DATABASE CONNECTION ===================================
 
 type QueryLogger struct {
-	db     *sqlx.DB
-	logger *log.Logger
+	db *sqlx.DB
 }
 
-func (p QueryLogger) label(s string) string {
-	return "\033[97;42m " + s + " \033[0m"
-}
 func (p QueryLogger) ExecContext(ctx context.Context, q string, args ...interface{}) (sql.Result, error) {
-	r, err := p.db.ExecContext(ctx, q, args...)
-	a, _ := r.RowsAffected()
-
-	p.logger.Print(p.label("DB Exec:"), strings.ReplaceAll(q, "\n", " "), args, "RowsAffected", a)
-	return r, err
+	defer NewLogMark("DB Exec", q, args).Debug()
+	return p.db.ExecContext(ctx, q, args...)
 }
 func (p QueryLogger) PrepareContext(ctx context.Context, q string) (*sql.Stmt, error) {
 	return p.db.PrepareContext(ctx, q)
 }
 func (p QueryLogger) QueryContext(ctx context.Context, q string, args ...interface{}) (*sql.Rows, error) {
-	r, err := p.db.QueryContext(ctx, q, args...)
-
-	p.logger.Print(p.label("DB Query:"), q, args)
-	if err != nil {
-		p.logger.Printf("Error: %s", err.Error())
-	}
-
-	return r, err
+	defer NewLogMark("DB Query", q, args).Debug()
+	return p.db.QueryContext(ctx, q, args...)
 }
 func (p QueryLogger) QueryRowContext(ctx context.Context, q string, args ...interface{}) *sql.Row {
-	r := p.db.QueryRowContext(ctx, q, args...)
-
-	p.logger.Print(p.label("DB Row:"), q, args)
-	err := r.Err()
-	if err != nil {
-		p.logger.Printf("Error: %s", err.Error())
-	}
-
-	return r
+	defer NewLogMark("DB Row", q, args).Debug()
+	return p.db.QueryRowContext(ctx, q, args...)
 }
 
 func connectToDB() (*sqlx.DB, error) {
@@ -329,9 +339,8 @@ func HTTPMethodOverrideHandler(h http.Handler) http.Handler {
 
 func RequestLoggerHandler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
+		defer NewLogMark(r.Method, r.URL.Path).Info()
 		h.ServeHTTP(w, r)
-		log.Printf("\033[97;43m %s \033[0m %s -- %s", r.Method, r.URL.Path, time.Now().Sub(start))
 	})
 }
 
