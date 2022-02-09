@@ -87,8 +87,8 @@ func init() {
 		log.Fatal(err)
 	}
 
-	log.SetFlags(log.Ldate)
-	queries = New(QueryLogger{db})
+	log.SetFlags(log.Ltime)
+	queries = New(queryLogger{db})
 	router = mux.NewRouter()
 	session = sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET")))
 	session.Options.HttpOnly = true
@@ -97,7 +97,7 @@ func init() {
 func Start() {
 	compileViews()
 	middlewares := []func(http.Handler) http.Handler{
-		HTTPMethodOverrideHandler,
+		methodOverrideHandler,
 		csrf.Protect(
 			[]byte(os.Getenv("SESSION_SECRET")),
 			csrf.Path("/"),
@@ -161,22 +161,22 @@ func (o logMark) Info() {
 
 // DATABASE CONNECTION ===================================
 
-type QueryLogger struct {
+type queryLogger struct {
 	db *sqlx.DB
 }
 
-func (p QueryLogger) ExecContext(ctx context.Context, q string, args ...interface{}) (sql.Result, error) {
+func (p queryLogger) ExecContext(ctx context.Context, q string, args ...interface{}) (sql.Result, error) {
 	defer NewLogMark("DB Exec", q, args).Debug()
 	return p.db.ExecContext(ctx, q, args...)
 }
-func (p QueryLogger) PrepareContext(ctx context.Context, q string) (*sql.Stmt, error) {
+func (p queryLogger) PrepareContext(ctx context.Context, q string) (*sql.Stmt, error) {
 	return p.db.PrepareContext(ctx, q)
 }
-func (p QueryLogger) QueryContext(ctx context.Context, q string, args ...interface{}) (*sql.Rows, error) {
+func (p queryLogger) QueryContext(ctx context.Context, q string, args ...interface{}) (*sql.Rows, error) {
 	defer NewLogMark("DB Query", q, args).Debug()
 	return p.db.QueryContext(ctx, q, args...)
 }
-func (p QueryLogger) QueryRowContext(ctx context.Context, q string, args ...interface{}) *sql.Row {
+func (p queryLogger) QueryRowContext(ctx context.Context, q string, args ...interface{}) *sql.Row {
 	defer NewLogMark("DB Row", q, args).Debug()
 	return p.db.QueryRowContext(ctx, q, args...)
 }
@@ -194,6 +194,7 @@ func connectToDB() (*sqlx.DB, error) {
 }
 
 // ROUTES HELPERS ==========================================
+
 type HandlerFunc func(http.ResponseWriter, *http.Request) http.HandlerFunc
 
 func handlerFuncToHttpHandler(handler HandlerFunc) http.HandlerFunc {
@@ -310,6 +311,7 @@ func applyMiddlewares(handler http.HandlerFunc, middlewares ...func(http.Handler
 }
 
 // SERVER MIDDLEWARES ==============================
+
 func staticWithoutDirectoryListingHandler() http.Handler {
 	dir := http.Dir(STATIC_DIR_PATH)
 	server := http.FileServer(dir)
@@ -326,7 +328,7 @@ func staticWithoutDirectoryListingHandler() http.Handler {
 }
 
 // Derived from Gorilla middleware https://github.com/gorilla/handlers/blob/v1.5.1/handlers.go#L134
-func HTTPMethodOverrideHandler(h http.Handler) http.Handler {
+func methodOverrideHandler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
 			om := r.FormValue("_method")
