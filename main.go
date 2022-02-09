@@ -116,6 +116,9 @@ func main() {
 		}
 
 		unshelved_books, err := queries.UserUnshelvedBooks(r.Context(), user.ID)
+		if err != nil {
+			return InternalServerError(err)
+		}
 		if len(unshelved_books) > 0 {
 			data["unshelved_books"] = unshelved_books
 		}

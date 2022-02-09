@@ -68,6 +68,17 @@ func (q *Queries) BookByIsbnAndUser(ctx context.Context, arg BookByIsbnAndUserPa
 	return i, err
 }
 
+const booksCount = `-- name: BooksCount :one
+SELECT count(*) FROM books WHERE user_id = $1
+`
+
+func (q *Queries) BooksCount(ctx context.Context, userID int64) (int64, error) {
+	row := q.db.QueryRowContext(ctx, booksCount, userID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const deleteBook = `-- name: DeleteBook :exec
 DELETE FROM books WHERE id = $1
 `

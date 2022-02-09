@@ -107,6 +107,11 @@ func Helpers() {
 
 		return rv.Index(rv.Len() - 1)
 	}
+
+	helpers["books_count"] = func(u int64) int64 {
+		c, _ := queries.BooksCount(context.Background(), u)
+		return c
+	}
 }
 
 func loggedin(r *http.Request) bool {

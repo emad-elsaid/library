@@ -148,3 +148,6 @@ UPDATE shelves
 
 -- name: MoveBookToShelf :exec
 UPDATE books SET shelf_id = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2;
+
+-- name: BooksCount :one
+SELECT count(*) FROM books WHERE user_id = $1;

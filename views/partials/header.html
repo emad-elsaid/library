@@ -1,28 +1,50 @@
 {{ if .user }}
-<a href="/users/{{ .user.Slug }}">
-  <figure class="image is-64x64 container">
-    <img class="is-rounded" src="{{ or .user.Image.String "/default_user" }}"/>
-  </figure>
-</a>
+<div class="card">
+  <div class="card-content">
+    <div class="columns">
+      <div class="column">
+        <div class="media">
+          <div class="media-left">
+            <figure class="image is-64x64">
+              <a href="/users/{{ .user.Slug }}">
+                <img class="is-rounded" src="{{ or .user.Image.String "/default_user" }}"/>
+              </a>
+            </figure>
+          </div>
+          <div class="media-content">
+            <p class="title is-4">
+              {{ if .user }}
+              <a href="/users/{{ .user.Slug }}">
+                {{ if eq .current_user .user }} Your Library {{ else }} {{ .user.Name.String }}'s Library {{ end }}
+              </a>
+              {{ else }} Library {{ end }}
+            </p>
+            {{ if .user.Description.String }}
+            <p class="subtitle is-6"> {{ simple_format .user.Description.String }} </p>
+            {{ end }}
+          </div>
+        </div>
+      </div>
+      <div class="column is-narrow">
+        <nav class="level">
+          <div class="level-item has-text-centered">
+            <div>
+              <p class="heading">Books</p>
+              <p class="title">{{ books_count .user.ID }}</p>
+            </div>
+          </div>
+        </nav>
+      </div>
+    </div>
+  </div>
+</div>
 {{ end }}
 
-<h1 class="title is-uppercase has-text-weight-bold mt-4">
-  {{ if .user }}
-  <a href="/users/{{ .user.Slug }}">
-    {{ if eq .current_user .user }}
-    Your Library
-    {{ else }}
-    {{ .user.Name.String }}'s Library
-    {{ end }}
-  </a>
-  {{ else }}
-  Library
-  {{ end }}
-</h1>
-
 {{ if can .current_user "login" nil }}
-<form action="/auth/google" method="POST">
-  {{ .csrf }}
-  <button class="button"> Login with Google </button>
-</form>
+<div class="section has-text-centered">
+  <form action="/auth/google" method="POST">
+    {{ .csrf }}
+    <button class="button"> Login with Google </button>
+  </form>
+</div>
 {{ end }}

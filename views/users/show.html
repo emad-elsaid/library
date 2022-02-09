@@ -1,9 +1,3 @@
-{{ if .user.Description.String }}
-  <div class="notification">
-    {{ simple_format .user.Description.String }}
-  </div>
-{{ end }}
-
 {{ if .unshelved_books }}
   <h1 class="title is-3">Books lying around</h1>
 
