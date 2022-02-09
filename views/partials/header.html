@@ -15,7 +15,7 @@
             <p class="title is-4">
               {{ if .user }}
               <a href="/users/{{ .user.Slug }}">
-                {{ if eq .current_user .user }} Your Library {{ else }} {{ .user.Name.String }}'s Library {{ end }}
+                {{ if eq .current_user.ID .user.ID }} Your Library {{ else }} {{ .user.Name.String }}'s Library {{ end }}
               </a>
               {{ else }} Library {{ end }}
             </p>
