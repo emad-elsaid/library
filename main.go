@@ -618,6 +618,7 @@ func main() {
 		return Render("layout", "shelves/edit", Locals{
 			"current_user": actor,
 			"user":         user,
+			"errors":       ValidationErrors{},
 			"shelf":        shelf,
 			"csrf":         CSRF(r),
 		})
