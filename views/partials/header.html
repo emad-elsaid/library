@@ -13,11 +13,9 @@
           </div>
           <div class="media-content">
             <p class="title is-4">
-              {{ if .user }}
-              <a href="/users/{{ .user.Slug }}">
-                {{ if eq .current_user.ID .user.ID }} Your Library {{ else }} {{ .user.Name.String }}'s Library {{ end }}
-              </a>
-              {{ else }} Library {{ end }}
+              {{ if .user }} <a href="/users/{{ .user.Slug }}"> {{ .user.Name.String }}'s Library </a>
+              {{ else }} Library
+              {{ end }}
             </p>
             {{ if .user.Description.String }}
             <p class="subtitle is-6"> {{ simple_format .user.Description.String }} </p>
