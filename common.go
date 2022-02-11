@@ -58,7 +58,7 @@ const (
 )
 
 var (
-	queries *Queries
+	Q       *Queries
 	router  *mux.Router
 	session *sessions.CookieStore
 
@@ -82,13 +82,17 @@ const (
 )
 
 func init() {
-	db, err := connectToDB()
+	log.SetFlags(log.Ltime)
+
+	db, err := sqlx.Connect("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	log.SetFlags(log.Ltime)
-	queries = New(queryLogger{db})
+	db.SetMaxOpenConns(MAX_DB_OPEN_CONNECTIONS)
+	db.SetMaxIdleConns(MAX_DB_IDLE_CONNECTIONS)
+
+	Q = New(queryLogger{db})
 	router = mux.NewRouter()
 	session = sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET")))
 	session.Options.HttpOnly = true
@@ -164,18 +168,6 @@ func (p queryLogger) QueryContext(ctx context.Context, q string, args ...interfa
 func (p queryLogger) QueryRowContext(ctx context.Context, q string, args ...interface{}) *sql.Row {
 	defer Log(DEBUG, "DB Row", q, args)()
 	return p.db.QueryRowContext(ctx, q, args...)
-}
-
-func connectToDB() (*sqlx.DB, error) {
-	db, err := sqlx.Connect("postgres", os.Getenv("DATABASE_URL"))
-	if err != nil {
-		return nil, err
-	}
-
-	db.SetMaxOpenConns(MAX_DB_OPEN_CONNECTIONS)
-	db.SetMaxIdleConns(MAX_DB_IDLE_CONNECTIONS)
-
-	return db, err
 }
 
 // ROUTES HELPERS ==========================================

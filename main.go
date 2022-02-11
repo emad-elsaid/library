@@ -74,7 +74,7 @@ func main() {
 			return InternalServerError(err)
 		}
 
-		u, err := queries.Signup(r.Context(), SignupParams{
+		u, err := Q.Signup(r.Context(), SignupParams{
 			Name:  NullString(user.Name),
 			Image: NullString(user.Picture),
 			Slug:  uuid.New().String(),
@@ -103,7 +103,7 @@ func main() {
 	GET("/users/{user}", func(w Response, r Request) Output {
 		vars := VARS(r)
 
-		user, err := queries.UserBySlug(r.Context(), vars["user"])
+		user, err := Q.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
 		}
@@ -115,7 +115,7 @@ func main() {
 			"user":         user,
 		}
 
-		unshelved_books, err := queries.UserUnshelvedBooks(r.Context(), user.ID)
+		unshelved_books, err := Q.UserUnshelvedBooks(r.Context(), user.ID)
 		if err != nil {
 			return InternalServerError(err)
 		}
@@ -123,7 +123,7 @@ func main() {
 			data["unshelved_books"] = unshelved_books
 		}
 
-		data["shelves"], err = queries.Shelves(r.Context(), user.ID)
+		data["shelves"], err = Q.Shelves(r.Context(), user.ID)
 
 		return Render("layout", "users/show", data)
 	})
@@ -132,7 +132,7 @@ func main() {
 		actor := current_user(r)
 		vars := VARS(r)
 
-		user, err := queries.UserBySlug(r.Context(), vars["user"])
+		user, err := Q.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
 		}
@@ -153,7 +153,7 @@ func main() {
 		actor := current_user(r)
 		vars := VARS(r)
 
-		user, err := queries.UserBySlug(r.Context(), vars["user"])
+		user, err := Q.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
 		}
@@ -194,7 +194,7 @@ func main() {
 			})
 		}
 
-		if err = queries.UpdateUser(r.Context(), params); err != nil {
+		if err = Q.UpdateUser(r.Context(), params); err != nil {
 			return InternalServerError(err)
 		}
 
@@ -205,7 +205,7 @@ func main() {
 		actor := current_user(r)
 		vars := VARS(r)
 
-		user, err := queries.UserBySlug(r.Context(), vars["user"])
+		user, err := Q.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
 		}
@@ -226,7 +226,7 @@ func main() {
 		actor := current_user(r)
 		vars := VARS(r)
 
-		user, err := queries.UserBySlug(r.Context(), vars["user"])
+		user, err := Q.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
 		}
@@ -265,7 +265,7 @@ func main() {
 			})
 		}
 
-		book, err := queries.NewBook(r.Context(), params)
+		book, err := Q.NewBook(r.Context(), params)
 		if err != nil {
 			return InternalServerError(err)
 		}
@@ -276,7 +276,7 @@ func main() {
 				return InternalServerError(err)
 			}
 
-			err = queries.UpdateBookImage(r.Context(), UpdateBookImageParams{
+			err = Q.UpdateBookImage(r.Context(), UpdateBookImageParams{
 				Image: NullString(name),
 				ID:    book.ID,
 			})
@@ -291,12 +291,12 @@ func main() {
 	GET("/users/{user}/books/{isbn}", func(w Response, r Request) Output {
 		vars := VARS(r)
 
-		user, err := queries.UserBySlug(r.Context(), vars["user"])
+		user, err := Q.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return InternalServerError(err)
 		}
 
-		book, err := queries.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
+		book, err := Q.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
 			UserID: user.ID,
 			Isbn:   vars["isbn"],
 		})
@@ -304,12 +304,12 @@ func main() {
 			return NotFound
 		}
 
-		highlights, err := queries.Highlights(r.Context(), book.ID)
+		highlights, err := Q.Highlights(r.Context(), book.ID)
 		if err != nil {
 			return InternalServerError(err)
 		}
 
-		shelves, err := queries.Shelves(r.Context(), user.ID)
+		shelves, err := Q.Shelves(r.Context(), user.ID)
 		if err != nil {
 			return InternalServerError(err)
 		}
@@ -340,12 +340,12 @@ func main() {
 		actor := current_user(r)
 		vars := VARS(r)
 
-		user, err := queries.UserBySlug(r.Context(), vars["user"])
+		user, err := Q.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
 		}
 
-		book, err := queries.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
+		book, err := Q.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
 			UserID: user.ID,
 			Isbn:   vars["isbn"],
 		})
@@ -370,12 +370,12 @@ func main() {
 		actor := current_user(r)
 		vars := VARS(r)
 
-		user, err := queries.UserBySlug(r.Context(), vars["user"])
+		user, err := Q.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
 		}
 
-		book, err := queries.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
+		book, err := Q.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
 			UserID: user.ID,
 			Isbn:   vars["isbn"],
 		})
@@ -422,7 +422,7 @@ func main() {
 			})
 		}
 
-		if err = queries.UpdateBook(r.Context(), params); err != nil {
+		if err = Q.UpdateBook(r.Context(), params); err != nil {
 			return InternalServerError(err)
 		}
 
@@ -439,7 +439,7 @@ func main() {
 				}
 			}
 
-			err = queries.UpdateBookImage(r.Context(), UpdateBookImageParams{
+			err = Q.UpdateBookImage(r.Context(), UpdateBookImageParams{
 				Image: NullString(name),
 				ID:    book.ID,
 			})
@@ -455,12 +455,12 @@ func main() {
 		actor := current_user(r)
 		vars := VARS(r)
 
-		user, err := queries.UserBySlug(r.Context(), vars["user"])
+		user, err := Q.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
 		}
 
-		book, err := queries.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
+		book, err := Q.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
 			UserID: user.ID,
 			Isbn:   vars["isbn"],
 		})
@@ -472,7 +472,7 @@ func main() {
 			return Unauthorized
 		}
 
-		images, err := queries.HighlightsWithImages(r.Context(), book.ID)
+		images, err := Q.HighlightsWithImages(r.Context(), book.ID)
 		if err != nil {
 			return InternalServerError(err)
 		}
@@ -484,7 +484,7 @@ func main() {
 			os.Remove(path.Join(BOOK_COVER_PATH, book.Image.String))
 		}
 
-		if err = queries.DeleteBook(r.Context(), book.ID); err != nil {
+		if err = Q.DeleteBook(r.Context(), book.ID); err != nil {
 			return InternalServerError(err)
 		}
 
@@ -495,12 +495,12 @@ func main() {
 		actor := current_user(r)
 		vars := VARS(r)
 
-		user, err := queries.UserBySlug(r.Context(), vars["user"])
+		user, err := Q.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
 		}
 
-		book, err := queries.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
+		book, err := Q.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
 			UserID: user.ID,
 			Isbn:   vars["isbn"],
 		})
@@ -512,7 +512,7 @@ func main() {
 			return Unauthorized
 		}
 
-		shelf, err := queries.ShelfByIdAndUser(r.Context(), ShelfByIdAndUserParams{
+		shelf, err := Q.ShelfByIdAndUser(r.Context(), ShelfByIdAndUserParams{
 			UserID: user.ID,
 			ID:     atoi64(r.FormValue("shelf_id")),
 		})
@@ -520,7 +520,7 @@ func main() {
 			return Unauthorized
 		}
 
-		err = queries.MoveBookToShelf(r.Context(), MoveBookToShelfParams{
+		err = Q.MoveBookToShelf(r.Context(), MoveBookToShelfParams{
 			ShelfID: sql.NullInt64{Int64: shelf.ID, Valid: err == nil},
 			ID:      book.ID,
 		})
@@ -535,7 +535,7 @@ func main() {
 		actor := current_user(r)
 		vars := VARS(r)
 
-		user, err := queries.UserBySlug(r.Context(), vars["user"])
+		user, err := Q.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
 		}
@@ -544,7 +544,7 @@ func main() {
 			return Unauthorized
 		}
 
-		shelves, err := queries.Shelves(r.Context(), user.ID)
+		shelves, err := Q.Shelves(r.Context(), user.ID)
 		if err != nil {
 			return InternalServerError(err)
 		}
@@ -562,7 +562,7 @@ func main() {
 		actor := current_user(r)
 		vars := VARS(r)
 
-		user, err := queries.UserBySlug(r.Context(), vars["user"])
+		user, err := Q.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
 		}
@@ -578,7 +578,7 @@ func main() {
 
 		errors := params.Validate()
 		if len(errors) > 0 {
-			shelves, err := queries.Shelves(r.Context(), user.ID)
+			shelves, err := Q.Shelves(r.Context(), user.ID)
 			if err != nil {
 				return InternalServerError(err)
 			}
@@ -593,7 +593,7 @@ func main() {
 			})
 		}
 
-		if err = queries.NewShelf(r.Context(), params); err != nil {
+		if err = Q.NewShelf(r.Context(), params); err != nil {
 			return InternalServerError(err)
 		}
 
@@ -604,12 +604,12 @@ func main() {
 		actor := current_user(r)
 		vars := VARS(r)
 
-		user, err := queries.UserBySlug(r.Context(), vars["user"])
+		user, err := Q.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
 		}
 
-		shelf, err := queries.ShelfByIdAndUser(r.Context(), ShelfByIdAndUserParams{
+		shelf, err := Q.ShelfByIdAndUser(r.Context(), ShelfByIdAndUserParams{
 			UserID: user.ID,
 			ID:     atoi64(vars["shelf"]),
 		})
@@ -631,12 +631,12 @@ func main() {
 		actor := current_user(r)
 		vars := VARS(r)
 
-		user, err := queries.UserBySlug(r.Context(), vars["user"])
+		user, err := Q.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
 		}
 
-		shelf, err := queries.ShelfByIdAndUser(r.Context(), ShelfByIdAndUserParams{
+		shelf, err := Q.ShelfByIdAndUser(r.Context(), ShelfByIdAndUserParams{
 			UserID: user.ID,
 			ID:     atoi64(vars["shelf"]),
 		})
@@ -664,7 +664,7 @@ func main() {
 			})
 		}
 
-		if err = queries.UpdateShelf(r.Context(), params); err != nil {
+		if err = Q.UpdateShelf(r.Context(), params); err != nil {
 			return InternalServerError(err)
 		}
 
@@ -675,12 +675,12 @@ func main() {
 		actor := current_user(r)
 		vars := VARS(r)
 
-		user, err := queries.UserBySlug(r.Context(), vars["user"])
+		user, err := Q.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
 		}
 
-		shelf, err := queries.ShelfByIdAndUser(r.Context(), ShelfByIdAndUserParams{
+		shelf, err := Q.ShelfByIdAndUser(r.Context(), ShelfByIdAndUserParams{
 			UserID: user.ID,
 			ID:     atoi64(vars["shelf"]),
 		})
@@ -692,7 +692,7 @@ func main() {
 			return Unauthorized
 		}
 
-		if err = queries.MoveShelfUp(r.Context(), shelf.ID); err != nil {
+		if err = Q.MoveShelfUp(r.Context(), shelf.ID); err != nil {
 			return InternalServerError(err)
 		}
 
@@ -703,12 +703,12 @@ func main() {
 		actor := current_user(r)
 		vars := VARS(r)
 
-		user, err := queries.UserBySlug(r.Context(), vars["user"])
+		user, err := Q.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
 		}
 
-		shelf, err := queries.ShelfByIdAndUser(r.Context(), ShelfByIdAndUserParams{
+		shelf, err := Q.ShelfByIdAndUser(r.Context(), ShelfByIdAndUserParams{
 			UserID: user.ID,
 			ID:     atoi64(vars["shelf"]),
 		})
@@ -720,7 +720,7 @@ func main() {
 			return Unauthorized
 		}
 
-		if err = queries.MoveShelfDown(r.Context(), shelf.ID); err != nil {
+		if err = Q.MoveShelfDown(r.Context(), shelf.ID); err != nil {
 			return InternalServerError(err)
 		}
 
@@ -731,12 +731,12 @@ func main() {
 		actor := current_user(r)
 		vars := VARS(r)
 
-		user, err := queries.UserBySlug(r.Context(), vars["user"])
+		user, err := Q.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
 		}
 
-		shelf, err := queries.ShelfByIdAndUser(r.Context(), ShelfByIdAndUserParams{
+		shelf, err := Q.ShelfByIdAndUser(r.Context(), ShelfByIdAndUserParams{
 			UserID: user.ID,
 			ID:     atoi64(vars["shelf"]),
 		})
@@ -748,11 +748,11 @@ func main() {
 			return Unauthorized
 		}
 
-		if err = queries.RemoveShelf(r.Context(), shelf.ID); err != nil {
+		if err = Q.RemoveShelf(r.Context(), shelf.ID); err != nil {
 			return InternalServerError(err)
 		}
 
-		if err = queries.DeleteShelf(r.Context(), shelf.ID); err != nil {
+		if err = Q.DeleteShelf(r.Context(), shelf.ID); err != nil {
 			return InternalServerError(err)
 		}
 
@@ -763,12 +763,12 @@ func main() {
 		actor := current_user(r)
 		vars := VARS(r)
 
-		user, err := queries.UserBySlug(r.Context(), vars["user"])
+		user, err := Q.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
 		}
 
-		book, err := queries.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
+		book, err := Q.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
 			UserID: user.ID,
 			Isbn:   vars["isbn"],
 		})
@@ -793,12 +793,12 @@ func main() {
 		actor := current_user(r)
 		vars := VARS(r)
 
-		user, err := queries.UserBySlug(r.Context(), vars["user"])
+		user, err := Q.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
 		}
 
-		book, err := queries.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
+		book, err := Q.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
 			UserID: user.ID,
 			Isbn:   vars["isbn"],
 		})
@@ -836,7 +836,7 @@ func main() {
 			})
 		}
 
-		highlight, err := queries.NewHighlight(r.Context(), params)
+		highlight, err := Q.NewHighlight(r.Context(), params)
 		if err != nil {
 			return InternalServerError(err)
 		}
@@ -847,7 +847,7 @@ func main() {
 				return InternalServerError(err)
 			}
 
-			err = queries.UpdateHighlightImage(r.Context(), UpdateHighlightImageParams{
+			err = Q.UpdateHighlightImage(r.Context(), UpdateHighlightImageParams{
 				Image: NullString(name),
 				ID:    highlight.ID,
 			})
@@ -863,12 +863,12 @@ func main() {
 		actor := current_user(r)
 		vars := VARS(r)
 
-		user, err := queries.UserBySlug(r.Context(), vars["user"])
+		user, err := Q.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
 		}
 
-		book, err := queries.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
+		book, err := Q.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
 			UserID: user.ID,
 			Isbn:   vars["isbn"],
 		})
@@ -876,7 +876,7 @@ func main() {
 			return NotFound
 		}
 
-		highlight, err := queries.HighlightByIDAndBook(r.Context(), HighlightByIDAndBookParams{
+		highlight, err := Q.HighlightByIDAndBook(r.Context(), HighlightByIDAndBookParams{
 			ID:     atoi64(vars["id"]),
 			BookID: book.ID,
 		})
@@ -902,12 +902,12 @@ func main() {
 		actor := current_user(r)
 		vars := VARS(r)
 
-		user, err := queries.UserBySlug(r.Context(), vars["user"])
+		user, err := Q.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
 		}
 
-		book, err := queries.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
+		book, err := Q.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
 			UserID: user.ID,
 			Isbn:   vars["isbn"],
 		})
@@ -915,7 +915,7 @@ func main() {
 			return NotFound
 		}
 
-		highlight, err := queries.HighlightByIDAndBook(r.Context(), HighlightByIDAndBookParams{
+		highlight, err := Q.HighlightByIDAndBook(r.Context(), HighlightByIDAndBookParams{
 			ID:     atoi64(vars["id"]),
 			BookID: book.ID,
 		})
@@ -953,7 +953,7 @@ func main() {
 			})
 		}
 
-		if err = queries.UpdateHighlight(r.Context(), params); err != nil {
+		if err = Q.UpdateHighlight(r.Context(), params); err != nil {
 			return InternalServerError(err)
 		}
 
@@ -963,7 +963,7 @@ func main() {
 				return InternalServerError(err)
 			}
 
-			err = queries.UpdateHighlightImage(r.Context(), UpdateHighlightImageParams{
+			err = Q.UpdateHighlightImage(r.Context(), UpdateHighlightImageParams{
 				Image: NullString(name),
 				ID:    highlight.ID,
 			})
@@ -979,12 +979,12 @@ func main() {
 		actor := current_user(r)
 		vars := VARS(r)
 
-		user, err := queries.UserBySlug(r.Context(), vars["user"])
+		user, err := Q.UserBySlug(r.Context(), vars["user"])
 		if err != nil {
 			return NotFound
 		}
 
-		book, err := queries.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
+		book, err := Q.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
 			UserID: user.ID,
 			Isbn:   vars["isbn"],
 		})
@@ -992,7 +992,7 @@ func main() {
 			return NotFound
 		}
 
-		highlight, err := queries.HighlightByIDAndBook(r.Context(), HighlightByIDAndBookParams{
+		highlight, err := Q.HighlightByIDAndBook(r.Context(), HighlightByIDAndBookParams{
 			ID:     atoi64(vars["id"]),
 			BookID: book.ID,
 		})
@@ -1008,7 +1008,7 @@ func main() {
 			os.Remove(path.Join(HIGHLIGHT_IMAGE_PATH, highlight.Image.String))
 		}
 
-		if err = queries.DeleteHighlight(r.Context(), highlight.ID); err != nil {
+		if err = Q.DeleteHighlight(r.Context(), highlight.ID); err != nil {
 			return InternalServerError(err)
 		}
 

@@ -73,7 +73,7 @@ func Helpers() {
 	}
 
 	helpers["shelf_books"] = func(shelfID int64) ([]ShelfBooksRow, error) {
-		return queries.ShelfBooks(context.Background(), sql.NullInt64{Valid: true, Int64: shelfID})
+		return Q.ShelfBooks(context.Background(), sql.NullInt64{Valid: true, Int64: shelfID})
 	}
 
 	helpers["has_field"] = func(v interface{}, name string) bool {
@@ -109,7 +109,7 @@ func Helpers() {
 	}
 
 	helpers["books_count"] = func(u int64) int64 {
-		c, _ := queries.BooksCount(context.Background(), u)
+		c, _ := Q.BooksCount(context.Background(), u)
 		return c
 	}
 }
@@ -130,7 +130,7 @@ func current_user(r *http.Request) *User {
 		return nil
 	}
 
-	user, err := queries.User(r.Context(), user_id)
+	user, err := Q.User(r.Context(), user_id)
 	if err != nil {
 		return nil
 	}
