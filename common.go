@@ -128,34 +128,19 @@ func Start() {
 
 // LOGGING ===============================================
 
-type logMark struct {
-	label string
-	log   string
-	args  []interface{}
-	start time.Time
-}
+const (
+	DEBUG = "\033[97;42m"
+	INFO  = "\033[97;42m"
+)
 
-func NewLogMark(label string, log string, args ...interface{}) logMark {
-	return logMark{
-		label: label,
-		log:   log,
-		args:  args,
-		start: time.Now(),
-	}
-}
-
-func (o logMark) Debug() {
-	if len(o.args) > 0 {
-		log.Printf("\033[97;42m %s \033[0m (%s) %s %v", o.label, time.Now().Sub(o.start), o.log, o.args)
-	} else {
-		log.Printf("\033[97;42m %s \033[0m (%s) %s", o.label, time.Now().Sub(o.start), o.log)
-	}
-}
-func (o logMark) Info() {
-	if len(o.args) > 0 {
-		log.Printf("\033[97;43m %s \033[0m (%s) %s %v", o.label, time.Now().Sub(o.start), o.log, o.args)
-	} else {
-		log.Printf("\033[97;43m %s \033[0m (%s) %s", o.label, time.Now().Sub(o.start), o.log)
+func Log(level, label, text string, args ...interface{}) func() {
+	start := time.Now()
+	return func() {
+		if len(args) > 0 {
+			log.Printf("%s %s \033[0m (%s) %s %v", level, label, time.Now().Sub(start), text, args)
+		} else {
+			log.Printf("%s %s \033[0m (%s) %s", level, label, time.Now().Sub(start), text)
+		}
 	}
 }
 
@@ -166,18 +151,18 @@ type queryLogger struct {
 }
 
 func (p queryLogger) ExecContext(ctx context.Context, q string, args ...interface{}) (sql.Result, error) {
-	defer NewLogMark("DB Exec", q, args).Debug()
+	defer Log(DEBUG, "DB Exec", q, args)()
 	return p.db.ExecContext(ctx, q, args...)
 }
 func (p queryLogger) PrepareContext(ctx context.Context, q string) (*sql.Stmt, error) {
 	return p.db.PrepareContext(ctx, q)
 }
 func (p queryLogger) QueryContext(ctx context.Context, q string, args ...interface{}) (*sql.Rows, error) {
-	defer NewLogMark("DB Query", q, args).Debug()
+	defer Log(DEBUG, "DB Query", q, args)()
 	return p.db.QueryContext(ctx, q, args...)
 }
 func (p queryLogger) QueryRowContext(ctx context.Context, q string, args ...interface{}) *sql.Row {
-	defer NewLogMark("DB Row", q, args).Debug()
+	defer Log(DEBUG, "DB Row", q, args)()
 	return p.db.QueryRowContext(ctx, q, args...)
 }
 
@@ -256,7 +241,7 @@ func compileViews() {
 		if strings.HasSuffix(path, VIEWS_EXTENSION) && d.Type().IsRegular() {
 			name := strings.TrimPrefix(path, "views/")
 			name = strings.TrimSuffix(name, VIEWS_EXTENSION)
-			m := NewLogMark("View", name)
+			m := Log(DEBUG, "View", name)
 
 			c, err := fs.ReadFile(views, path)
 			if err != nil {
@@ -264,7 +249,7 @@ func compileViews() {
 			}
 
 			template.Must(templates.New(name).Funcs(helpers).Parse(string(c)))
-			m.Debug()
+			m()
 		}
 
 		return nil
@@ -342,7 +327,7 @@ func methodOverrideHandler(h http.Handler) http.Handler {
 
 func RequestLoggerHandler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		defer NewLogMark(r.Method, r.URL.Path).Info()
+		defer Log(INFO, r.Method, r.URL.Path)()
 		h.ServeHTTP(w, r)
 	})
 }
