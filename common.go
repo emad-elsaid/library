@@ -233,7 +233,7 @@ func compileViews() {
 		if strings.HasSuffix(path, VIEWS_EXTENSION) && d.Type().IsRegular() {
 			name := strings.TrimPrefix(path, "views/")
 			name = strings.TrimSuffix(name, VIEWS_EXTENSION)
-			m := Log(DEBUG, "View", name)
+			defer Log(DEBUG, "View", name)()
 
 			c, err := fs.ReadFile(views, path)
 			if err != nil {
@@ -241,7 +241,6 @@ func compileViews() {
 			}
 
 			template.Must(templates.New(name).Funcs(helpers).Parse(string(c)))
-			m()
 		}
 
 		return nil
