@@ -1,7 +1,7 @@
 version: 1
 packages:
-  - path: "."
+  - path: ".."
     name: "main"
     engine: "postgresql"
-    schema: "db/structure.sql"
+    schema: "structure.sql"
     queries: "query.sql"

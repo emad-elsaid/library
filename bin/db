@@ -63,7 +63,7 @@ dump() {
     pg_dump --format=plain --schema-only --no-owner $DATABASE_URL \
             > db/structure.sql
     # dump schema_migrations table
-    pg_dump --format=plain --data-only -t schema_migrations $DATABASE_URL \
+    pg_dump --format=plain --inserts --data-only -t schema_migrations $DATABASE_URL \
             >> db/structure.sql
 }
 

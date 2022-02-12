@@ -1,4 +1,4 @@
-//go:generate sqlc generate
+//go:generate sqlc generate --file db/sqlc.yaml
 package main
 
 // This is an experiment
