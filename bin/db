@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+up() {
+    f=`ls db/migrate/$1_*.sql`
+    echo "Migrating $f"
+}
+
+case $1 in
+    "create")
+        ts=`date +"%Y%m%d%H%M%S"`
+        f="db/migrate/${ts}_$2.sql"
+        touch $f
+        echo "Migration created: $f"
+        ;;
+
+    "dump")
+        echo "Dumping database schema..."
+        # dump schema of all tables
+        pg_dump --format=plain --schema-only --no-owner $DATABASE_URL > db/structure.sql
+        # dump schema_migrations table
+        pg_dump --format=plain --data-only -t schema_migrations $DATABASE_URL >> db/structure.sql
+        ;;
+
+    "migrate")
+        # List all migrations from the database
+        psql --no-psqlrc --tuples-only $DATABASE_URL --command "SELECT * from schema_migrations" | awk '{ print $1 }' > /tmp/migrated
+
+        # List all migrations files
+        ls db/migrate/*.sql | awk -F"/" '{ print $3 }' | awk -F"_" '{ print $1 }' > /tmp/migrations
+
+        # list of timestamps yet to be migrated
+        uplist=`comm -23 <(sort /tmp/migrations) <(sort /tmp/migrated)`
+
+        # migrate up every one of them in order
+        for ts in $uplist; do
+            up $ts
+        done
+        ;;
+
+    "create")
+        # TODO
+        createdb --encoding=UTF8 $DATABASE_URL
+        ;;
+
+    "setup")
+        # restoring structure and migrations list
+        psql --no-psqlrc $DATABASE_URL < db/structure.sql
+        ;;
+esac

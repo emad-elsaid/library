@@ -1,3 +1,10 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 13.4
+-- Dumped by pg_dump version 13.4
+
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
@@ -346,31 +353,56 @@ ALTER TABLE ONLY public.books
 -- PostgreSQL database dump complete
 --
 
-SET search_path TO "$user", public;
+--
+-- PostgreSQL database dump
+--
 
-INSERT INTO "schema_migrations" (version) VALUES
-('20210518144128'),
-('20210520081623'),
-('20210520122458'),
-('20210609123416'),
-('20210609195207'),
-('20210624200935'),
-('20211217153054'),
-('20220103113949'),
-('20220113204455'),
-('20220116114024'),
-('20220125191717'),
-('20220125193806'),
-('20220129201723'),
-('20220130120749'),
-('20220130212907'),
-('20220131112523'),
-('20220131115959'),
-('20220131124929'),
-('20220201201413'),
-('20220203060659'),
-('20220205001018'),
-('20220205192708'),
-('20220205194930');
+-- Dumped from database version 13.4
+-- Dumped by pg_dump version 13.4
 
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- Data for Name: schema_migrations; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.schema_migrations (version) FROM stdin;
+20210518144128
+20210520081623
+20210520122458
+20210609123416
+20210609195207
+20210624200935
+20211217153054
+20220103113949
+20220113204455
+20220116114024
+20220125191717
+20220125193806
+20220129201723
+20220130120749
+20220130212907
+20220131112523
+20220131115959
+20220131124929
+20220201201413
+20220203060659
+20220205001018
+20220205192708
+20220205194930
+\.
+
+
+--
+-- PostgreSQL database dump complete
+--
 
