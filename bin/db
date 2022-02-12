@@ -1,10 +1,17 @@
 #!/usr/bin/env bash
 set -e
 
+mkdir -p db/migrate
+
 PGUSER=`echo $DATABASE_URL | sed 's/postgres:\/\///' | awk -F"[@/?:]" '{ print $1 }'`
 PGPASSWORD=`echo $DATABASE_URL | sed 's/postgres:\/\///' | awk -F"[@/?:]" '{ print $2 }'`
 PGHOST=`echo $DATABASE_URL | sed 's/postgres:\/\///' | awk -F"[@/?:]" '{ print $3 }'`
 PGDATABASE=`echo $DATABASE_URL | sed 's/postgres:\/\///' | awk -F"[@/?:]" '{ print $4 }'`
+
+create_schema_migrations() {
+    echo "CREATE TABLE IF NOT EXISTS schema_migrations (version character varying NOT NULL UNIQUE);" \
+        | psql -v ON_ERROR_STOP=1 --no-psqlrc --quiet $DATABASE_URL
+}
 
 create() {
     echo "Create database $PGDATABASE"
@@ -34,6 +41,7 @@ up() {
     awk '/-- up/{flag=1; next} /-- down/{flag=0} flag' $f \
         | tee \
         | psql -v ON_ERROR_STOP=1 --no-psqlrc --echo-queries $DATABASE_URL
+    create_schema_migrations
     psql -v ON_ERROR_STOP=1 --no-psqlrc $DATABASE_URL --command "INSERT INTO schema_migrations (version) VALUES($1);"
     dump
 }
@@ -44,6 +52,7 @@ down() {
     awk '/-- down/{flag=1; next} /-- up/{flag=0} flag' $f \
         | tee \
         | psql -v ON_ERROR_STOP=1 --no-psqlrc --echo-queries $DATABASE_URL
+    create_schema_migrations
     psql -v ON_ERROR_STOP=1 --no-psqlrc $DATABASE_URL --command "DELETE FROM schema_migrations WHERE version='$1';"
     dump
 }
