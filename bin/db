@@ -36,36 +36,35 @@ create_migration() {
     echo "Migration created: $f"
 }
 
+migrate(){
+    # List all migrations from the database
+    psql --no-psqlrc --tuples-only $DATABASE_URL --command "SELECT * from schema_migrations" \
+        | awk '{ print $1 }' \
+              > /tmp/migrated
+
+    # List all migrations files
+    ls db/migrate/*.sql \
+        | awk -F"/" '{ print $3 }' \
+        | awk -F"_" '{ print $1 }' \
+              > /tmp/migrations
+
+    # list of timestamps yet to be migrated
+    uplist=`comm -23 <(sort /tmp/migrations) <(sort /tmp/migrated)`
+
+    # migrate up every one of them in order
+    for ts in $uplist; do
+        up $ts
+    done
+}
+
 case $1 in
     "create_migration") create_migration $2;;
     "dump") dump;;
-
-    "migrate")
-        # List all migrations from the database
-        psql --no-psqlrc --tuples-only $DATABASE_URL --command "SELECT * from schema_migrations" \
-            | awk '{ print $1 }' \
-                  > /tmp/migrated
-
-        # List all migrations files
-        ls db/migrate/*.sql \
-            | awk -F"/" '{ print $3 }' \
-            | awk -F"_" '{ print $1 }' \
-                  > /tmp/migrations
-
-        # list of timestamps yet to be migrated
-        uplist=`comm -23 <(sort /tmp/migrations) <(sort /tmp/migrated)`
-
-        # migrate up every one of them in order
-        for ts in $uplist; do
-            up $ts
-        done
-        ;;
-
+    "migrate") migrate;;
     "create")
         # TODO
         createdb --encoding=UTF8 $DATABASE_URL
         ;;
-
     "setup")
         # restoring structure and migrations list
         psql --no-psqlrc $DATABASE_URL < db/structure.sql
