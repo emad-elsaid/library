@@ -1,32 +1,55 @@
 #!/usr/bin/env bash
+set -e
 
 up() {
     f=`ls db/migrate/$1_*.sql`
     echo "Migrating $f"
+    awk '/-- up/{flag=1; next} /-- down/{flag=0} flag' $f \
+        | psql -v ON_ERROR_STOP=1 --no-psqlrc $DATABASE_URL
+    psql -v ON_ERROR_STOP=1 --no-psqlrc $DATABASE_URL --command "INSERT INTO schema_migrations (version) VALUES($1);"
+}
+
+down() {
+    f=`ls db/migrate/$1_*.sql`
+    echo "Migrating $f"
+    awk '/-- down/{flag=1; next} /-- up/{flag=0} flag' $f \
+        | psql -v ON_ERROR_STOP=1 --no-psqlrc $DATABASE_URL
+}
+
+dump() {
+    echo "Dumping database schema..."
+    # dump schema of all tables
+    pg_dump --format=plain --schema-only --no-owner $DATABASE_URL \
+            > db/structure.sql
+    # dump schema_migrations table
+    pg_dump --format=plain --data-only -t schema_migrations $DATABASE_URL \
+            >> db/structure.sql
+}
+
+create_migration() {
+    ts=`date +"%Y%m%d%H%M%S"`
+    f="db/migrate/${ts}_$1.sql"
+    touch $f
+    echo "-- up" >> $f
+    echo "-- down" >> $f
+    echo "Migration created: $f"
 }
 
 case $1 in
-    "create")
-        ts=`date +"%Y%m%d%H%M%S"`
-        f="db/migrate/${ts}_$2.sql"
-        touch $f
-        echo "Migration created: $f"
-        ;;
-
-    "dump")
-        echo "Dumping database schema..."
-        # dump schema of all tables
-        pg_dump --format=plain --schema-only --no-owner $DATABASE_URL > db/structure.sql
-        # dump schema_migrations table
-        pg_dump --format=plain --data-only -t schema_migrations $DATABASE_URL >> db/structure.sql
-        ;;
+    "create_migration") create_migration $2;;
+    "dump") dump;;
 
     "migrate")
         # List all migrations from the database
-        psql --no-psqlrc --tuples-only $DATABASE_URL --command "SELECT * from schema_migrations" | awk '{ print $1 }' > /tmp/migrated
+        psql --no-psqlrc --tuples-only $DATABASE_URL --command "SELECT * from schema_migrations" \
+            | awk '{ print $1 }' \
+                  > /tmp/migrated
 
         # List all migrations files
-        ls db/migrate/*.sql | awk -F"/" '{ print $3 }' | awk -F"_" '{ print $1 }' > /tmp/migrations
+        ls db/migrate/*.sql \
+            | awk -F"/" '{ print $3 }' \
+            | awk -F"_" '{ print $1 }' \
+                  > /tmp/migrations
 
         # list of timestamps yet to be migrated
         uplist=`comm -23 <(sort /tmp/migrations) <(sort /tmp/migrated)`
