@@ -7,6 +7,7 @@ up() {
     awk '/-- up/{flag=1; next} /-- down/{flag=0} flag' $f \
         | psql -v ON_ERROR_STOP=1 --no-psqlrc $DATABASE_URL
     psql -v ON_ERROR_STOP=1 --no-psqlrc $DATABASE_URL --command "INSERT INTO schema_migrations (version) VALUES($1);"
+    dump
 }
 
 down() {
