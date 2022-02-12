@@ -5,6 +5,7 @@ up() {
     f=`ls db/migrate/$1_*.sql`
     echo "Migrating $f"
     awk '/-- up/{flag=1; next} /-- down/{flag=0} flag' $f \
+        | tee \
         | psql -v ON_ERROR_STOP=1 --no-psqlrc $DATABASE_URL
     psql -v ON_ERROR_STOP=1 --no-psqlrc $DATABASE_URL --command "INSERT INTO schema_migrations (version) VALUES($1);"
     dump
@@ -12,9 +13,12 @@ up() {
 
 down() {
     f=`ls db/migrate/$1_*.sql`
-    echo "Migrating $f"
+    echo "Rolling back $f"
     awk '/-- down/{flag=1; next} /-- up/{flag=0} flag' $f \
+        | tee \
         | psql -v ON_ERROR_STOP=1 --no-psqlrc $DATABASE_URL
+    psql -v ON_ERROR_STOP=1 --no-psqlrc $DATABASE_URL --command "DELETE FROM schema_migrations WHERE version='$1';"
+    dump
 }
 
 dump() {
@@ -57,16 +61,21 @@ migrate(){
     done
 }
 
+rollback() {
+    version=`psql --no-psqlrc --tuples-only $DATABASE_URL --command "SELECT * from schema_migrations ORDER BY version DESC LIMIT 1" | awk '{ print $1 }'`
+    down $version
+}
+
 case $1 in
     "create_migration") create_migration $2;;
     "dump") dump;;
     "migrate") migrate;;
+    "rollback") rollback;;
     "create")
         # TODO
         createdb --encoding=UTF8 $DATABASE_URL
         ;;
     "setup")
-        # restoring structure and migrations list
-        psql --no-psqlrc $DATABASE_URL < db/structure.sql
+        psql -v ON_ERROR_STOP=1 --no-psqlrc $DATABASE_URL < db/structure.sql
         ;;
 esac
