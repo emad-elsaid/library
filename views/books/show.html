@@ -9,7 +9,10 @@
         {{ .csrf }}
         <div class="field">
           <div class="control">
-            <a class="button is-fullwidth" href="/users/{{ .user.Slug }}/books/{{ .book.Isbn }}/edit">Edit</a>
+            <a class="button is-fullwidth" href="/users/{{ .user.Slug }}/books/{{ .book.Isbn }}/edit">
+              <span class="icon"><i class="fa-solid fa-pen"></i></span>
+              <span>Edit</span>
+            </a>
           </div>
         </div>
         <div class="field has-addons">
@@ -25,7 +28,7 @@
           </div>
 
           <div class="control">
-            <button class="button">Move</button>
+            <button class="button"> Move </button>
           </div>
         </div>
 
@@ -33,7 +36,8 @@
           <div class="field">
             <div class="control">
               <a class="button is-warning is-fullwidth" href="/users/{{ .user.Slug }}/books/{{ .book.Isbn }}/highlights/new">
-                Create Highlight
+                <span class="icon"><i class="fa-solid fa-highlighter"></i></span>
+                <span>Create Highlight</span>
               </a>
             </div>
           </div>
@@ -45,8 +49,14 @@
     <hr/>
 
     <div class="buttons">
-      <a class="button is-fullwidth" href="https://www.amazon.de/s?k={{ .book.Isbn }}&tag={{ .user.AmazonAssociatesID.Value }}" target="_blank" rel="noopener">On Amazon.de</a>
-      <a class="button is-fullwidth" href="https://www.goodreads.com/search?q={{ .book.Isbn }}" target="_blank" rel="noopener">On Goodreads.com</a>
+      <a class="button is-fullwidth" href="https://www.amazon.de/s?k={{ .book.Isbn }}&tag={{ .user.AmazonAssociatesID.Value }}" target="_blank" rel="noopener">
+        <span class="icon"><i class="fa-brands fa-amazon"></i></span>
+        <span>On Amazon.de</span>
+      </a>
+      <a class="button is-fullwidth" href="https://www.goodreads.com/search?q={{ .book.Isbn }}" target="_blank" rel="noopener">
+        <span class="icon"><i class="fa-brands fa-goodreads-g"></i></span>
+        <span>On Goodreads.com</span>
+      </a>
     </div>
 
   </div>
@@ -65,9 +75,10 @@
       </p>
     {{ end }}
 
-    <p class="subtitle is-capitalized">
-      👤 {{ .book.Author }}
-    </p>
+      <p class="subtitle is-capitalized">
+        <span class="icon"><i class="fa-solid fa-feather"></i></span>
+        <span>{{ .book.Author }}</span>
+      </p>
 
     {{ if .book.Description }}
       <p class="content">

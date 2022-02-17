@@ -28,18 +28,26 @@
     <div class="navbar-end">
       {{ if can .current_user "create_book" .current_user }}
         <a href="/users/{{ .current_user.Slug }}/books/new" class="navbar-item">
-          📕 Add a Book
+          <span class="icon"><i class="fa-solid fa-book-medical"></i></span>
+          <span>Add a Book</span>
         </a>
       {{ end }}
 
       {{ if can .current_user "list_shelves" .current_user }}
         <a href="/users/{{ .current_user.Slug }}/shelves" class="navbar-item">
-          📚 Manage Shelves
+          <span class="icon"><i class="fa-solid fa-layer-group"></i></span>
+          <span>Manage Shelves</span>
         </a>
       {{ end }}
 
-      <a href="/users/{{ .current_user.Slug }}/edit" class="navbar-item">⚙️ Settings</a>
-      <a href="/logout" class="has-text-danger navbar-item">👋 Logout</a>
+        <a href="/users/{{ .current_user.Slug }}/edit" class="navbar-item">
+          <span class="icon"><i class="fa-solid fa-gear"></i></span>
+          <span>Settings</span>
+        </a>
+        <a href="/logout" class="has-text-danger navbar-item">
+          <span class="icon"><i class="fa-solid fa-power-off"></i></span>
+          <span>Logout</span>
+        </a>
     </div>
   </div>
 </nav>
