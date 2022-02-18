@@ -112,9 +112,27 @@
             </div>
             <div class="column"></div>
           </div>
-        {{ end }}
+          {{ end }}
 
-    {{ end }}
+          {{ end }}
 
   </div>
 </div>
+
+{{ $books:=shelf_books .book.ShelfID.Int64 }}
+{{ if $books }}
+<section class="section">
+  <hr/>
+  <h2 class="title is-3">
+    On the same shelf
+  </h2>
+
+  <div class="columns is-mobile is-multiline">
+    {{ range $books }}
+    <div class="column is-2-tablet is-4-mobile">
+      {{ template "books/book" . }}
+    </div>
+    {{ end }}
+  </div>
+</section>
+{{ end }}
