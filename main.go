@@ -244,6 +244,7 @@ func main() {
 			Description:   r.FormValue("description"),
 			Publisher:     r.FormValue("publisher"),
 			PageCount:     atoi32(r.FormValue("page_count")),
+			PageRead:      atoi32(r.FormValue("page_read")),
 			GoogleBooksID: NullString(r.FormValue("google_books_id")),
 			UserID:        user.ID,
 		}
@@ -396,6 +397,7 @@ func main() {
 			Description: r.FormValue("description"),
 			Publisher:   r.FormValue("publisher"),
 			PageCount:   atoi32(r.FormValue("page_count")),
+			PageRead:    atoi32(r.FormValue("page_read")),
 			ID:          book.ID,
 		}
 
@@ -413,6 +415,7 @@ func main() {
 			book.Description = params.Description
 			book.Publisher = params.Publisher
 			book.PageCount = params.PageCount
+			book.PageRead = params.PageRead
 			return Render("layout", "books/new", Locals{
 				"current_user": actor,
 				"user":         user,
@@ -529,6 +532,35 @@ func main() {
 		}
 
 		return Redirect(fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]))
+	}, loggedinMiddleware)
+
+	POST("/users/{user}/books/{isbn}/complete", func(w Response, r Request) Output {
+		actor := current_user(r)
+		vars := VARS(r)
+
+		user, err := Q.UserBySlug(r.Context(), vars["user"])
+		if err != nil {
+			return NotFound
+		}
+
+		book, err := Q.BookByIsbnAndUser(r.Context(), BookByIsbnAndUserParams{
+			UserID: user.ID,
+			Isbn:   vars["isbn"],
+		})
+		if err != nil {
+			return NotFound
+		}
+
+		if !can(actor, "edit", book) {
+			return Unauthorized
+		}
+
+		err = Q.CompleteBook(r.Context(), book.ID)
+		if err != nil {
+			return InternalServerError(err)
+		}
+
+		return Redirect(fmt.Sprintf("/users/%s/books/%s", user.Slug, book.Isbn))
 	}, loggedinMiddleware)
 
 	GET("/users/{user}/shelves", func(w Response, r Request) Output {

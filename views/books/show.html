@@ -1,49 +1,33 @@
 <div class="columns">
   <div class="column is-3">
-    <figure class="image is-3by4 mb-5">
-      <img src="{{ book_cover .book.Image.String .book.GoogleBooksID.String }}" loading="lazy" class="cover">
-    </figure>
+    {{ if can .current_user "edit" .book }}
+    <a class="button is-fullwidth" href="/users/{{ .user.Slug }}/books/{{ .book.Isbn }}/edit">
+      <span class="icon"><i class="fa-solid fa-pen"></i></span>
+      <span>Edit</span>
+    </a>
+    <br/>
+    {{ end }}
+
+    {{ template "books/book" .book }}
 
     {{ if can .current_user "edit" .book }}
-      <form action="/users/{{ .user.Slug }}/books/{{ .book.Isbn }}/shelf" method="POST">
-        {{ .csrf }}
-        <div class="field">
-          <div class="control">
-            <a class="button is-fullwidth" href="/users/{{ .user.Slug }}/books/{{ .book.Isbn }}/edit">
-              <span class="icon"><i class="fa-solid fa-pen"></i></span>
-              <span>Edit</span>
-            </a>
-          </div>
+    {{ if lt .book.PageRead .book.PageCount }}
+    <form action="/users/{{ .user.Slug }}/books/{{ .book.Isbn }}/complete" method="POST" class="mb-2">
+      {{ .csrf }}
+      <div class="field">
+        <div class="control">
+          <button class="button is-fullwidth is-success"> Finished </button>
         </div>
-        <div class="field has-addons">
-          <div class="control is-expanded">
-            <span class="select is-fullwidth">
-              <select name="shelf_id">
-                <option value="" {{ if not .book.ShelfID }}selected{{ end }}>No Shelf</option>
-                {{ range .shelves }}
-                <option value="{{ .ID }}" {{ if eq .ID $.book.ShelfID.Int64 }}selected{{ end }}>{{ .Name }}</option>
-                {{ end }}
-              </select>
-            </span>
-          </div>
+      </div>
+    </form>
+    {{ end }}
+    {{ end }}
 
-          <div class="control">
-            <button class="button"> Move </button>
-          </div>
-        </div>
-
-        {{ if can .current_user "highlight" .book }}
-          <div class="field">
-            <div class="control">
-              <a class="button is-warning is-fullwidth" href="/users/{{ .user.Slug }}/books/{{ .book.Isbn }}/highlights/new">
-                <span class="icon"><i class="fa-solid fa-highlighter"></i></span>
-                <span>Create Highlight</span>
-              </a>
-            </div>
-          </div>
-        {{ end }}
-
-      </form>
+    {{ if can .current_user "highlight" .book }}
+    <a class="button is-warning is-fullwidth" href="/users/{{ .user.Slug }}/books/{{ .book.Isbn }}/highlights/new">
+      <span class="icon"><i class="fa-solid fa-highlighter"></i></span>
+      <span>Create Highlight</span>
+    </a>
     {{ end }}
 
     <hr/>
@@ -62,9 +46,33 @@
   </div>
 
   <div class="column content">
+
+    {{ if can .current_user "edit" .book }}
+    <form action="/users/{{ .user.Slug }}/books/{{ .book.Isbn }}/shelf" method="POST">
+      {{ .csrf }}
+      <div class="field has-addons">
+        <div class="control">
+          <span class="select">
+            <select name="shelf_id">
+              <option value="" {{ if not .book.ShelfID }}selected{{ end }}>No Shelf</option>
+              {{ range .shelves }}
+              <option value="{{ .ID }}" {{ if eq .ID $.book.ShelfID.Int64 }}selected{{ end }}>{{ .Name }}</option>
+              {{ end }}
+            </select>
+          </span>
+        </div>
+
+        <div class="control">
+          <button class="button"> Move </button>
+        </div>
+      </div>
+    </form>
+    {{ else }}
     {{ if .book.ShelfID.Valid }}
-      <a class="tag is-info is-light" href="/users/{{ .user.Slug }}#shelf-{{ .book.ShelfID.Int64 }}">{{ .book.ShelfName.String }}</a>
+    <a class="tag is-info is-light" href="/users/{{ .user.Slug }}#shelf-{{ .book.ShelfID.Int64 }}">{{ .book.ShelfName.String }}</a>
     {{ end }}
+    {{ end }}
+
     <h2 class="title">
       {{ .book.Title }}
     </h2>

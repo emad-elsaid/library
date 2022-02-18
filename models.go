@@ -29,6 +29,7 @@ type Book struct {
 	Description   string
 	PageCount     int32
 	Publisher     string
+	PageRead      int32
 }
 
 type Highlight struct {
