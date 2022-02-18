@@ -10,6 +10,9 @@ mv fontawesome-free* fontawesome
 
 cat << EOT > bulma.scss
 @charset "utf-8";
+
+\$fa-font-path: "fonts";
+
 @import "bulma/bulma.sass";
 @import "./fontawesome/scss/fontawesome.scss";
 @import "./fontawesome/scss/solid.scss";

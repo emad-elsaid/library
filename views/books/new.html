@@ -65,12 +65,20 @@
   </div>
 
   <div class="field">
-    <label class="label">Cover Image</label>
-    <div class="control">
-      <input class="input {{ if index .errors "image"  }}is-danger{{ end }}" type="file" name="image"  accept="image/*;capture=camera">
-      {{ template "common/errors" index .errors "image" }}
+    <div class="file">
+      <label class="file-label">
+        <input class="file-input {{ if index .errors "image"  }}is-danger{{ end }}" type="file" name="image"  accept="image/*;capture=camera">
+        <span class="file-cta">
+          <span class="file-icon">
+            <i class="fas fa-upload"></i>
+          </span>
+          <span class="file-label"> Choose a cover image… </span>
+        </span>
+      </label>
     </div>
+    {{ template "common/errors" index .errors "image" }}
   </div>
+
 
   <details class="field">
     <summary>Optional details</summary>

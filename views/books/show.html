@@ -95,7 +95,9 @@
 
       <p>
         {{ if can $.current_user "highlight" $.book }}
-          <a href="/users/{{ $.user.Slug }}/books/{{ $.book.Isbn }}/highlights/{{ .ID }}/edit" class="icon is-medium">✏️</a>
+        <a href="/users/{{ $.user.Slug }}/books/{{ $.book.Isbn }}/highlights/{{ .ID }}/edit" class="icon is-medium">
+          <span class="icon"><i class="fa-solid fa-pen"></i></span>
+        </a>
         {{ end }}
         {{ simple_format .Content }}
       </p>
