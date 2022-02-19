@@ -1,5 +1,5 @@
 <div class="columns">
-  <div class="column is-3">
+  <div class="column is-2">
     {{ if can .current_user "edit" .book }}
     <a class="button is-fullwidth" href="/users/{{ .user.Slug }}/books/{{ .book.Isbn }}/edit">
       <span class="icon"><i class="fa-solid fa-pen"></i></span>
@@ -54,7 +54,7 @@
     <form action="/users/{{ .user.Slug }}/books/{{ .book.Isbn }}/shelf" method="POST">
       {{ .csrf }}
       <div class="field has-addons">
-        <div class="control">
+        <div class="control has-icons-left">
           <span class="select">
             <select name="shelf_id">
               <option value="" {{ if not .book.ShelfID }}selected{{ end }}>No Shelf</option>
@@ -63,6 +63,9 @@
               {{ end }}
             </select>
           </span>
+          <div class="icon is-small is-left">
+            <i class="fa-solid fa-layer-group"></i>
+          </div>
         </div>
 
         <div class="control">
@@ -71,14 +74,14 @@
       </div>
     </form>
     {{ else }}
-    {{ if .book.ShelfID.Valid }}
-    <a class="tag is-info is-light" href="/users/{{ .user.Slug }}#shelf-{{ .book.ShelfID.Int64 }}">{{ .book.ShelfName.String }}</a>
-    {{ end }}
+      {{ if .book.ShelfID.Valid }}
+      <a class="tag is-info is-light" href="/users/{{ .user.Slug }}#shelf-{{ .book.ShelfID.Int64 }}">{{ .book.ShelfName.String }}</a>
+      {{ end }}
     {{ end }}
 
-    <h2 class="title" dir="auto">
+    <h1 class="title" dir="auto">
       {{ .book.Title }}
-    </h2>
+    </h1>
 
     {{ if .book.Subtitle }}
       <p class="subtitle" dir="auto">
@@ -86,7 +89,7 @@
       </p>
     {{ end }}
 
-      <p class="subtitle is-capitalized" dir="auto">
+      <p dir="auto">
         <span class="icon"><i class="fa-solid fa-feather"></i></span>
         <span>{{ .book.Author }}</span>
       </p>

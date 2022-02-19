@@ -134,7 +134,7 @@ func Start() {
 
 const (
 	DEBUG = "\033[97;42m"
-	INFO  = "\033[97;42m"
+	INFO  = "\033[97;43m"
 )
 
 func Log(level, label, text string, args ...interface{}) func() {

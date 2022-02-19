@@ -11,6 +11,7 @@ mv fontawesome-free* fontawesome
 cat << EOT > bulma.scss
 @charset "utf-8";
 
+\$body-size: 13px;
 \$fa-font-path: "fonts";
 
 @import "bulma/bulma.sass";

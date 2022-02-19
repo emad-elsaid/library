@@ -17,7 +17,7 @@
     {{ meta_property .meta "twitter:title" }}
 
     <title>{{ if .title }} {{ .title }} | {{end }} LIBRARY </title>
-    <link rel="stylesheet" href="/style.css?v=4">
+    <link rel="stylesheet" href="/style.css?v={{ sha256 "public/style.css" }}">
   </head>
   <body>
     {{ if .current_user }} {{ template "partials/user_nav" . }} {{ end }}
