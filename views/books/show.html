@@ -73,23 +73,23 @@
     {{ end }}
     {{ end }}
 
-    <h2 class="title">
+    <h2 class="title" dir="auto">
       {{ .book.Title }}
     </h2>
 
     {{ if .book.Subtitle }}
-      <p class="subtitle">
+      <p class="subtitle" dir="auto">
         {{ .book.Subtitle }}
       </p>
     {{ end }}
 
-      <p class="subtitle is-capitalized">
+      <p class="subtitle is-capitalized" dir="auto">
         <span class="icon"><i class="fa-solid fa-feather"></i></span>
         <span>{{ .book.Author }}</span>
       </p>
 
     {{ if .book.Description }}
-      <p class="content">
+      <p class="content" dir="auto">
         {{ .book.Description }}
       </p>
     {{ end }}
