@@ -20,7 +20,7 @@ cat << EOT > bulma.scss
 
 .cover {
   box-sizing: border-box;
-  border-radius: 0px 0.3em 0.3em 0px;
+  border-radius: 0px 0.3em 0.0em 0px;
   box-shadow: 0 0 1em #DDD;
 }
 
@@ -38,6 +38,11 @@ cat << EOT > bulma.scss
 }
 #menu-switch:checked ~ .navbar-menu{
  display: block;
+}
+
+.is-attached {
+ border-radius: 0 0 0.3em 0;
+ height:0.5rem;
 }
 EOT
 

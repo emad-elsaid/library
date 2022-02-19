@@ -5,8 +5,7 @@
 </figure>
 
 <progress
-    class="progress {{ if lt .PageRead .PageCount }}is-link{{ else }}is-success{{ end }}"
-    style="border-radius: 0 0 290486px 290486px; height:0.5rem"
+    class="progress is-attached {{ if lt .PageRead .PageCount }}is-link{{ else }}is-success{{ end }}"
     value="{{ .PageRead }}"
     max="{{ .PageCount }}"
     title="{{ .PageRead }}/{{ .PageCount }}" >
