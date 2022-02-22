@@ -8,6 +8,24 @@
   {{ .csrf }}
   <input type="hidden" name="google_books_id" value="{{ .book.GoogleBooksID.String }}">
 
+  {{ if has_field .book "ID" | not }}
+  <div class="field">
+    <label class="label">ISBN *</label>
+    <div class="control">
+      <input
+          class="input {{ if index .errors "isbn" }}is-danger{{ end }}"
+          type="number"
+          name="isbn"
+          value="{{ .book.Isbn }}"
+          {{ if has_field .book "ID" }}{{ else }}
+          onchange="document.getElementsByTagName('google-books')[0].setAttribute('keyword', `isbn:${this.value}`)"
+          {{ end }}
+          required>
+      {{ template "common/errors" index .errors "isbn" }}
+    </div>
+  </div>
+  {{ end }}
+
   <div class="field">
     <label class="label">Title</label>
     <div class="control">
@@ -25,23 +43,17 @@
     </div>
   </div>
 
-  {{ if has_field .book "ID" | not }}
-    <div class="field">
-      <label class="label">ISBN</label>
-      <div class="control">
-        <input
-            class="input {{ if index .errors "isbn" }}is-danger{{ end }}"
-            type="number"
-            name="isbn"
-            value="{{ .book.Isbn }}"
-            {{ if has_field .book "ID" }}{{ else }}
-            onchange="document.getElementsByTagName('google-books')[0].setAttribute('keyword', `isbn:${this.value}`)"
-            {{ end }}
-            required>
-        {{ template "common/errors" index .errors "isbn" }}
-      </div>
+  <div class="field">
+    <label class="label">Subtitle</label>
+    <div class="control">
+      <input
+          class="input {{ if index .errors "subtitle" }}is-danger{{ end }}"
+          type="text"
+          name="subtitle"
+          value="{{ .book.Subtitle }}">
+      {{ template "common/errors" index .errors "subtitle" }}
     </div>
-  {{ end }}
+  </div>
 
   <div class="field">
     <label class="label">Author</label>
@@ -65,63 +77,65 @@
   </div>
 
   <div class="field">
-    <label class="label">Cover Image</label>
+    <div class="file">
+      <label class="file-label">
+        <input class="file-input {{ if index .errors "image"  }}is-danger{{ end }}" type="file" name="image"  accept="image/*;capture=camera">
+        <span class="file-cta">
+          <span class="file-icon">
+            <i class="fas fa-upload"></i>
+          </span>
+          <span class="file-label"> Choose a cover image… </span>
+        </span>
+      </label>
+    </div>
+    {{ template "common/errors" index .errors "image" }}
+  </div>
+
+  <div class="field">
+    <label class="label">Description</label>
     <div class="control">
-      <input class="input {{ if index .errors "image"  }}is-danger{{ end }}" type="file" name="image"  accept="image/*;capture=camera">
-      {{ template "common/errors" index .errors "image" }}
+      <textarea
+          class="textarea {{ if index .errors "description" }}is-danger{{ end }}"
+          name="description">{{ .book.Description }}</textarea>
+      {{ template "common/errors" index .errors "description" }}
     </div>
   </div>
 
-  <details class="field">
-    <summary>Optional details</summary>
-
-    <div class="field">
-      <label class="label">Subtitle</label>
-      <div class="control">
-        <input
-            class="input {{ if index .errors "subtitle" }}is-danger{{ end }}"
-            type="text"
-            name="subtitle"
-            value="{{ .book.Subtitle }}">
-        {{ template "common/errors" index .errors "subtitle" }}
-      </div>
+  <div class="field">
+    <label class="label">Publisher</label>
+    <div class="control">
+      <input
+          class="input {{ if index .errors "publisher" }}is-danger{{ end }}"
+          type="text"
+          name="publisher"
+          value="{{ .book.Publisher }}">
+      {{ template "common/errors" index .errors "publisher" }}
     </div>
+  </div>
 
-    <div class="field">
-      <label class="label">Description</label>
-      <div class="control">
-        <textarea
-            class="textarea {{ if index .errors "description" }}is-danger{{ end }}"
-            name="description">{{ .book.Description }}</textarea>
-        {{ template "common/errors" index .errors "description" }}
-      </div>
+  <div class="field">
+    <label class="label">Pages</label>
+    <div class="control">
+      <input
+          class="input {{ if index .errors "page_count" }}is-danger{{ end }}"
+          type="number"
+          name="page_count"
+          value="{{ .book.PageCount }}">
+      {{ template "common/errors" index .errors "page_count" }}
     </div>
+  </div>
 
-    <div class="field">
-      <label class="label">Publisher</label>
-      <div class="control">
-        <input
-            class="input {{ if index .errors "publisher" }}is-danger{{ end }}"
-            type="text"
-            name="publisher"
-            value="{{ .book.Publisher }}">
-        {{ template "common/errors" index .errors "publisher" }}
-      </div>
+  <div class="field">
+    <label class="label">Pages Read</label>
+    <div class="control">
+      <input
+          class="input {{ if index .errors "page_read" }}is-danger{{ end }}"
+          type="number"
+          name="page_read"
+          value="{{ .book.PageRead }}">
+      {{ template "common/errors" index .errors "page_read" }}
     </div>
-
-    <div class="field">
-      <label class="label">Pages</label>
-      <div class="control">
-        <input
-            class="input {{ if index .errors "page_count" }}is-danger{{ end }}"
-            type="number"
-            name="page_count"
-            value="{{ .book.PageCount }}">
-        {{ template "common/errors" index .errors "page_count" }}
-      </div>
-    </div>
-
-  </details>
+  </div>
 
   <div class="field is-grouped">
     <div class="control">

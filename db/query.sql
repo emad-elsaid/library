@@ -13,7 +13,7 @@ VALUES($1,$2,$3,$4)
        RETURNING id;
 
 -- name: UserUnshelvedBooks :many
-SELECT books.id id, title, books.image image, google_books_id, slug, isbn
+SELECT books.id id, title, books.image image, google_books_id, slug, isbn, page_count, page_read
   FROM books, users
  WHERE users.id = books.user_id
    AND user_id = $1
@@ -23,7 +23,7 @@ SELECT books.id id, title, books.image image, google_books_id, slug, isbn
 SELECT * FROM shelves WHERE user_id = $1 ORDER BY position;
 
 -- name: ShelfBooks :many
-SELECT books.id id, title, books.image image, google_books_id, slug, isbn
+SELECT books.id id, title, books.image image, google_books_id, slug, isbn, page_read, page_count
   FROM books, users
  WHERE users.id = books.user_id
    AND shelf_id = $1
@@ -43,8 +43,8 @@ SELECT books.*, slug, shelves.name shelf_name
 SELECT * FROM highlights WHERE book_id = $1 ORDER BY page;
 
 -- name: NewBook :one
-INSERT INTO books (title, isbn, author, subtitle, description, publisher, page_count, google_books_id, user_id)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+INSERT INTO books (title, isbn, author, subtitle, description, publisher, page_count, google_books_id, user_id, page_read)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
        RETURNING *;
 
 -- name: UpdateBook :exec
@@ -55,11 +55,15 @@ UPDATE books
        description = $4,
        publisher = $5,
        page_count = $6,
+       page_read = $7,
        updated_at = CURRENT_TIMESTAMP
- WHERE id = $7;
+ WHERE id = $8;
 
 -- name: UpdateBookImage :exec
 UPDATE books SET image = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2;
+
+-- name: CompleteBook :exec
+UPDATE books SET page_read = page_count WHERE id = $1;
 
 -- name: ShelfByIdAndUser :one
 SELECT * FROM shelves WHERE user_id = $1 AND id = $2 LIMIT 1;

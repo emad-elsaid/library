@@ -6,33 +6,43 @@
   <table class="table is-striped is-hoverable is-fullwidth">
     <thead>
       <tr>
-        <th> Shelf </th>
-        <th> </th>
+        <th colspan="4"> Shelf </th>
       </tr>
     </thead>
     <tbody>
       {{ $lastitem := last .shelves }}
       {{ range .shelves }}
         <tr>
-          <td>
+          <td width="100%">
             {{ .Name }}
           </td>
           <td>
-              <a class="button is-small is-pulled-right" href="/users/{{ $.user.Slug }}/shelves/{{ .ID }}/edit">Edit</a>
-              {{ if can $.current_user "up" . }}
-              <form action="/users/{{ $.user.Slug }}/shelves/{{ .ID }}/up" class="is-pulled-right" method="POST">
-                {{ $.csrf }}
-                <button class="button is-small">↑</button>
-              </form>
-              {{ end }}
-              {{ if can $.current_user "down" . }}
-              {{ if ne $lastitem . }}
-              <form action="/users/{{ $.user.Slug }}/shelves/{{.ID }}/down" class="is-pulled-right" method="POST">
-                {{ $.csrf }}
-                <button class="button is-small">↓</button>
-              </form>
-              {{ end }}
-              {{ end }}
+            {{ if can $.current_user "down" . }}
+            {{ if ne $lastitem . }}
+            <form action="/users/{{ $.user.Slug }}/shelves/{{.ID }}/down" method="POST">
+              {{ $.csrf }}
+              <button class="button is-small">
+                <span class="icon"><i class="fa-solid fa-angle-down"></i></span>
+              </button>
+            </form>
+            {{ end }}
+            {{ end }}
+          </td>
+          <td>
+            {{ if can $.current_user "up" . }}
+            <form action="/users/{{ $.user.Slug }}/shelves/{{ .ID }}/up" method="POST">
+              {{ $.csrf }}
+              <button class="button is-small">
+                <span class="icon"><i class="fa-solid fa-angle-up"></i></span>
+              </button>
+            </form>
+            {{ end }}
+          </td>
+          <td>
+            <a class="button is-small" href="/users/{{ $.user.Slug }}/shelves/{{ .ID }}/edit">
+              <span class="icon"><i class="fa-solid fa-pen"></i></span>
+              <span>Edit</span>
+            </a>
           </td>
         </tr>
       {{ end }}
@@ -51,7 +61,10 @@
           {{ template "common/errors" index .errors "name" }}
         </div>
         <div class="control">
-          <button class="button">New Shelf 📚</button>
+          <button class="button">
+            <span class="icon"><i class="fa-solid fa-circle-plus"></i></span>
+            <span>New Shelf</span>
+          </button>
         </div>
       </div>
     </form>

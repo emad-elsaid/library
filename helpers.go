@@ -22,11 +22,11 @@ import (
 )
 
 func Helpers() {
-	helpers["partial"] = func(path string, data interface{}) (template.HTML, error) {
+	HELPER("partial", func(path string, data interface{}) (template.HTML, error) {
 		return template.HTML(partial(path, data)), nil
-	}
+	})
 
-	helpers["meta_property"] = func(meta map[string]string, name string) template.HTML {
+	HELPER("meta_property", func(meta map[string]string, name string) template.HTML {
 		if meta == nil {
 			return ""
 		}
@@ -38,9 +38,9 @@ func Helpers() {
 
 		tag := fmt.Sprintf(`<meta property="%s" value="%s"/>`, template.HTMLEscapeString(name), template.HTMLEscapeString(v))
 		return template.HTML(tag)
-	}
+	})
 
-	helpers["meta_name"] = func(meta map[string]string, name string) template.HTML {
+	HELPER("meta_name", func(meta map[string]string, name string) template.HTML {
 		if meta == nil {
 			return ""
 		}
@@ -52,11 +52,11 @@ func Helpers() {
 
 		tag := fmt.Sprintf(`<meta name="%s" value="%s"/>`, template.HTMLEscapeString(name), template.HTMLEscapeString(v))
 		return template.HTML(tag)
-	}
+	})
 
-	helpers["can"] = can
+	HELPER("can", can)
 
-	helpers["include"] = func(list []string, str string) bool {
+	HELPER("include", func(list []string, str string) bool {
 		for _, i := range list {
 			if i == str {
 				return true
@@ -64,19 +64,19 @@ func Helpers() {
 		}
 
 		return false
-	}
+	})
 
-	helpers["book_cover"] = book_cover
+	HELPER("book_cover", book_cover)
 
-	helpers["simple_format"] = func(str string) (template.HTML, error) {
+	HELPER("simple_format", func(str string) (template.HTML, error) {
 		return template.HTML(strings.ReplaceAll(template.HTMLEscapeString(str), "\n", "<br/>")), nil
-	}
+	})
 
-	helpers["shelf_books"] = func(shelfID int64) ([]ShelfBooksRow, error) {
+	HELPER("shelf_books", func(shelfID int64) ([]ShelfBooksRow, error) {
 		return Q.ShelfBooks(context.Background(), sql.NullInt64{Valid: true, Int64: shelfID})
-	}
+	})
 
-	helpers["has_field"] = func(v interface{}, name string) bool {
+	HELPER("has_field", func(v interface{}, name string) bool {
 		rv := reflect.ValueOf(v)
 		if rv.Kind() == reflect.Ptr {
 			rv = rv.Elem()
@@ -89,9 +89,9 @@ func Helpers() {
 			return val.IsValid()
 		}
 		return false
-	}
+	})
 
-	helpers["last"] = func(v interface{}) interface{} {
+	HELPER("last", func(v interface{}) interface{} {
 		rv := reflect.ValueOf(v)
 		if rv.Kind() == reflect.Ptr {
 			rv = rv.Elem()
@@ -106,12 +106,12 @@ func Helpers() {
 		}
 
 		return rv.Index(rv.Len() - 1)
-	}
+	})
 
-	helpers["books_count"] = func(u int64) int64 {
+	HELPER("books_count", func(u int64) int64 {
 		c, _ := Q.BooksCount(context.Background(), u)
 		return c
-	}
+	})
 }
 
 func loggedin(r *http.Request) bool {

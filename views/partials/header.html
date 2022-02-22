@@ -1,5 +1,19 @@
+{{ if can .current_user "login" nil }}
+<div class="columns">
+  <div class="column has-text-right">
+    <form action="/auth/google" method="POST">
+      {{ .csrf }}
+      <button class="button is-danger">
+        <span class="icon"><i class="fa-brands fa-google"></i></span>
+        <span>Login with Google</span>
+      </button>
+    </form>
+  </div>
+</div>
+{{ end }}
+
 {{ if .user }}
-<div class="columns box">
+<div class="columns">
   <div class="column is-narrow">
     <figure class="image is-64x64">
       <a href="/users/{{ .user.Slug }}">
@@ -21,14 +35,5 @@
     <p class="heading">Books</p>
     <p class="title">{{ books_count .user.ID }}</p>
   </div>
-</div>
-{{ end }}
-
-{{ if can .current_user "login" nil }}
-<div class="section has-text-centered">
-  <form action="/auth/google" method="POST">
-    {{ .csrf }}
-    <button class="button"> Login with Google </button>
-  </form>
 </div>
 {{ end }}

@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 13.4
--- Dumped by pg_dump version 13.4
+-- Dumped from database version 13.5
+-- Dumped by pg_dump version 13.5
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -50,7 +50,8 @@ CREATE TABLE public.books (
     subtitle character varying NOT NULL,
     description character varying NOT NULL,
     page_count integer NOT NULL,
-    publisher character varying NOT NULL
+    publisher character varying NOT NULL,
+    page_read integer DEFAULT 0 NOT NULL
 );
 
 
@@ -357,8 +358,8 @@ ALTER TABLE ONLY public.books
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 13.4
--- Dumped by pg_dump version 13.4
+-- Dumped from database version 13.5
+-- Dumped by pg_dump version 13.5
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -375,9 +376,9 @@ SET row_security = off;
 -- Data for Name: schema_migrations; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.schema_migrations VALUES ('20210520122458');
 INSERT INTO public.schema_migrations VALUES ('20210518144128');
 INSERT INTO public.schema_migrations VALUES ('20210520081623');
+INSERT INTO public.schema_migrations VALUES ('20210520122458');
 INSERT INTO public.schema_migrations VALUES ('20210609123416');
 INSERT INTO public.schema_migrations VALUES ('20210609195207');
 INSERT INTO public.schema_migrations VALUES ('20210624200935');
@@ -398,6 +399,7 @@ INSERT INTO public.schema_migrations VALUES ('20220203060659');
 INSERT INTO public.schema_migrations VALUES ('20220205001018');
 INSERT INTO public.schema_migrations VALUES ('20220205192708');
 INSERT INTO public.schema_migrations VALUES ('20220205194930');
+INSERT INTO public.schema_migrations VALUES ('20220218225900');
 
 
 --

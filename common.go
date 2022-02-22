@@ -269,6 +269,14 @@ func Render(path string, view string, data Locals) http.HandlerFunc {
 	}
 }
 
+func HELPER(name string, f interface{}) {
+	if _, ok := helpers[name]; ok {
+		log.Fatalf("Helper: %s has been defined already", name)
+	}
+
+	helpers[name] = f
+}
+
 // SESSION =================================
 
 func SESSION(r *http.Request) *sessions.Session {

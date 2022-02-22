@@ -3,3 +3,11 @@
     <img src="{{ book_cover .Image.String .GoogleBooksID.String }}" loading="lazy" class="cover">
   </a>
 </figure>
+
+<progress
+    class="progress is-attached {{ if lt .PageRead .PageCount }}is-link{{ else }}is-success{{ end }}"
+    value="{{ .PageRead }}"
+    max="{{ .PageCount }}"
+    title="{{ .PageRead }}/{{ .PageCount }}" >
+  {{ .PageRead }}/{{ .PageCount }}
+</progress>

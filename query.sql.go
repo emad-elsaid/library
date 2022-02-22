@@ -10,7 +10,7 @@ import (
 )
 
 const bookByIsbnAndUser = `-- name: BookByIsbnAndUser :one
-SELECT books.id, books.title, books.author, books.image, books.isbn, books.created_at, books.updated_at, books.shelf_id, books.user_id, books.google_books_id, books.subtitle, books.description, books.page_count, books.publisher, slug, shelves.name shelf_name
+SELECT books.id, books.title, books.author, books.image, books.isbn, books.created_at, books.updated_at, books.shelf_id, books.user_id, books.google_books_id, books.subtitle, books.description, books.page_count, books.publisher, books.page_read, slug, shelves.name shelf_name
   FROM users, books
        LEFT JOIN shelves
            ON shelves.id = books.shelf_id
@@ -40,6 +40,7 @@ type BookByIsbnAndUserRow struct {
 	Description   string
 	PageCount     int32
 	Publisher     string
+	PageRead      int32
 	Slug          string
 	ShelfName     sql.NullString
 }
@@ -62,6 +63,7 @@ func (q *Queries) BookByIsbnAndUser(ctx context.Context, arg BookByIsbnAndUserPa
 		&i.Description,
 		&i.PageCount,
 		&i.Publisher,
+		&i.PageRead,
 		&i.Slug,
 		&i.ShelfName,
 	)
@@ -77,6 +79,15 @@ func (q *Queries) BooksCount(ctx context.Context, userID int64) (int64, error) {
 	var count int64
 	err := row.Scan(&count)
 	return count, err
+}
+
+const completeBook = `-- name: CompleteBook :exec
+UPDATE books SET page_read = page_count WHERE id = $1
+`
+
+func (q *Queries) CompleteBook(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, completeBook, id)
+	return err
 }
 
 const deleteBook = `-- name: DeleteBook :exec
@@ -247,9 +258,9 @@ func (q *Queries) MoveShelfUp(ctx context.Context, id int64) error {
 }
 
 const newBook = `-- name: NewBook :one
-INSERT INTO books (title, isbn, author, subtitle, description, publisher, page_count, google_books_id, user_id)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-       RETURNING id, title, author, image, isbn, created_at, updated_at, shelf_id, user_id, google_books_id, subtitle, description, page_count, publisher
+INSERT INTO books (title, isbn, author, subtitle, description, publisher, page_count, google_books_id, user_id, page_read)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+       RETURNING id, title, author, image, isbn, created_at, updated_at, shelf_id, user_id, google_books_id, subtitle, description, page_count, publisher, page_read
 `
 
 type NewBookParams struct {
@@ -262,6 +273,7 @@ type NewBookParams struct {
 	PageCount     int32
 	GoogleBooksID sql.NullString
 	UserID        int64
+	PageRead      int32
 }
 
 func (q *Queries) NewBook(ctx context.Context, arg NewBookParams) (Book, error) {
@@ -275,6 +287,7 @@ func (q *Queries) NewBook(ctx context.Context, arg NewBookParams) (Book, error) 
 		arg.PageCount,
 		arg.GoogleBooksID,
 		arg.UserID,
+		arg.PageRead,
 	)
 	var i Book
 	err := row.Scan(
@@ -292,6 +305,7 @@ func (q *Queries) NewBook(ctx context.Context, arg NewBookParams) (Book, error) 
 		&i.Description,
 		&i.PageCount,
 		&i.Publisher,
+		&i.PageRead,
 	)
 	return i, err
 }
@@ -352,7 +366,7 @@ func (q *Queries) RemoveShelf(ctx context.Context, id int64) error {
 }
 
 const shelfBooks = `-- name: ShelfBooks :many
-SELECT books.id id, title, books.image image, google_books_id, slug, isbn
+SELECT books.id id, title, books.image image, google_books_id, slug, isbn, page_read, page_count
   FROM books, users
  WHERE users.id = books.user_id
    AND shelf_id = $1
@@ -366,6 +380,8 @@ type ShelfBooksRow struct {
 	GoogleBooksID sql.NullString
 	Slug          string
 	Isbn          string
+	PageRead      int32
+	PageCount     int32
 }
 
 func (q *Queries) ShelfBooks(ctx context.Context, shelfID sql.NullInt64) ([]ShelfBooksRow, error) {
@@ -384,6 +400,8 @@ func (q *Queries) ShelfBooks(ctx context.Context, shelfID sql.NullInt64) ([]Shel
 			&i.GoogleBooksID,
 			&i.Slug,
 			&i.Isbn,
+			&i.PageRead,
+			&i.PageCount,
 		); err != nil {
 			return nil, err
 		}
@@ -491,8 +509,9 @@ UPDATE books
        description = $4,
        publisher = $5,
        page_count = $6,
+       page_read = $7,
        updated_at = CURRENT_TIMESTAMP
- WHERE id = $7
+ WHERE id = $8
 `
 
 type UpdateBookParams struct {
@@ -502,6 +521,7 @@ type UpdateBookParams struct {
 	Description string
 	Publisher   string
 	PageCount   int32
+	PageRead    int32
 	ID          int64
 }
 
@@ -513,6 +533,7 @@ func (q *Queries) UpdateBook(ctx context.Context, arg UpdateBookParams) error {
 		arg.Description,
 		arg.Publisher,
 		arg.PageCount,
+		arg.PageRead,
 		arg.ID,
 	)
 	return err
@@ -676,7 +697,7 @@ func (q *Queries) UserBySlug(ctx context.Context, slug string) (User, error) {
 }
 
 const userUnshelvedBooks = `-- name: UserUnshelvedBooks :many
-SELECT books.id id, title, books.image image, google_books_id, slug, isbn
+SELECT books.id id, title, books.image image, google_books_id, slug, isbn, page_count, page_read
   FROM books, users
  WHERE users.id = books.user_id
    AND user_id = $1
@@ -690,6 +711,8 @@ type UserUnshelvedBooksRow struct {
 	GoogleBooksID sql.NullString
 	Slug          string
 	Isbn          string
+	PageCount     int32
+	PageRead      int32
 }
 
 func (q *Queries) UserUnshelvedBooks(ctx context.Context, userID int64) ([]UserUnshelvedBooksRow, error) {
@@ -708,6 +731,8 @@ func (q *Queries) UserUnshelvedBooks(ctx context.Context, userID int64) ([]UserU
 			&i.GoogleBooksID,
 			&i.Slug,
 			&i.Isbn,
+			&i.PageCount,
+			&i.PageRead,
 		); err != nil {
 			return nil, err
 		}
