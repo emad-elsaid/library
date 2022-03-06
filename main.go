@@ -33,7 +33,7 @@ func main() {
 			return Redirect(fmt.Sprintf("/users/%s", user.Slug))
 		}
 
-		return Render("layout", "index", Locals{"csrf": CSRF(r)})
+		return Render("wide_layout", "index", Locals{"csrf": CSRF(r)})
 	})
 
 	GET("/privacy", func(w Response, r Request) Output {
