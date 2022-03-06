@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -10,7 +11,6 @@ import (
 
 	"github.com/google/uuid"
 	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
 )
 
 const (
@@ -24,7 +24,11 @@ func main() {
 		ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
 		RedirectURL:  os.Getenv("DOMAIN") + "/auth/google/callback",
 		Scopes:       []string{"email", "profile"},
-		Endpoint:     google.Endpoint,
+		Endpoint: oauth2.Endpoint{
+			AuthURL:   "https://accounts.google.com/o/oauth2/auth",
+			TokenURL:  "https://oauth2.googleapis.com/token",
+			AuthStyle: oauth2.AuthStyleInParams,
+		},
 	}
 
 	GET("/", func(w Response, r Request) Output {
@@ -48,12 +52,12 @@ func main() {
 	})
 
 	GET("/auth/google/callback", func(w Response, r Request) Output {
-		tok, err := google_conf.Exchange(oauth2.NoContext, r.URL.Query().Get("code"))
+		tok, err := google_conf.Exchange(context.Background(), r.URL.Query().Get("code"))
 		if err != nil {
 			return BadRequest
 		}
 
-		client := google_conf.Client(oauth2.NoContext, tok)
+		client := google_conf.Client(context.Background(), tok)
 		resp, err := client.Get("https://www.googleapis.com/oauth2/v2/userinfo")
 		if err != nil {
 			return Unauthorized
