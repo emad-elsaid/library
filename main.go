@@ -19,7 +19,7 @@ const (
 )
 
 func main() {
-	google_conf := &oauth2.Config{
+	google := &oauth2.Config{
 		ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
 		ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
 		RedirectURL:  os.Getenv("DOMAIN") + "/auth/google/callback",
@@ -48,16 +48,29 @@ func main() {
 	})
 
 	POST("/auth/google", func(w Response, r Request) Output {
-		return Redirect(google_conf.AuthCodeURL("state"))
+		state := uuid.New().String()
+		s := SESSION(r)
+		s.Values["state"] = state
+		if err := s.Save(r, w); err != nil {
+			return InternalServerError(err)
+		}
+
+		return Redirect(google.AuthCodeURL(state))
 	})
 
 	GET("/auth/google/callback", func(w Response, r Request) Output {
-		tok, err := google_conf.Exchange(context.Background(), r.URL.Query().Get("code"))
+		state := SESSION(r).Values["state"]
+		param := r.FormValue("state")
+		if state != param {
+			return BadRequest
+		}
+
+		tok, err := google.Exchange(context.Background(), r.URL.Query().Get("code"))
 		if err != nil {
 			return BadRequest
 		}
 
-		client := google_conf.Client(context.Background(), tok)
+		client := google.Client(context.Background(), tok)
 		resp, err := client.Get("https://www.googleapis.com/oauth2/v2/userinfo")
 		if err != nil {
 			return Unauthorized
