@@ -23,13 +23,13 @@
     {{ if .current_user }} {{ template "partials/user_nav" . }} {{ end }}
 
     <section class="section">
-      <div class="container is-max-widescreen">
+      <div class="container is-max-desktop">
         {{ template "partials/header" . }}
       </div>
     </section>
 
     <section class="section">
-      <div class="container is-max-widescreen">
+      <div class="container is-max-desktop">
         {{ partial .view . }}
       </div>
     </section>
