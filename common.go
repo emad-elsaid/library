@@ -414,10 +414,10 @@ func ValidateImage(val io.Reader, key, label string, ve ValidationErrors, maxw, 
 
 	sz := image.Bounds().Size()
 	if sz.X > maxw {
-		ve.Add(key, fmt.Errorf("%s width should be less than %d px", label, maxw))
+		ve.Add(key, fmt.Errorf("%s width should be less than %d px, uploaded image width %d px", label, maxw, sz.X))
 	}
 	if sz.Y > maxh {
-		ve.Add(key, fmt.Errorf("%s height should be less than %d px", label, maxh))
+		ve.Add(key, fmt.Errorf("%s height should be less than %d px, uploaded image height %d px", label, maxh, sz.Y))
 	}
 }
 
