@@ -269,7 +269,7 @@ func main() {
 
 		file, _, _ := r.FormFile("image")
 		if file != nil {
-			ValidateImage(file, "image", "Image", errors, 600, 600)
+			ValidateImage(file, "image", "Image", errors, 3000, 4000)
 			file.Seek(0, os.SEEK_SET)
 		}
 
