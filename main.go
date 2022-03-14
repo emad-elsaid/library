@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/google/uuid"
 	"golang.org/x/oauth2"
@@ -48,9 +49,15 @@ func main() {
 	})
 
 	POST("/auth/google", func(w Response, r Request) Output {
+		origin := r.FormValue("origin")
+		if !strings.HasPrefix(origin, "/") {
+			origin = "/"
+		}
+
 		state := uuid.New().String()
 		s := SESSION(r)
 		s.Values["state"] = state
+		s.Values["origin"] = origin
 		if err := s.Save(r, w); err != nil {
 			return InternalServerError(err)
 		}
@@ -107,7 +114,12 @@ func main() {
 			return InternalServerError(err)
 		}
 
-		return Redirect("/")
+		origin, ok := s.Values["origin"].(string)
+		if !ok {
+			origin = "/"
+		}
+
+		return Redirect(origin)
 	})
 
 	GET("/logout", func(w Response, r Request) Output {

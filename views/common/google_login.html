@@ -1,0 +1,8 @@
+<form action="/auth/google" method="POST">
+  {{ .csrf }}
+  <input type="hidden" name="origin" value="{{ .request.URL.Path }}" />
+  <button class="button is-danger">
+    <span class="icon"><i class="fa-brands fa-google"></i></span>
+    <span>Login with Google</span>
+  </button>
+</form>

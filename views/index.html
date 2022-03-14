@@ -5,13 +5,7 @@
       <p class="subtitle"> Simply take control of your library </p>
       <p>
         {{ if can .current_user "login" nil }}
-        <form action="/auth/google" method="POST">
-          {{ .csrf }}
-          <button class="button is-danger">
-            <span class="icon"><i class="fa-brands fa-google"></i></span>
-            <span>Login with Google</span>
-          </button>
-        </form>
+        {{ template "common/google_login" . }}
         {{ end }}
       </p>
     </div>
