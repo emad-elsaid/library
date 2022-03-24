@@ -32,7 +32,7 @@ services:
 
   backup:
     build: .
-    command: bundle exec ./backup
+    command: bin/backup
     restart: always
     volumes:
       - /root/data/library/backups:/backups

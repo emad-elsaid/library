@@ -1,16 +1,17 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/google/uuid"
 	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
 )
 
 const (
@@ -19,12 +20,16 @@ const (
 )
 
 func main() {
-	google_conf := &oauth2.Config{
+	google := &oauth2.Config{
 		ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
 		ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
 		RedirectURL:  os.Getenv("DOMAIN") + "/auth/google/callback",
 		Scopes:       []string{"email", "profile"},
-		Endpoint:     google.Endpoint,
+		Endpoint: oauth2.Endpoint{
+			AuthURL:   "https://accounts.google.com/o/oauth2/auth",
+			TokenURL:  "https://oauth2.googleapis.com/token",
+			AuthStyle: oauth2.AuthStyleInParams,
+		},
 	}
 
 	GET("/", func(w Response, r Request) Output {
@@ -33,7 +38,7 @@ func main() {
 			return Redirect(fmt.Sprintf("/users/%s", user.Slug))
 		}
 
-		return Render("layout", "index", Locals{"csrf": CSRF(r)})
+		return Render("wide_layout", "index", Locals{"csrf": CSRF(r)})
 	})
 
 	GET("/privacy", func(w Response, r Request) Output {
@@ -44,16 +49,35 @@ func main() {
 	})
 
 	POST("/auth/google", func(w Response, r Request) Output {
-		return Redirect(google_conf.AuthCodeURL("state"))
+		origin := r.FormValue("origin")
+		if !strings.HasPrefix(origin, "/") {
+			origin = "/"
+		}
+
+		state := uuid.New().String()
+		s := SESSION(r)
+		s.Values["state"] = state
+		s.Values["origin"] = origin
+		if err := s.Save(r, w); err != nil {
+			return InternalServerError(err)
+		}
+
+		return Redirect(google.AuthCodeURL(state))
 	})
 
 	GET("/auth/google/callback", func(w Response, r Request) Output {
-		tok, err := google_conf.Exchange(oauth2.NoContext, r.URL.Query().Get("code"))
+		state := SESSION(r).Values["state"]
+		param := r.FormValue("state")
+		if state != param {
+			return BadRequest
+		}
+
+		tok, err := google.Exchange(context.Background(), r.URL.Query().Get("code"))
 		if err != nil {
 			return BadRequest
 		}
 
-		client := google_conf.Client(oauth2.NoContext, tok)
+		client := google.Client(context.Background(), tok)
 		resp, err := client.Get("https://www.googleapis.com/oauth2/v2/userinfo")
 		if err != nil {
 			return Unauthorized
@@ -90,7 +114,12 @@ func main() {
 			return InternalServerError(err)
 		}
 
-		return Redirect("/")
+		origin, ok := s.Values["origin"].(string)
+		if !ok {
+			origin = "/"
+		}
+
+		return Redirect(origin)
 	})
 
 	GET("/logout", func(w Response, r Request) Output {
@@ -252,7 +281,7 @@ func main() {
 
 		file, _, _ := r.FormFile("image")
 		if file != nil {
-			ValidateImage(file, "image", "Image", errors, 600, 600)
+			ValidateImage(file, "image", "Image", errors, 3000, 4000)
 			file.Seek(0, os.SEEK_SET)
 		}
 

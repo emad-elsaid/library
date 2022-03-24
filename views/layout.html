@@ -17,19 +17,19 @@
     {{ meta_property .meta "twitter:title" }}
 
     <title>{{ if .title }} {{ .title }} | {{end }} LIBRARY </title>
-    <link rel="stylesheet" href="/style.css?v=4">
+    <link rel="stylesheet" href="/style.css?v={{ sha256 "public/style.css" }}">
   </head>
   <body>
     {{ if .current_user }} {{ template "partials/user_nav" . }} {{ end }}
 
     <section class="section">
-      <div class="container is-max-widescreen">
+      <div class="container is-max-desktop">
         {{ template "partials/header" . }}
       </div>
     </section>
 
     <section class="section">
-      <div class="container is-max-widescreen">
+      <div class="container is-max-desktop">
         {{ partial .view . }}
       </div>
     </section>
