@@ -8,3 +8,4 @@
 /public/highlights/image/*
 !/public/highlights/image/
 !/public/highlights/image/.keep
+/myenv.sample
