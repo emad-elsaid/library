@@ -117,6 +117,155 @@ func (q *Queries) DeleteShelf(ctx context.Context, id int64) error {
 	return err
 }
 
+const exportBooksByUserId = `-- name: ExportBooksByUserId :many
+SELECT books.id id, title, author, books.image image, isbn, created_at, updated_at, shelf_id, user_id, google_books_id, 
+  subtitle, description, page_count, publisher, page_read
+  FROM books
+ WHERE user_id=$1
+`
+
+func (q *Queries) ExportBooksByUserId(ctx context.Context, userID int64) ([]Book, error) {
+	rows, err := q.db.QueryContext(ctx, exportBooksByUserId, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Book
+	for rows.Next() {
+		var i Book
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Author,
+			&i.Image,
+			&i.Isbn,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.ShelfID,
+			&i.UserID,
+			&i.GoogleBooksID,
+			&i.Subtitle,
+			&i.Description,
+			&i.PageCount,
+			&i.Publisher,
+			&i.PageRead,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const exportHighlightsByUserId = `-- name: ExportHighlightsByUserId :many
+SELECT highlights.id, highlights.book_id, highlights.page, highlights.content, highlights.image,
+  highlights.created_at, highlights.updated_at
+  FROM highlights
+INNER JOIN books on highlights.book_id = books.id
+WHERE books.user_id=$1
+`
+
+func (q *Queries) ExportHighlightsByUserId(ctx context.Context, userID int64) ([]Highlight, error) {
+	rows, err := q.db.QueryContext(ctx, exportHighlightsByUserId, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Highlight
+	for rows.Next() {
+		var i Highlight
+		if err := rows.Scan(
+			&i.ID,
+			&i.BookID,
+			&i.Page,
+			&i.Content,
+			&i.Image,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const exportShelvasByUserId = `-- name: ExportShelvasByUserId :many
+SELECT id, name, created_at, updated_at, user_id, position
+FROM shelves
+WHERE user_id=$1
+`
+
+func (q *Queries) ExportShelvasByUserId(ctx context.Context, userID int64) ([]Shelf, error) {
+	rows, err := q.db.QueryContext(ctx, exportShelvasByUserId, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Shelf
+	for rows.Next() {
+		var i Shelf
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.UserID,
+			&i.Position,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const exportUserDataByUserId = `-- name: ExportUserDataByUserId :one
+SELECT id, name, email, image, created_at, updated_at, slug, description, facebook, twitter, linkedin, instagram, phone, whatsapp, telegram, amazon_associates_id FROM users WHERE id=$1
+`
+
+func (q *Queries) ExportUserDataByUserId(ctx context.Context, id int64) (User, error) {
+	row := q.db.QueryRowContext(ctx, exportUserDataByUserId, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.Image,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Slug,
+		&i.Description,
+		&i.Facebook,
+		&i.Twitter,
+		&i.Linkedin,
+		&i.Instagram,
+		&i.Phone,
+		&i.Whatsapp,
+		&i.Telegram,
+		&i.AmazonAssociatesID,
+	)
+	return i, err
+}
+
 const highlightByIDAndBook = `-- name: HighlightByIDAndBook :one
 SELECT id, book_id, page, content, image, created_at, updated_at FROM highlights WHERE id = $1 AND book_id = $2 LIMIT 1
 `
