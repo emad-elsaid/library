@@ -21,7 +21,6 @@ import (
 	"github.com/google/uuid"
 	"golang.org/x/image/draw"
 	"strconv"
-	"archive/zip"
 )
 
 
@@ -288,67 +287,3 @@ func DownloadFile(w http.ResponseWriter, r *http.Request, file string) string {
 	io.Copy(w, Openfile) //'Copy' the file to the client
 	return file
 }
-
-func DownloadZipFile(w http.ResponseWriter, r *http.Request, file string, newLocation string) string {
-	// Openfile, err := os.Open(file) //Open the file to be downloaded later
-	// defer Openfile.Close() //Close after function return
-
-	// if err != nil {		
-	// 	http.Error(w, "File not found.", 404) //return 404 if file is not found
-	// 	return ""
-	// }
-
-	// tempBuffer := make([]byte, 512) //Create a byte array to read the file later
-	// Openfile.Read(tempBuffer) //Read the file into  byte
-	// FileContentType := http.DetectContentType(tempBuffer) //Get file header
-
-	// FileStat, _ := Openfile.Stat() //Get info from file
-	// FileSize := strconv.FormatInt(FileStat.Size(), 10) //Get file size as a string
-
-	// Filename := file
-
-	// //Set the headers
-	// w.Header().Set("Content-Type", FileContentType+";"+Filename)
-	// w.Header().Set("Content-Length", FileSize)
-
-	// Openfile.Seek(0, 0) //We read 512 bytes from the file already so we reset the offset back to 0
-	// io.Copy(w, Openfile) //'Copy' the file to the client
-	// return file
-	
-	// move the zip file from the public folder to the export folder
-	MoveFile(file, newLocation)
-	w.Header().Set("Content-type", "application/zip")
-	http.ServeFile(w, r, "export/library.zip")
-	//defer os.Remove(file)	
-	return ""
-
-}
-
-func appendFiles(filename string, zipw *zip.Writer) error {
-	file, err := os.Open(filename)
-	if err != nil {
-		return fmt.Errorf("Failed to open %s: %s", filename, err)
-	}
-	defer file.Close()
- 
-	wr, err := zipw.Create(filename)
-	if err != nil {
-		msg := "Failed to create entry for %s in zip file: %s"
-		return fmt.Errorf(msg, filename, err)
-	}
- 
-	if _, err := io.Copy(wr, file); err != nil {
-		return fmt.Errorf("Failed to write %s to zip: %s", filename, err)
-	}
- 
-	return nil
-}
-
-func MoveFile(oldLocation string, newLocation string) string {
-	err := os.Rename(oldLocation, newLocation)
-	if err != nil {
-		return ""
-	}
-	return ""
-}
- 
