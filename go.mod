@@ -5,7 +5,6 @@ go 1.17
 require (
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/csrf v1.7.1
-	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/sessions v1.2.1
 	github.com/jmoiron/sqlx v1.3.4
 	github.com/lib/pq v1.10.4

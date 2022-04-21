@@ -33,6 +33,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -40,7 +41,6 @@ import (
 	_ "embed"
 
 	"github.com/gorilla/csrf"
-	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -59,10 +59,9 @@ const (
 
 var (
 	Q       *Queries
-	router  *mux.Router
+	router  *Handler = &Handler{}
 	session *sessions.CookieStore
 
-	VARS = mux.Vars
 	CSRF = csrf.TemplateField
 )
 
@@ -93,7 +92,6 @@ func init() {
 	db.SetMaxIdleConns(MAX_DB_IDLE_CONNECTIONS)
 
 	Q = New(queryLogger{db})
-	router = mux.NewRouter()
 	session = sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET")))
 	session.Options.HttpOnly = true
 }
@@ -111,7 +109,8 @@ func Start() {
 		RequestLoggerHandler,
 	}
 
-	router.PathPrefix("/").Handler(staticWithoutDirectoryListingHandler())
+	ROUTE(staticWithoutDirectoryListingHandler(), checkNoop)
+
 	var handler http.Handler = router
 	for _, v := range middlewares {
 		handler = v(handler)
@@ -126,6 +125,69 @@ func Start() {
 
 	log.Printf("Starting server: %s", BIND_ADDRESS)
 	log.Fatal(srv.ListenAndServe())
+}
+
+// Mux/Handler ===========================================
+type RouteCheck func(Request) (Request, bool)
+
+type Route struct {
+	checks []RouteCheck
+	route  http.HandlerFunc
+}
+
+type Handler struct {
+	routes []Route
+}
+
+func (h *Handler) ServeHTTP(w Response, r Request) {
+ROUTES:
+	for _, route := range h.routes {
+		rn := r
+		ok := false
+		for _, check := range route.checks {
+			if rn, ok = check(rn); !ok {
+				continue ROUTES
+			}
+		}
+
+		route.route(w, rn)
+		return
+	}
+}
+
+func checkNoop(r Request) (Request, bool) { return r, true }
+
+func checkMethod(method string) RouteCheck {
+	return func(r Request) (Request, bool) { return r, r.Method == method }
+}
+
+func checkPath(path string) RouteCheck {
+	placeholder := regexp.MustCompile("{([^}]*)}")
+	path = "^" + placeholder.ReplaceAllString(path, "(?P<$1>[^/]+)") + "$"
+	reg := regexp.MustCompile(path)
+	groups := reg.SubexpNames()
+
+	return func(r Request) (Request, bool) {
+		if !reg.MatchString(r.URL.Path) {
+			return r, false
+		}
+
+		values := reg.FindStringSubmatch(r.URL.Path)
+		vars := map[string]string{}
+		for i, g := range groups {
+			vars[g] = values[i]
+		}
+
+		ctx := context.WithValue(r.Context(), "vars", vars)
+		return r.WithContext(ctx), true
+	}
+}
+
+func VARS(r Request) map[string]string {
+	if rv := r.Context().Value("vars"); rv != nil {
+		return rv.(map[string]string)
+	}
+	return map[string]string{}
 }
 
 // LOGGING ===============================================
@@ -202,16 +264,32 @@ func Redirect(url string) http.HandlerFunc {
 	}
 }
 
+func ROUTE(route http.HandlerFunc, checks ...RouteCheck) {
+	router.routes = append(router.routes, Route{
+		checks: checks,
+		route:  route,
+	})
+}
+
 func GET(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) {
-	router.Methods("GET").Path(path).HandlerFunc(applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...))
+	ROUTE(
+		applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...),
+		checkMethod(http.MethodGet), checkPath(path),
+	)
 }
 
 func POST(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) {
-	router.Methods("POST").Path(path).HandlerFunc(applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...))
+	ROUTE(
+		applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...),
+		checkMethod(http.MethodPost), checkPath(path),
+	)
 }
 
 func DELETE(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) {
-	router.Methods("DELETE").Path(path).HandlerFunc(applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...))
+	ROUTE(
+		applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...),
+		checkMethod(http.MethodDelete), checkPath(path),
+	)
 }
 
 // VIEWS ====================
@@ -295,19 +373,19 @@ func applyMiddlewares(handler http.HandlerFunc, middlewares ...func(http.Handler
 
 // SERVER MIDDLEWARES ==============================
 
-func staticWithoutDirectoryListingHandler() http.Handler {
+func staticWithoutDirectoryListingHandler() http.HandlerFunc {
 	dir := http.Dir(STATIC_DIR_PATH)
 	server := http.FileServer(dir)
 	handler := http.StripPrefix("/", server)
 
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasSuffix(r.URL.Path, "/") {
 			http.NotFound(w, r)
 			return
 		}
 
 		handler.ServeHTTP(w, r)
-	})
+	}
 }
 
 // Derived from Gorilla middleware https://github.com/gorilla/handlers/blob/v1.5.1/handlers.go#L134
