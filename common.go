@@ -109,7 +109,7 @@ func Start() {
 		RequestLoggerHandler,
 	}
 
-	ROUTE(staticWithoutDirectoryListingHandler(), checkNoop)
+	ROUTE(staticWithoutDirectoryListingHandler())
 
 	var handler http.Handler = router
 	for _, v := range middlewares {
@@ -154,8 +154,6 @@ ROUTES:
 		return
 	}
 }
-
-func checkNoop(r Request) (Request, bool) { return r, true }
 
 func checkMethod(method string) RouteCheck {
 	return func(r Request) (Request, bool) { return r, r.Method == method }
