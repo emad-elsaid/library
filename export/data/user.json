@@ -1,0 +1,54 @@
+{
+"ID": 2,
+"Name": {
+"String": "Haitham Shaaban",
+"Valid": true
+},
+"Email": {
+"String": "haithamshaabann@gmail.com",
+"Valid": true
+},
+"Image": {
+"String": "https://lh3.googleusercontent.com/a-/AOh14GhmkWgWc3glQhLL-KDdOJ7LHhOE5u_GyeMkHY4CuQ=s96-c",
+"Valid": true
+},
+"CreatedAt": "2022-03-24T21:01:17.959663Z",
+"UpdatedAt": "2022-04-02T13:48:18.436802Z",
+"Slug": "3cea95c8-f275-45b9-a4bc-ace8f5449b41",
+"Description": {
+"String": "",
+"Valid": false
+},
+"Facebook": {
+"String": "",
+"Valid": false
+},
+"Twitter": {
+"String": "",
+"Valid": false
+},
+"Linkedin": {
+"String": "",
+"Valid": false
+},
+"Instagram": {
+"String": "",
+"Valid": false
+},
+"Phone": {
+"String": "",
+"Valid": false
+},
+"Whatsapp": {
+"String": "",
+"Valid": false
+},
+"Telegram": {
+"String": "",
+"Valid": false
+},
+"AmazonAssociatesID": {
+"String": "",
+"Valid": false
+}
+}

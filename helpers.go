@@ -20,7 +20,9 @@ import (
 
 	"github.com/google/uuid"
 	"golang.org/x/image/draw"
+	"strconv"
 )
+
 
 func Helpers() {
 	HELPER("partial", func(path string, data interface{}) (template.HTML, error) {
@@ -256,4 +258,32 @@ func UploadImage(in io.Reader, p string, w, h int) (string, error) {
 	}
 
 	return name, nil
+}
+
+func DownloadFile(w http.ResponseWriter, r *http.Request, file string) string {
+	Openfile, err := os.Open(file) //Open the file to be downloaded later
+	defer Openfile.Close() //Close after function return
+
+	if err != nil {		
+		http.Error(w, "File not found.", 404)
+		return ""
+	}
+
+	tempBuffer := make([]byte, 512) //Create a byte array to read the file later
+	Openfile.Read(tempBuffer) //Read the file into  byte
+	FileContentType := http.DetectContentType(tempBuffer) //Get file header
+
+	FileStat, _ := Openfile.Stat() //Get info from file
+	FileSize := strconv.FormatInt(FileStat.Size(), 10) //Get file size as a string
+
+	Filename := file
+
+	//Set the headers
+	w.Header().Set("Content-Disposition", "attachment; filename="+ Filename)
+	w.Header().Set("Content-Type", FileContentType+";"+Filename)
+	w.Header().Set("Content-Length", FileSize)
+
+	Openfile.Seek(0, 0) //We read 512 bytes from the file already so we reset the offset back to 0
+	io.Copy(w, Openfile) //'Copy' the file to the client
+	return file
 }

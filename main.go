@@ -12,11 +12,21 @@ import (
 
 	"github.com/google/uuid"
 	"golang.org/x/oauth2"
+
+	"io/ioutil"
+	"archive/zip"
+	"bytes"
 )
 
 const (
 	BOOK_COVER_PATH      = "public/books/image"
 	HIGHLIGHT_IMAGE_PATH = "public/highlights/image"
+	BOOK_EXPORT_PATH = "export/data/books.json"
+	HIGHLIGHT_EXPORT_PATH = "export/data/highlights.json"
+	SHELVES_EXPORT_PATH = "export/data/shelves.json"
+	USER_EXPORT_PATH = "export/data/user.json"
+	BOOK_IMAGES_EXPORT_PATH = "export/images/books"
+	HIGHLIGHT_IMAGE_EXPORT_PATH = "export/images/highlights"
 )
 
 func main() {
@@ -1076,6 +1086,158 @@ func main() {
 		return Redirect(fmt.Sprintf("/users/%s/books/%s", user.Slug, vars["isbn"]))
 	}, loggedinMiddleware)
 
+	POST("/users/export/{user}", func(w Response, r Request) Output {
+		vars := VARS(r)
+
+		user, err := Q.UserBySlug(r.Context(), vars["user"])
+		if err != nil {
+			return NotFound
+		}
+
+		// export books data
+		books, err := Q.ExportBooksByUserId(r.Context(), user.ID);
+		if err != nil {
+			return InternalServerError(err)
+		}
+
+		booksFile, _ := json.MarshalIndent(books, "", "")
+		err = ioutil.WriteFile(BOOK_EXPORT_PATH, booksFile, 0644)
+		if err != nil {
+			return InternalServerError(err)
+		}
+		
+		buf := new(bytes.Buffer)
+		writer := zip.NewWriter(buf)
+
+		bookData, err := ioutil.ReadFile(BOOK_EXPORT_PATH)
+		if err != nil {
+			return InternalServerError(err)
+		}
+		
+		// Write books.json file into the zip file
+		f_book, err := writer.Create(BOOK_EXPORT_PATH)
+		if err != nil {
+			return InternalServerError(err)
+		}
+		_, err = f_book.Write([]byte(bookData))
+		if err != nil {
+			return InternalServerError(err)
+		}
+
+
+
+		//export hightlights data
+		highlights, err := Q.ExportHighlightsByUserId(r.Context(), user.ID);
+		if err != nil {
+			return InternalServerError(err);
+		}
+
+		highlightsFile, _ := json.MarshalIndent(highlights, "", "")
+		_ = ioutil.WriteFile(HIGHLIGHT_EXPORT_PATH, highlightsFile, 0644)
+
+		highlightsData, err := ioutil.ReadFile(HIGHLIGHT_EXPORT_PATH)
+
+		// Write highlights.json file into the zip file
+		f_highlights, err := writer.Create(HIGHLIGHT_EXPORT_PATH)
+		if err != nil {
+			return InternalServerError(err)
+		}
+		_, err = f_highlights.Write([]byte(highlightsData))
+		if err != nil {
+			return InternalServerError(err)
+		}
+
+		//export shelves data
+		shelves, err := Q.ExportShelvasByUserId(r.Context(), user.ID)
+		if err != nil {
+			return InternalServerError(err)
+		}
+
+		shelvesFile, _ := json.MarshalIndent(shelves, "", "")
+		_ = ioutil.WriteFile(SHELVES_EXPORT_PATH, shelvesFile, 0644)
+		shelvesData, err := ioutil.ReadFile(SHELVES_EXPORT_PATH)
+
+		// Write shelves.json file into the zip file
+		f_shelves, err := writer.Create(SHELVES_EXPORT_PATH)
+		if err != nil {
+			return InternalServerError(err)
+		}
+		_, err = f_shelves.Write([]byte(shelvesData))
+		if err != nil {
+			return InternalServerError(err)
+		}
+
+		//export user data
+		_user, err := Q.ExportUserDataByUserId(r.Context(), user.ID)
+		if err != nil {
+			return InternalServerError(err)
+		}
+
+		userDataFile, _ := json.MarshalIndent(_user, "", "")
+
+		_ = ioutil.WriteFile(USER_EXPORT_PATH, userDataFile, 0644)
+
+		userData, err := ioutil.ReadFile(USER_EXPORT_PATH)
+
+		// Write user.json file into the zip file
+		f_users, err := writer.Create(USER_EXPORT_PATH)
+		if err != nil {
+			return InternalServerError(err)
+		}
+		_, err = f_users.Write([]byte(userData))
+		if err != nil {
+			return InternalServerError(err)
+		}
+
+		err = writer.Close()
+
+		if err != nil {
+			return InternalServerError(err)
+		}
+		w.Header().Set("Content-Type", "application/zip")
+		w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s.zip\"", "library"))
+		
+		// Download the zip file
+		w.Write(buf.Bytes())
+		return Render("wide_layout", "index", Locals{"csrf": CSRF(r)})
+	}, loggedinMiddleware)
+
 	Helpers()
 	Start()
+}
+
+func addFiles(w *zip.Writer, basePath, baseInZip string) {
+	// Open the Directory
+	files, err := ioutil.ReadDir(basePath)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	for _, file := range files {
+		fmt.Println(basePath + file.Name())
+		if !file.IsDir() {
+			dat, err := ioutil.ReadFile(basePath + file.Name())
+			if err != nil {
+				fmt.Println(err)
+			}
+
+			// Add some files to the archive.
+			f, err := w.Create(baseInZip + file.Name())
+			if err != nil {
+				fmt.Println(err)
+			}
+			_, err = f.Write(dat)
+			if err != nil {
+				fmt.Println(err)
+			}
+		} else if file.IsDir() {
+
+			// Recurse
+			newBase := basePath + file.Name() + "/"
+			fmt.Println("Recursing and Adding SubDir: " + file.Name())
+			fmt.Println("Recursing and Adding SubDir: " + newBase)
+
+			addFiles(w, newBase, baseInZip  + file.Name() + "/")
+		}
+	}
 }

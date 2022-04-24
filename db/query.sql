@@ -155,3 +155,26 @@ UPDATE books SET shelf_id = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2;
 
 -- name: BooksCount :one
 SELECT count(*) FROM books WHERE user_id = $1;
+
+
+-- name: ExportBooksByUserId :many
+SELECT books.id id, title, author, books.image image, isbn, created_at, updated_at, shelf_id, user_id, google_books_id, 
+  subtitle, description, page_count, publisher, page_read
+  FROM books
+ WHERE user_id=$1;
+
+-- name: ExportHighlightsByUserId :many
+SELECT highlights.id, highlights.book_id, highlights.page, highlights.content, highlights.image,
+  highlights.created_at, highlights.updated_at
+  FROM highlights
+INNER JOIN books on highlights.book_id = books.id
+WHERE books.user_id=$1;
+
+-- name: ExportShelvasByUserId :many
+SELECT id, name, created_at, updated_at, user_id, position
+FROM shelves
+WHERE user_id=$1;
+
+
+-- name: ExportUserDataByUserId :one
+SELECT * FROM users WHERE id=$1;
