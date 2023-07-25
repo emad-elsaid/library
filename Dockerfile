@@ -1,7 +1,7 @@
-FROM golang:1.17.7-bullseye
+FROM golang:1.17.7-alpine
 
 ENV LANG=C.UTF-8
-RUN apt-get update && apt-get install -qq -y postgresql-client
+RUN apk update && apk add --no-cache postgresql-client
 
 ENV app /app
 RUN mkdir -p $app

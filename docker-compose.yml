@@ -1,7 +1,6 @@
-version: '2'
 services:
   db:
-    image: "postgres:13.3"
+    image: "postgres:13-alpine"
     restart: always
     env_file:
       - .env
@@ -40,7 +39,6 @@ services:
       - db
     links:
       - db
-    restart: always
     env_file:
       - .env
     logging:
