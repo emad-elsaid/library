@@ -1,0 +1,18 @@
+[
+{
+"ID": 1,
+"Name": "Reading",
+"CreatedAt": "2022-03-24T21:04:04.360679Z",
+"UpdatedAt": "2022-03-24T21:04:22.520145Z",
+"UserID": 2,
+"Position": 1
+},
+{
+"ID": 2,
+"Name": "Want to read",
+"CreatedAt": "2022-03-24T21:04:11.20175Z",
+"UpdatedAt": "2022-03-24T21:04:11.20175Z",
+"UserID": 2,
+"Position": 2
+}
+]

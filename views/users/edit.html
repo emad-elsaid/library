@@ -88,3 +88,17 @@
     </div>
   </div>
 </form>
+
+<div class="title">
+  Export Data
+</div>
+
+<form action="/users/export/{{ .user.Slug }}" method="POST">
+  {{ .csrf }}
+
+  <div class="field is-grouped">
+    <div class="control">
+      <button class="button is-link">Export</button>
+    </div>
+  </div>
+</form>
