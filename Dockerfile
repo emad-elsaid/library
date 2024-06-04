@@ -9,4 +9,5 @@ CMD ./main
 
 WORKDIR $app
 ADD . $app
+EXPOSE 3000
 RUN go build -o main *.go

@@ -28,7 +28,6 @@ services:
       driver: journald
     labels:
       - "traefik.http.routers.library.rule=Host(`library.emadelsaid.com`)"
-      - "traefik.http.services.library.loadbalancer.server.port=3000"
 
   backup:
     build: .
