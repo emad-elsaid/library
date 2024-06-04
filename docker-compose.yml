@@ -22,12 +22,13 @@ services:
     volumes:
       - /root/data/library/books:/app/public/books/image
       - /root/data/library/highlights:/app/public/highlights/image
-    ports:
-      - '127.0.0.1:8200:3000'
     env_file:
       - .env
     logging:
       driver: journald
+    labels:
+      - "traefik.http.routers.library.rule=Host(`library.emadelsaid.com`)"
+      - "traefik.http.services.library.loadbalancer.server.port=3000"
 
   backup:
     build: .
